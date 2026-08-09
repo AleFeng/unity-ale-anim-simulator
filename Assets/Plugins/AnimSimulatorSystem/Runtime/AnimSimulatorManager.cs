@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Ale.Toolkit.Runtime;
-using Fs.GameFramework.Common.AssetSystem;
 
 #if HAS_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -1043,8 +1042,10 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 组合 背景资产 地址
             _backgroundCurrentName = 
                 $"{animSimulatorConfig.backgroundAddressableFolder}{backgroundName}.prefab";
-            // 使用 资产管理器 加载并实例化 背景资产
-            AssetManager.Instance.LoadAssetAndInstantiate<GameObject>(_backgroundCurrentName, OnLoadBackgroundComplete);
+            // 使用 资产门面 加载并实例化 背景资产。直接挂到本管理器下，实例化时即完成父子关系，
+            // 免得先建到场景根部再重挂一次（其组件的 Awake 也就能在已挂好父节点的状态下执行）。
+            ToolkitAssets.InstantiateByAddress<GameObject>(
+                _backgroundCurrentName, OnLoadBackgroundComplete, transform);
         }
         
         /// <summary>
@@ -1057,8 +1058,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             if (backgroundInstance)
             {
                 _backgroundCurrentInstance = backgroundInstance;
-                // 设置 父节点
-                _backgroundCurrentInstance.transform.SetParent(transform);
+                // 父节点已在实例化时设好，此处无需再挂。
                 // 从实例上 获取 AnimActor组件
                 _backgroundAnimActorCurrent = _backgroundCurrentInstance.GetComponent<AnimActor>();
                 if (_backgroundAnimActorCurrent)
@@ -1084,10 +1084,10 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 _backgroundCurrentInstance = null;
                 _backgroundAnimActorCurrent = null;
             }
-            // 卸载 背景资产
+            // 卸载 背景资产。释放的是源资源句柄，与上面销毁实例是两件事。
             if (!string.IsNullOrEmpty(_backgroundCurrentName))
             {
-                AssetManager.Instance.UnloadAsset(_backgroundCurrentName);
+                ToolkitAssets.ReleaseAddress(_backgroundCurrentName);
                 _backgroundCurrentName = null;
             }
         }
@@ -1146,8 +1146,9 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 组合 角色资产 地址
             _actorCurrentName = 
                 $"{animSimulatorConfig.actorAddressableFolder}{actorName}.prefab";
-            // 加载 新的角色 并实例化
-            AssetManager.Instance.LoadAssetAndInstantiate<GameObject>(_actorCurrentName, OnLoadActorComplete);
+            // 加载 新的角色 并实例化。同背景，直接挂到本管理器下。
+            ToolkitAssets.InstantiateByAddress<GameObject>(
+                _actorCurrentName, OnLoadActorComplete, transform);
         }
         
         /// <summary>
@@ -1160,8 +1161,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             if (actorInstance)
             {
                 _actorCurrentInstance = actorInstance;
-                // 设置 父节点
-                _actorCurrentInstance.transform.SetParent(transform);
+                // 父节点已在实例化时设好，此处无需再挂。
                 // 从实例上 获取 AnimActor组件
                 _animActorCurrent = _actorCurrentInstance.GetComponent<AnimActor>();
                 if (_animActorCurrent)
@@ -1198,10 +1198,10 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 // 刷新 角色皮肤组 列表UI
                 RefreshUIAnimActorSkinGroupList();
             }
-            // 卸载 角色资产
+            // 卸载 角色资产。释放的是源资源句柄，与上面销毁实例是两件事。
             if (!string.IsNullOrEmpty(_actorCurrentName))
             {
-                AssetManager.Instance.UnloadAsset(_actorCurrentName);
+                ToolkitAssets.ReleaseAddress(_actorCurrentName);
                 _actorCurrentName = null;
             }
         }
