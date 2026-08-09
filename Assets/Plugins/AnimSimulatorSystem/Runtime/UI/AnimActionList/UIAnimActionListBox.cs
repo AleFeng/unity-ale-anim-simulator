@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using AirFishLab.ScrollingList;
-using AirFishLab.ScrollingList.ContentManagement;
 
 #if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
@@ -11,10 +9,12 @@ using UnityEngine.Localization.Components;
 namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 {
     /// <summary>
-    /// 动画动作 UI列表项。
-    /// 显示单个动画动作的信息，并处理用户交互。
+    /// 动画动作 UI列表项。显示单个动画动作的信息。
+    /// <para>由 <see cref="UIAnimActionScrollList"/> 作为虚拟滚动的格子复用：
+    /// 滚入视口时 <see cref="Bind"/>，滚出视口时 <see cref="Clear"/> 并隐藏。
+    /// 因此本组件不持有任何跨复用的状态，显示内容完全由传入的数据决定。</para>
     /// </summary>
-    public class UIAnimActionListBox : ListBox
+    public class UIAnimActionListBox : MonoBehaviour
     {
         [Header("UI组件")] 
 #if ATK_LOCALIZATION
@@ -39,42 +39,53 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         public AnimAction AnimAction => _uiAnimActionListBoxContent?.AnimAction;
         
         /// <summary>
-        /// 更新 显示内容
+        /// 绑定 显示内容。传入 <c>null</c> 等同于 <see cref="Clear"/>。
         /// </summary>
-        /// <param name="listContent"></param>
-        protected override void UpdateDisplayContent(IListContent listContent)
+        /// <param name="content">动画动作数据</param>
+        public void Bind(UIAnimActionListBoxContent content)
         {
-            // 将列表内容转换为 AnimActionListContent 类型
-            _uiAnimActionListBoxContent = listContent as UIAnimActionListBoxContent;
+            // 记录 当前列表内容
+            _uiAnimActionListBoxContent = content;
             if (_uiAnimActionListBoxContent == null)
             {
-                // 无效内容时，清空显示
-#if ATK_LOCALIZATION
-                // 设置 UI皮肤名称 多语言Key 为空
-                if (localizeTxtActionName)
-                    localizeTxtActionName.StringReference = null;
-#else
-                // 设置 UI皮肤名称 为空
-                if (textActionName)
-                    textActionName.text = string.Empty;
-#endif
-                imageActionIcon.sprite = null;
+                Clear();
+                return;
             }
-            else
-            {
-                // 更新UI显示内容
+
+            // 更新UI显示内容
 #if ATK_LOCALIZATION
-                // 设置 UI皮肤名称 多语言Key 为空
-                if (localizeTxtActionName)
-                    localizeTxtActionName.StringReference = _uiAnimActionListBoxContent.UIDisplayActionName;
+            // 设置 UI动作名称 多语言Key
+            if (localizeTxtActionName)
+                localizeTxtActionName.StringReference = _uiAnimActionListBoxContent.UIDisplayActionName;
 #else
-                // 设置 UI皮肤名称 为空
-                if (textActionName)
-                    textActionName.text = _uiAnimActionListBoxContent.UIDisplayActionName;
+            // 设置 UI动作名称
+            if (textActionName)
+                textActionName.text = _uiAnimActionListBoxContent.UIDisplayActionName;
 #endif
-                // 设置 动作图标图片
+            // 设置 动作图标图片
+            if (imageActionIcon)
                 imageActionIcon.sprite = _uiAnimActionListBoxContent.ActionIcon;
-            }
+        }
+
+        /// <summary>
+        /// 清空 显示内容。格子被回收出视口时调用。
+        /// </summary>
+        public void Clear()
+        {
+            // 断开数据引用，避免回收后的格子仍通过 AnimAction 属性暴露旧数据
+            _uiAnimActionListBoxContent = null;
+
+#if ATK_LOCALIZATION
+            // 设置 UI动作名称 多语言Key 为空
+            if (localizeTxtActionName)
+                localizeTxtActionName.StringReference = null;
+#else
+            // 设置 UI动作名称 为空
+            if (textActionName)
+                textActionName.text = string.Empty;
+#endif
+            if (imageActionIcon)
+                imageActionIcon.sprite = null;
         }
     }
 }
