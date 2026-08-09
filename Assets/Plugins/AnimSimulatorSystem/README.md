@@ -31,18 +31,40 @@
 
 （`AnimSimulatorManager` 的 UI 淡入淡出有 `#else` 回退，仅退化为瞬间显示 / 隐藏，不影响可用性。）
 
-### 可选：由 asmdef `versionDefines` 自动探测
+### 必需：Ale Toolkit
 
-| 包 | 宏 | 缺失时的影响 |
-|---|---|---|
-| `com.esotericsoftware.spine.spine-unity` | `HAS_SPINE` | Spine 动画播放与换装功能不可用 |
-| `com.unity.localization` | `HAS_LOCALIZATION` | 动作名 / 皮肤名 / 进度条名 退化为纯文本字段 |
-| `com.unity.inputsystem` | `HAS_INPUT_SYSTEM` | 光标操作输入（点击 / 拖拽 / 旋转 / 按压）不可用 |
-| `com.unity.addressables` | `HAS_ADDRESSABLES` | 该宏当前未被插件代码使用（asmdef 中保留了 versionDefine） |
+本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.0**）之上，用到的底层能力：
+
+| toolkit 能力 | 插件中的用途 |
+|---|---|
+| `ToolkitMonoSingleton<T>` | `AnimSimulatorManager` 的单例基类 |
+| `ToolkitAssets`（按地址加载） | 角色 / 背景资产的加载、实例化与释放 |
+| `ToolkitInputBinder` | 光标移动 / 左键 / 右键的输入绑定 |
+| `UIUtility.WorldPosToUILocalPos` | 动作列表跟随角色的世界坐标定位 |
+| `UiwFocusOrderList<,>` / `UiwVirtualOrderList<,>` | 动画动作列表与皮肤列表的虚拟滚动 |
+| `LocalizedTextEvent` / `LocalizedFontEvent` | Demo 预制体的文本与字体本地化 |
+
+toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写进 `package.json` 的 `dependencies`，需自行安装。
+
+> **`ToolkitMonoSingleton` 的行为提示**：它的 `Instance` **不会自动创建实例**。场景中必须先存在 `AnimSimulatorManager` 组件，`AnimActionPlayer` 等才能注册进去；否则会给出明确警告而非静默失效。
+
+### 编译宏
+
+以下宏均为**项目级手动开关**（写在 `Player Settings > Scripting Define Symbols`），插件 asmdef 的 `versionDefines` 已清空——自动探测与手动开关并存会导致「装了包就强制置位、开关关不掉」，故统一由手动开关决定。
+
+| 宏 | 由谁管理 | 需要的包 | 未启用时的影响 |
+|---|---|---|---|
+| `ATK_LOCALIZATION` | Ale Toolkit 欢迎窗口<br/>（`Tools > Ale Toolkit > Welcome`） | `com.unity.localization` | 动作名 / 皮肤名 / 进度条名 退化为纯 `string` 字段 |
+| `ATK_TMP` | 同上 | 内置于 `com.unity.ugui` | toolkit 的本地化字体组件不参与编译 |
+| `ATK_INPUT_SYSTEM` | 同上 | `com.unity.inputsystem` | 光标操作输入（点击 / 拖拽 / 旋转 / 按压）不可用 |
+| `ATK_ADDRESSABLE` | 同上 | `com.unity.addressables` | 角色 / 背景无法按地址异步加载（退化为 `Resources` 兜底并告警） |
+| `ASS_SPINE` | 本插件自有前缀（`ASS_` = AnimSimulatorSystem） | `com.esotericsoftware.spine.spine-unity` | Spine 动画播放与换装功能不可用 |
+
+> ⚠️ **`ATK_LOCALIZATION` 会改变序列化字段的类型**（`LocalizedString` ↔ `string`）。在已有配置资产的工程里切换该宏会丢失对应字段的数据，请在项目初期就定好。
 
 ### 其他
 
-插件还依赖 **Fs Game Framework**（`AssetManager` / `ControllerManager` / `MonoBehaviourSingleton` / `UIUtility` 及其内置的 `CircularScrollingList`）与 **TextMeshPro**。
+插件还依赖 **TextMeshPro**（`UILevelProgressBar` 的等级数字使用 `TextMeshProUGUI`）。
 
 ## 使用文档
 

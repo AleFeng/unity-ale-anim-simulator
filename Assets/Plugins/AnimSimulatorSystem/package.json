@@ -1,6 +1,6 @@
 {
   "name": "com.ale.animsimulatorsystem",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "displayName": "Anim Simulator System",
   "description": "基于 Spine / Live2D 的 2D 动画模拟器系统：用光标进行点击/拖拽/旋转/按压操作驱动动画动作，配合等级进度条与动作进度条实现解锁与自动播放，并支持可分组的自定义换装。基于 Ale Toolkit（com.ale.toolkit）构建。【必需依赖】DOTween（Asset Store 资源，非 UPM 包，无法自动安装）：需导入 DOTween 并在 Scripting Define Symbols 中定义 DOTWEEN 宏，否则 Spine 动画将无法显示。详见 README 的『依赖』章节。",
   "unity": "2022.3",
