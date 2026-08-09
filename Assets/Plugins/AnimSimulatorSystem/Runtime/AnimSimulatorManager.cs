@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Ale.Toolkit.Runtime;
 
-#if HAS_INPUT_SYSTEM
+#if ATK_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+// 输入绑定器所在程序集同样受 ATK_INPUT_SYSTEM 约束，宏关闭时该命名空间不存在，故 using 也须一并门控。
+using Ale.Toolkit.Runtime.InputSupport;
 #endif
 #if DOTWEEN
 using DG.Tweening;
@@ -324,32 +326,31 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         private void OnEnableInput()
         {
-#if HAS_INPUT_SYSTEM
-            // 订阅 Input System 事件
-            if (ControllerManager.Instance)
-            {
-                // 光标移动
-                ControllerManager.Instance.BindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionPointName, 
-                    OnPointMove
-                );
-                // 光标左键点击
-                ControllerManager.Instance.BindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionLeftClickName, 
-                    OnLeftClick
-                );
-                // 光标右键点击
-                ControllerManager.Instance.BindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionRightClickName,
-                    OnRightClick
-                );
-            }
+#if ATK_INPUT_SYSTEM
+            // 订阅 Input System 事件。
+            // 绑定器允许此刻输入源（PlayerInput）尚未生成——它会把绑定挂起并逐帧重试，不会丢回调，
+            // 因此这里无需自行判断输入是否就绪。
+            // 光标移动
+            ToolkitInputBinder.Bind
+            (
+                inputActionMapName,
+                inputActionPointName,
+                OnPointMove
+            );
+            // 光标左键点击
+            ToolkitInputBinder.Bind
+            (
+                inputActionMapName,
+                inputActionLeftClickName,
+                OnLeftClick
+            );
+            // 光标右键点击
+            ToolkitInputBinder.Bind
+            (
+                inputActionMapName,
+                inputActionRightClickName,
+                OnRightClick
+            );
 #endif
         }
         
@@ -358,32 +359,29 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         private void OnDisableInput()
         {
-#if HAS_INPUT_SYSTEM
-            // 取消订阅 Input System 事件
-            if (ControllerManager.Instance)
-            {
-                // 光标移动
-                ControllerManager.Instance.UnbindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionPointName,
-                    OnPointMove
-                );
-                // 光标左键点击
-                ControllerManager.Instance.UnbindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionLeftClickName,
-                    OnLeftClick
-                );
-                // 光标右键点击
-                ControllerManager.Instance.UnbindCallbackToFirstPlayerController
-                (
-                    inputActionMapName,
-                    inputActionRightClickName,
-                    OnRightClick
-                );
-            }
+#if ATK_INPUT_SYSTEM
+            // 取消订阅 Input System 事件。绑定已生效则退订，仍在挂起则从待生效队列移除，两种情况都能正确撤销。
+            // 光标移动
+            ToolkitInputBinder.Unbind
+            (
+                inputActionMapName,
+                inputActionPointName,
+                OnPointMove
+            );
+            // 光标左键点击
+            ToolkitInputBinder.Unbind
+            (
+                inputActionMapName,
+                inputActionLeftClickName,
+                OnLeftClick
+            );
+            // 光标右键点击
+            ToolkitInputBinder.Unbind
+            (
+                inputActionMapName,
+                inputActionRightClickName,
+                OnRightClick
+            );
 #endif
         }
         #endregion
@@ -402,7 +400,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         // 当前正在播放的 AnimActionPlayer组件 列表
         private List<AnimActionPlayer> _animActionPlayerPlayingList = new List<AnimActionPlayer>();
         
-#if HAS_INPUT_SYSTEM
+#if ATK_INPUT_SYSTEM
         /// <summary>
         /// 光标移动处理
         /// 现在会从相机发射射线检测碰撞体，并尝试获取碰撞体上的 AnimActionPlayer 组件。
