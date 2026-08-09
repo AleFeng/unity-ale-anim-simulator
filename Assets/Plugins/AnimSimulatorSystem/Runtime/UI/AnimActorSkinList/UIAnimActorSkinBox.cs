@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using AirFishLab.ScrollingList;
-using AirFishLab.ScrollingList.ContentManagement;
 #if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
 #endif
@@ -12,8 +10,13 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     /// <summary>
     /// 动画角色 UI皮肤项目。
     /// 显示单个 角色皮肤 信息，可选择 添加或移除 该皮肤。
+    ///
+    /// <para>由 <see cref="UIAnimActorSkinScrollList"/> 作为虚拟滚动的格子复用：
+    /// 滚入视口时 <see cref="Bind"/>，滚出视口时 <see cref="Clear"/> 并隐藏。
+    /// 因为格子会被反复复用，<b>对角色换装事件的订阅必须与绑定严格配对</b>——
+    /// 绑定时订阅、清空时退订，否则被回收的格子仍会响应事件、按早已不属于自己的皮肤刷新显示。</para>
     /// </summary>
-    public class UIAnimActorSkinBox : ListBox
+    public class UIAnimActorSkinBox : MonoBehaviour
     {
         [Header("UI组件")]
         [Tooltip("文本：皮肤名称")]
@@ -49,49 +52,33 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         }
         
         /// <summary>
-        /// 更新 数据内容 事件。
+        /// 绑定 显示内容。传入 <c>null</c> 等同于 <see cref="Clear"/>。
         /// </summary>
-        /// <param name="listContent"></param>
-        protected override void UpdateDisplayContent(IListContent listContent)
+        /// <param name="content">角色皮肤数据</param>
+        public void Bind(UIAnimActorSkinBoxContent content)
         {
-            if (_uiAnimActorSkinBoxContent != null)
-            {
-                if (_uiAnimActorSkinBoxContent.AnimActor)
-                {
-                    // 移除 角色皮肤添加或移除 事件监听
-                    _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove -= OnSkinAddOrRemove;
-                }
-            }
-            
+            // 先退订上一条数据的事件，再记录新数据——订阅与绑定严格配对
+            UnsubscribeSkinEvent();
+
             // 记录 当前角色皮肤 数据
-            _uiAnimActorSkinBoxContent = listContent as UIAnimActorSkinBoxContent;
+            _uiAnimActorSkinBoxContent = content;
             if (_uiAnimActorSkinBoxContent == null)
             {
-                // 无效内容时，清空显示
-#if ATK_LOCALIZATION
-                // 设置 UI皮肤名称 多语言Key 为空
-                if (localizeTxtSkinName)
-                    localizeTxtSkinName.StringReference = null;
-#else
-                // 设置 UI皮肤名称 为空
-                if (txtSkinName != null)
-                    txtSkinName.text = string.Empty;
-#endif
-                // 设置 UI皮肤图片 为空
-                if (imgSkin)
-                    imgSkin.sprite = null;
+                Clear();
                 return;
             }
-            
+
             if (_uiAnimActorSkinBoxContent.AnimActor)
             {
                 // 监听 角色皮肤添加或移除 事件
                 _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove += OnSkinAddOrRemove;
-                // 设置 选择提示 显示状态
+                // 设置 选择提示 显示状态。
+                // 强制写入：格子是复用来的，_isSelected 保留着上一条数据的状态，
+                // 走增量判断会在「新旧状态恰好相同」时跳过，而此时提示对象的显示状态未必与之一致。
                 SetSelectedTipDisplay(_uiAnimActorSkinBoxContent.AnimActor.CheckIsSelectedSkin(
-                    _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin));
+                    _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin), true);
             }
-            
+
 #if ATK_LOCALIZATION
             // 设置 UI皮肤名称 多语言Key
             if (localizeTxtSkinName)
@@ -109,6 +96,50 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             {
                 imgSkin.sprite = _uiAnimActorSkinBoxContent.AnimActorSkin.skinImage;
             }
+        }
+
+        /// <summary>
+        /// 清空 显示内容。格子被回收出视口时调用。
+        /// </summary>
+        public void Clear()
+        {
+            // 退订事件并断开数据引用
+            UnsubscribeSkinEvent();
+            _uiAnimActorSkinBoxContent = null;
+
+#if ATK_LOCALIZATION
+            // 设置 UI皮肤名称 多语言Key 为空
+            if (localizeTxtSkinName)
+                localizeTxtSkinName.StringReference = null;
+#else
+            // 设置 UI皮肤名称 为空
+            if (txtSkinName != null)
+                txtSkinName.text = string.Empty;
+#endif
+            // 设置 UI皮肤图片 为空
+            if (imgSkin)
+                imgSkin.sprite = null;
+
+            // 提示对象一并复位，与 _isSelected 保持一致，避免复用时状态错位
+            SetSelectedTipDisplay(false, true);
+        }
+
+        /// <summary>
+        /// 退订 当前数据对应角色的 换装事件。无数据或角色已销毁时为空操作。
+        /// </summary>
+        private void UnsubscribeSkinEvent()
+        {
+            if (_uiAnimActorSkinBoxContent == null) return;
+            if (!_uiAnimActorSkinBoxContent.AnimActor) return;
+
+            _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove -= OnSkinAddOrRemove;
+        }
+
+        private void OnDestroy()
+        {
+            // 列表销毁时会连同格子一并销毁。角色可能比列表活得更久，
+            // 不退订就会把委托留在角色上，指向已销毁的格子。
+            UnsubscribeSkinEvent();
         }
         
         /// <summary>
@@ -180,11 +211,13 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// <summary>
         /// 设置 选择提示 显示状态
         /// </summary>
-        /// <param name="isSelected"></param>
-        private void SetSelectedTipDisplay(bool isSelected)
+        /// <param name="isSelected">是否已选择</param>
+        /// <param name="isForce">强制写入。绑定 / 清空时必须为 true——格子复用后 <c>_isSelected</c>
+        /// 残留的是上一条数据的状态，增量判断会误跳过。</param>
+        private void SetSelectedTipDisplay(bool isSelected, bool isForce = false)
         {
             // 状态无变化时，跳过
-            if (_isSelected == isSelected) return;
+            if (!isForce && _isSelected == isSelected) return;
             // 记录状态
             _isSelected = isSelected;
             

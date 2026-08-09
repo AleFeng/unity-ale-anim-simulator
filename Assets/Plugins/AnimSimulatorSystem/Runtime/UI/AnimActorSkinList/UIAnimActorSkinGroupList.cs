@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using AirFishLab.ScrollingList;
 using UnityEngine.Serialization;
 
 namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
@@ -20,14 +19,15 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         [FormerlySerializedAs("scrollingListSkinGroups")]
         [Header("UI列表")]
         [Tooltip("列表组件")]
-        [SerializeField] private CircularScrollingList scrollingListSkinGroup;
-        [Tooltip("列表数据")]
-        [SerializeField] private UIAnimActorSkinListBank uiAnimActorSkinListBank;
+        [SerializeField] private UIAnimActorSkinScrollList scrollingListSkinGroup;
 
         // 当前 动画角色
         private AnimActor _animActor;
         // 皮肤组页签 列表
         private List<UIAnimActorSkinGroupTab> _uiAnimActorSkinGroupTabList = new List<UIAnimActorSkinGroupTab>();
+        // 皮肤数据 列表。作为滚动列表的数据源。
+        private readonly List<UIAnimActorSkinBoxContent> _uiAnimActorSkinBoxContentList =
+            new List<UIAnimActorSkinBoxContent>();
 
         /// <summary>
         /// 设置 皮肤组数据
@@ -39,16 +39,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             if (_animActor == animActor) return;
             // 记录当前角色
             _animActor = animActor;
-            
-            // 检查并初始化 列表数据组件
-            if (scrollingListSkinGroup.ListBank == null && uiAnimActorSkinListBank != null)
-            {
-                // 关联 列表数据组件
-                scrollingListSkinGroup.SetListBank(uiAnimActorSkinListBank);
-                // 初始化 列表组件
-                scrollingListSkinGroup.Initialize();
-            }
-            
+
             // 刷新 皮肤组列表UI
             if (_animActor && _animActor.AnimActorSkinGroups != null)
             {
@@ -94,8 +85,32 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 }
                 
                 // 清空 列表的数据内容
-                uiAnimActorSkinListBank.SetListContents(null, null, scrollingListSkinGroup);
+                RebuildSkinListContents(null);
             }
+        }
+
+        /// <summary>
+        /// 依据指定皮肤组重建列表数据并推给列表组件。皮肤组为空时即为清空。
+        /// </summary>
+        /// <param name="animActorSkinGroup">皮肤组</param>
+        private void RebuildSkinListContents(AnimActorSkinGroup animActorSkinGroup)
+        {
+            // 清空 现有数据
+            _uiAnimActorSkinBoxContentList.Clear();
+
+            // 检查 皮肤组数据
+            var animActorSkins = animActorSkinGroup?.animActorSkins;
+            if (animActorSkins != null)
+            {
+                // 填充 动画皮肤 数据列表
+                for (int i = 0; i < animActorSkins.Length; i++)
+                    _uiAnimActorSkinBoxContentList.Add(
+                        new UIAnimActorSkinBoxContent(_animActor, animActorSkinGroup, animActorSkins[i]));
+            }
+
+            // 推给 列表组件。切换皮肤组属于换内容，回到起点是期望行为。
+            if (scrollingListSkinGroup)
+                scrollingListSkinGroup.SetItems(_uiAnimActorSkinBoxContentList);
         }
         
         // 当前 选择的 皮肤组页签
@@ -119,7 +134,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             _skinGroupTabSelected.SetIsSelected(true);
             
             // 更新 列表数据内容
-            uiAnimActorSkinListBank.SetListContents(_animActor, _skinGroupTabSelected.AnimActorSkinGroup, scrollingListSkinGroup);
+            RebuildSkinListContents(_skinGroupTabSelected.AnimActorSkinGroup);
         }
     }
 }
