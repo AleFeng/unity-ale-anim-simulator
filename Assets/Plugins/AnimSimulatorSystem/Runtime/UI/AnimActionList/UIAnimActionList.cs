@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using AirFishLab.ScrollingList;
-using Fs.GameFramework.Main.UI;
+using Ale.Toolkit.Runtime.UI;
 
 namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 {
