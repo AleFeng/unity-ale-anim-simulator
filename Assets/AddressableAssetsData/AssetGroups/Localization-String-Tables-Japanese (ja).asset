@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-String-Tables-Japanese (ja)
   m_GUID: db5e05028151fb144a454d51a7bd0df2
   m_SerializeEntries:
+  - m_GUID: 0b36643581f6e1c4a89ffe6552e63beb
+    m_Address: AnimSimulatorSystem_Basic_ja
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ja
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a38a84e2f6271dc44b89c4f67e5a4976
     m_Address: LocStrBasics_ja
     m_ReadOnly: 1

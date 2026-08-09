@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cd2a90cd41caa9439e5481f796b46bb
+    m_Address: Assets/Demo/Localization/AnimSimulatorSystem_Basic Shared Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ab2ea891866ea8844b4bf5c4b0334771
     m_Address: Assets/Localization/AssetTables/LocAssBasics Shared Data.asset
     m_ReadOnly: 1

@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-String-Tables-Chinese (Traditional) (zh-Hant)
   m_GUID: 16e371822f5307a4b98f880477e9b580
   m_SerializeEntries:
+  - m_GUID: 6da77020ca6e01343a01d7cd6c9959b0
+    m_Address: AnimSimulatorSystem_Basic_zh-Hant
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh-Hant
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9985e828d2e239046ac6eaabc4bcf1ca
     m_Address: LocStrDialog_zh-Hant
     m_ReadOnly: 1

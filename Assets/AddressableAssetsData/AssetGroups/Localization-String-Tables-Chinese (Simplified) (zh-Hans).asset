@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-zh-Hans
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d0bd46d089bdeba4dabd84351d4f5e5e
+    m_Address: AnimSimulatorSystem_Basic_zh-Hans
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh-Hans
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 1
   m_Settings: {fileID: 11400000, guid: 06e884e924424b9479f34f902c5ea485, type: 2}
   m_SchemaSet:

@@ -1,0 +1,155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: AnimSimulatorSystem_Basic_fr
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: fr
+  m_SharedData: {fileID: 11400000, guid: 9cd2a90cd41caa9439e5481f796b46bb, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 19795951616
+    m_Localized: "Sensibilit\xE9 de la t\xEAte"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 602795819008
+    m_Localized: "Sensibilit\xE9 des seins\tSensi"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 644273291264
+    m_Localized: "Sensibilit\xE9 du bras"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2083095724032
+    m_Localized: Plaisir
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4354353283072
+    m_Localized: 'Niveau:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1071749448744960
+    m_Localized: Excitation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4750981441929216
+    m_Localized: Robe bleue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4751229920886784
+    m_Localized: Robe verte
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4751968919502848
+    m_Localized: "Sweat \xE0 capuche bleu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752115111968768
+    m_Localized: "Sweat \xE0 capuche orange"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752473271975936
+    m_Localized: Bottes roses
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752604864069632
+    m_Localized: Bottes rouges
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752717170753536
+    m_Localized: Pantalon vert
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752937103278080
+    m_Localized: Jean
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754396729458688
+    m_Localized: "Sac \xE0 dos"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754535577698304
+    m_Localized: "Sac bandouli\xE8re"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754635225972736
+    m_Localized: "Ch\xE2le bleu"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754726653411328
+    m_Localized: "Ch\xE2le rouge"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754802893275136
+    m_Localized: Bonnet bleu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754917632655360
+    m_Localized: Bonnet rouge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755783118897152
+    m_Localized: "\xC9charpe"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756105207889920
+    m_Localized: Cheveux courts roux
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755875381002240
+    m_Localized: Cheveux mi-longs bleus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755959061561344
+    m_Localized: "Cheveux mi-longs ch\xE2tains"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756063424233472
+    m_Localized: Cheveux mi-longs roses
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756005123407872
+    m_Localized: Cheveux longs bleus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756976054452224
+    m_Localized: Yeux bleus
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757031549288448
+    m_Localized: Yeux verts
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757054202724352
+    m_Localized: Yeux violets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757106304368640
+    m_Localized: Yeux jaunes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757231231713280
+    m_Localized: Nez court
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757299510788096
+    m_Localized: Nez long
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7666301374709760
+    m_Localized: Test d'action
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

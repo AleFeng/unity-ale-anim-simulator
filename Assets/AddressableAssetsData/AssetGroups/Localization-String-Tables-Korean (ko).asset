@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-ko
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c9b1eb3e06ccc045acb21997db61774
+    m_Address: AnimSimulatorSystem_Basic_ko
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ko
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 95c3a5397e614dc43beb47217befadd8
     m_Address: LocStrDialog_ko
     m_ReadOnly: 1

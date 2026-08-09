@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-String-Tables-English (en)
   m_GUID: cc10d4816973eda43b91872bd4aa943d
   m_SerializeEntries:
+  - m_GUID: 67e046e687606464982344bbf0e70ddd
+    m_Address: AnimSimulatorSystem_Basic_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 728a983fb067ded42ada7343797695f0
     m_Address: LocStrDialog_en
     m_ReadOnly: 1

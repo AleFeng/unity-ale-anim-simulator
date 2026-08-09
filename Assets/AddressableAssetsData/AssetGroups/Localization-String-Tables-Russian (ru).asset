@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-ru
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d323b9a90cf17624f8bb9312f0e595e6
+    m_Address: AnimSimulatorSystem_Basic_ru
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ru
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea87c5eff7ad17a409ed64acd6d24fdd
     m_Address: LocStrBasics_ru
     m_ReadOnly: 1
