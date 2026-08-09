@@ -1,6 +1,6 @@
 {
-    "name": "Fs.GameFramework.Gameplay.AnimSimulatorSystem",
-    "rootNamespace": "",
+    "name": "Ale.AnimSimulatorSystem",
+    "rootNamespace": "Ale.AnimSimulatorSystem",
     "references": [
         "GUID:1935be488c7ca5046af9c55382bf12c1",
         "GUID:b6b27ffb34be8f347b40f762964b5f24",

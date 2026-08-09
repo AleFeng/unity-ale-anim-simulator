@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 #if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画动作 UI列表项。显示单个动画动作的信息。

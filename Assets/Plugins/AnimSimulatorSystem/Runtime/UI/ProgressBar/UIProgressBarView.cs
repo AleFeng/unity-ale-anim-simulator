@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 进度条 UI

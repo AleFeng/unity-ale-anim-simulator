@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画角色 皮肤组 页签。

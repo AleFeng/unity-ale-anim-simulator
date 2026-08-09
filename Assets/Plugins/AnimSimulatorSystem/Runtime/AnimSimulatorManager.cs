@@ -12,7 +12,7 @@ using Ale.Toolkit.Runtime.InputSupport;
 using DG.Tweening;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画模拟器管理器

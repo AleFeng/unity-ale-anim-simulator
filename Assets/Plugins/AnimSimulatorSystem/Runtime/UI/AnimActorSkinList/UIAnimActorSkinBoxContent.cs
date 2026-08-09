@@ -1,4 +1,4 @@
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画皮肤 UI列表项目的内容。一件皮肤在列表里所需的全部展示与操作数据。

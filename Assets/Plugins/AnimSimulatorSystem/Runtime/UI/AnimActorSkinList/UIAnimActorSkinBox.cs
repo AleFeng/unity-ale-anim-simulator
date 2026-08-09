@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Localization.Components;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画角色 UI皮肤项目。

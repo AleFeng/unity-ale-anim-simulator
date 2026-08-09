@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using TMPro;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 等级进度条 UI

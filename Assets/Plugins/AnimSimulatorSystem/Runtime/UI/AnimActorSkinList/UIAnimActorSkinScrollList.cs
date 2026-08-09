@@ -1,6 +1,6 @@
 using Ale.Toolkit.Runtime.UI;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画角色皮肤 滚动列表。把当前皮肤组内的皮肤显示为一列可滚动的 <see cref="UIAnimActorSkinBox"/>。

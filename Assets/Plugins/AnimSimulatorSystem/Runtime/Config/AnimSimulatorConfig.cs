@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Localization;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动作模拟器 系统配置

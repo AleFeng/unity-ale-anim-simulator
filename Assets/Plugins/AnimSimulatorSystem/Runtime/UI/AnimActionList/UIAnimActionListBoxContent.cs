@@ -4,7 +4,7 @@ using UnityEngine.Localization;
 
 using UnityEngine;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画动作 UI列表项目的内容。一条动画动作在列表里所需的全部展示数据。

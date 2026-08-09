@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Ale.Toolkit.Runtime.UI;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画动作 UI列表。

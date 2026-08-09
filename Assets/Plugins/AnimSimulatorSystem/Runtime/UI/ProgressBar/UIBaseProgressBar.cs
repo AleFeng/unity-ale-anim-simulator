@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.Localization.Components;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     public class UIBaseProgressBar : MonoBehaviour
     {

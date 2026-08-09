@@ -12,7 +12,7 @@ using Spine.Unity.AttachmentTools;
 using DG.Tweening;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// Spine 动画播放器

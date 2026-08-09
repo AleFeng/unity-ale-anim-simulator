@@ -1,6 +1,6 @@
 using Ale.Toolkit.Runtime.UI;
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画动作 滚动列表。把动画动作数据显示为一列可滚动的 <see cref="UIAnimActionListBox"/>。

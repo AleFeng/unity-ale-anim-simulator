@@ -10,7 +10,7 @@ using UnityEngine.Localization;
 using Spine.Unity;
 #endif
 
-namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
+namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画角色。
