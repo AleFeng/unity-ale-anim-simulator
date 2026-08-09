@@ -1,0 +1,160 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: AnimSimulatorSystem_Basic Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: AnimSimulatorSystem_Basic
+  m_TableCollectionNameGuidString: 9cd2a90cd41caa9439e5481f796b46bb
+  m_Entries:
+  - m_Id: 4354353283072
+    m_Key: ProgressBar_Level_Level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 19795951616
+    m_Key: ProgressBar_Level_Head
+    m_Metadata:
+      m_Items: []
+  - m_Id: 602795819008
+    m_Key: ProgressBar_Level_Breast
+    m_Metadata:
+      m_Items: []
+  - m_Id: 644273291264
+    m_Key: ProgressBar_Level_Arm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2083095724032
+    m_Key: ProgressBar_Action_Pleasure
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1071749448744960
+    m_Key: ProgressBar_Action_Excitement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4750981441929216
+    m_Key: Actor_Test_Skin_Dress_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4751229920886784
+    m_Key: Actor_Test_Skin_Dress_Green
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4751968919502848
+    m_Key: Actor_Test_Skin_Hoodie_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752115111968768
+    m_Key: Actor_Test_Skin_Hoodie_Orange
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752473271975936
+    m_Key: Actor_Test_Skin_Boots_Pink
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752604864069632
+    m_Key: Actor_Test_Skin_Boots_Red
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752717170753536
+    m_Key: Actor_Test_Skin_Pants_Green
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4752937103278080
+    m_Key: Actor_Test_Skin_Pants_Jeans
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754396729458688
+    m_Key: Actor_Test_Skin_Accessories_Backpack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754535577698304
+    m_Key: Actor_Test_Skin_Accessories_Bag
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754635225972736
+    m_Key: Actor_Test_Skin_Accessories_Cape_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754726653411328
+    m_Key: Actor_Test_Skin_Accessories_Cape_Red
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754802893275136
+    m_Key: Actor_Test_Skin_Accessories_Hat_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4754917632655360
+    m_Key: Actor_Test_Skin_Accessories_Hat_Red
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755783118897152
+    m_Key: Actor_Test_Skin_Accessories_Scarf
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756105207889920
+    m_Key: Actor_Test_Skin_Hair_Short_Red
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755875381002240
+    m_Key: Actor_Test_Skin_Hair_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4755959061561344
+    m_Key: Actor_Test_Skin_Hair_Brown
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756063424233472
+    m_Key: Actor_Test_Skin_Hair_Pink
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756005123407872
+    m_Key: Actor_Test_Skin_Hair_Long_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4756976054452224
+    m_Key: Actor_Test_Skin_Eyes_Blue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757031549288448
+    m_Key: Actor_Test_Skin_Eyes_Green
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757054202724352
+    m_Key: Actor_Test_Skin_Eyes_Violet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757106304368640
+    m_Key: Actor_Test_Skin_Eyes_Yellow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757231231713280
+    m_Key: Actor_Test_Skin_Nose_Short
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4757299510788096
+    m_Key: Actor_Test_Skin_Nose_Long
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7666301374709760
+    m_Key: Actor_Test_AnimAction_Test
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 992107623066107991
+  references:
+    version: 2
+    RefIds:
+    - rid: 992107623066107991
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1769771667016
