@@ -283,8 +283,21 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         private void OnEnable()
         {
             // 注册到 动画模拟器管理器
-            if (AnimSimulatorManager.Instance)
-                AnimSimulatorManager.Instance.RegisterAnimActionPlayer(this);
+            var manager = AnimSimulatorManager.Instance;
+            if (manager)
+            {
+                manager.RegisterAnimActionPlayer(this);
+            }
+            else
+            {
+                // 管理器不会被自动创建：必须先在场景中存在 AnimSimulatorManager，本组件才能注册进去。
+                // 常规流程下角色是由管理器自己加载并实例化的，不会走到这里；
+                // 手动把 AnimActionPlayer 摆进场景、却没有管理器时才会命中。
+                // 此处不静默跳过——注册失败意味着该播放器整个不受管理器驱动，必须让它可被发现。
+                Debug.LogWarning(
+                    $"[AnimActionPlayer] OnEnable: 场景中没有 AnimSimulatorManager，'{name}' 未能注册，将不受管理器驱动。",
+                    this);
+            }
         }
 
         private void OnDisable()
@@ -975,16 +988,24 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             {
                 // 选择
                 case EAnimActionSelectType.Select:
+                {
+                    var manager = AnimSimulatorManager.Instance;
+                    if (!manager)
+                    {
+                        Debug.LogWarning("[AnimActionPlayer] PlayAnimActionByType: 场景中没有 AnimSimulatorManager，无法打开动画动作列表。");
+                        break;
+                    }
                     // 替换 当前悬停的 动画动作播放器。强制设置为 允许操作。
-                    AnimSimulatorManager.Instance.ReplaceAnimActionPlayer(this, true);
+                    manager.ReplaceAnimActionPlayer(this, true);
                     // 打开 动画动作列表 界面，等待玩家选择动作
-                    AnimSimulatorManager.Instance.OpenCloseAnimActionList(this, true, true);
+                    manager.OpenCloseAnimActionList(this, true, true);
                     // 记录回调
                     if (onActionComplete != null)
                         _onActionCompleteEvent = onActionComplete; // 记录动作完成的回调
                     if (onActionStart != null)
                         _onActionStartEvent = onActionStart; // 记录动作开始的回调
                     break;
+                }
                 // 顺序
                 case EAnimActionSelectType.Order:
                 {
@@ -1394,14 +1415,18 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         {
             if (_animActionCurrent.progressBarConfigs == null || _animActionCurrent.progressBarConfigs.Length == 0)
                 return;
-            
+
+            // 进度条由管理器统管，没有管理器则整段无从谈起。在循环外取一次并判空。
+            var manager = AnimSimulatorManager.Instance;
+            if (!manager) return;
+
             // 遍历所有 进度条 配置
             foreach (var progressBarConfig in _animActionCurrent.progressBarConfigs)
             {
                 // 计算 本次变化值。变化值可以是负数。
                 float valueModify = progressBarConfig.progressModifyValue * Mathf.Abs(progressValueModify);
                 // 应用 进度变化值
-                AnimSimulatorManager.Instance.ModifyProgressBars(progressBarConfig.progressName, valueModify);
+                manager.ModifyProgressBars(progressBarConfig.progressName, valueModify);
             }
         }
         #endregion
@@ -1710,8 +1735,11 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             var paramArray = condition.conditionTargetParameter.Split('|');
             if (paramArray.Length >= 1 && int.TryParse(paramArray[0], out int requiredLevel))
             {
-                // 获取 当前等级进度条 的等级
-                var uiLevelProgressBar = AnimSimulatorManager.Instance.GetProgressBar<UILevelProgressBar>(levelProgressName);
+                // 获取 当前等级进度条 的等级。没有管理器时取不到进度条，与「进度条名称查不到」同样处理。
+                var manager = AnimSimulatorManager.Instance;
+                var uiLevelProgressBar = manager
+                    ? manager.GetProgressBar<UILevelProgressBar>(levelProgressName)
+                    : null;
                 // 检查是否满足要求
                 if (uiLevelProgressBar is not null && uiLevelProgressBar.LevelNumber < requiredLevel)
                 {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Fs.Utility.Singleton;
+using Ale.Toolkit.Runtime;
 using Fs.GameFramework.Common.AssetSystem;
 
 #if HAS_INPUT_SYSTEM
@@ -17,13 +17,14 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     /// 动画模拟器管理器
     /// 主流程的执行与子组件的管理
     /// </summary>
-    public class AnimSimulatorManager : MonoBehaviourSingleton<AnimSimulatorManager>
+    public class AnimSimulatorManager : ToolkitMonoSingleton<AnimSimulatorManager>
     {
-        protected override void Awake()
+        /// <summary>
+        /// 初始化。由基类在 Awake 中设置好单例实例、并完成 DontDestroyOnLoad 之后调用。
+        /// 重复实例不会走到这里——基类在 Awake 里已把后来者销毁。
+        /// </summary>
+        protected override void Init()
         {
-            base.Awake();
-            // 初始化
-
             if (!animSimulatorConfig)
                 Debug.LogWarning("[AnimSimulatorManager] AnimSimulatorConfig 未设置，动画模拟器系统 无法正常工作！");
 
@@ -34,12 +35,12 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 初始化 角色管理器
             InitActor();
         }
-        
-        protected override void OnEnable()
+
+        private void OnEnable()
         {
             // 订阅输入事件
             OnEnableInput();
-            
+
 #if UNITY_EDITOR
             // 测试用 直接加载指定角色
             if (string.IsNullOrEmpty(testActorName) == false)
@@ -52,7 +53,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 #endif
         }
 
-        protected override void OnDisable()
+        private void OnDisable()
         {
             // 取消输入事件订阅
             OnDisableInput();

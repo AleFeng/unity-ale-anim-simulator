@@ -178,9 +178,17 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 检查 进度值 是否达到要求
             if (CheckAnimActionCanPlay(actionPlayConfig))
             {
+                // AnimActionPlayer 由管理器按名字查找与驱动，没有管理器则整段无从执行。
+                var manager = AnimSimulatorManager.Instance;
+                if (!manager)
+                {
+                    Debug.LogWarning("[ActionProgressBar] PlayAnimAction: 场景中没有 AnimSimulatorManager，无法播放动画动作。");
+                    return;
+                }
+
                 // 获取 选择类型
                 EAnimActionSelectType actionSelectType = actionPlayConfig.animActionSelectType;
-                
+
                 // 判断 播放类型
                 switch (actionPlayConfig.animActionPlayType)
                 {
@@ -192,12 +200,12 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                         break;
                     case EAnimActionPlayType.Manual:
                         // 将AnimActionPlayer移动到鼠标的位置。
-                        AnimSimulatorManager.Instance.MoveAnimActionPlayerToCursor(actionPlayConfig.actionPlayerName);
+                        manager.MoveAnimActionPlayerToCursor(actionPlayConfig.actionPlayerName);
                         break;
                 }
-                
+
                 // 自动播放动作
-                AnimSimulatorManager.Instance.PlayAnimActionPlayerByType
+                manager.PlayAnimActionPlayerByType
                 (
                     actionPlayConfig.actionPlayerName,
                     actionSelectType,

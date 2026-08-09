@@ -56,8 +56,17 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             
             // 设置 等级数字
             SetLevelNumber(levelNumber);
+
+            // 升级曲线由管理器提供，没有管理器就算不出升级所需经验值。
+            var manager = AnimSimulatorManager.Instance;
+            if (!manager)
+            {
+                Debug.LogWarning("[LevelProgressBar] SetInfo: 场景中没有 AnimSimulatorManager，无法取得升级所需经验值。");
+                return;
+            }
+
             // 获取 升级所需经验值
-            int expRequire = AnimSimulatorManager.Instance.GetExpRequireForLevel(_levelProgressBarConfig, levelNumber);
+            int expRequire = manager.GetExpRequireForLevel(_levelProgressBarConfig, levelNumber);
             // 设置 当前经验值 与 最大经验值
             InitProgressValue(expCurrent, expRequire);
         }
@@ -93,6 +102,15 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 未达到升级所需经验，直接返回（进度条已由基类更新）
             if (expCurrent < expRequire) return;
 
+            // 到这里说明确实要结算升级，而升级曲线由管理器提供。在循环外取一次并判空——
+            // 若放进循环里退化为 expRequire = 0，会被下方的「所需经验不可小于等于 0」误报为配置错误。
+            var manager = AnimSimulatorManager.Instance;
+            if (!manager)
+            {
+                Debug.LogWarning("[LevelProgressBar] OnProgressValueModified: 场景中没有 AnimSimulatorManager，无法计算升级所需经验值，已跳过本次升级结算。");
+                return;
+            }
+
             // 最大等级：达到后视为满级，不再升级
             int levelMax = _levelProgressBarConfig != null ? _levelProgressBarConfig.levelMax : int.MaxValue;
 
@@ -118,7 +136,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 // 升级
                 levelNumberNew += 1;
                 // 获取新的升级所需经验值（按升级后的等级计算）
-                expRequire = AnimSimulatorManager.Instance.GetExpRequireForLevel(_levelProgressBarConfig, levelNumberNew);
+                expRequire = manager.GetExpRequireForLevel(_levelProgressBarConfig, levelNumberNew);
             }
             // 更新 等级数
             SetLevelNumber(levelNumberNew);
