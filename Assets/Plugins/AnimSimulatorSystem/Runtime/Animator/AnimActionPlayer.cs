@@ -2,11 +2,11 @@
 using UnityEditor;
 #endif
 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization;
 #endif
 
-#if HAS_SPINE
+#if ASS_SPINE
 using Spine;
 using Spine.Unity;
 #endif
@@ -267,7 +267,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void OnValidate()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator == false)
             {
                 // 尝试从父物体获取 SpineAnimator 组件
@@ -430,7 +430,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 
         #region 动画 控制
         [Header("动画设置")]
-#if HAS_SPINE
+#if ASS_SPINE
         [Tooltip("Spine动画播放器")]
         [SerializeField] private SpineAnimator spineAnimator;
 #endif
@@ -457,7 +457,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         private void PlayAnimNormalMode()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator == null || _animActionCurrent.animReferenceAsset == null) return;
             // 播放动画
             spineAnimator.PlaySpineAnim
@@ -761,7 +761,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// <param name="animAction"></param>
         private void SetAnimProgressMode(AnimAction animAction)
         {
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator == false || animAction.animReferenceAsset == false) return;
             // 不循环，播放速度为0。由玩家操作 直接设置动画进度。
             _spineAnimDataCurrent.isLoop = false;
@@ -810,7 +810,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 // 不会重复启动协程
                 if (_animProgressDampingCor == null)
                 {
-#if HAS_SPINE
+#if ASS_SPINE
                     // 获取 当前动画轨道
                     var trackEntry = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
                     // Spine动画 进度控制的阻尼协程
@@ -825,7 +825,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             {
                 // 无阻尼时间，直接设置进度，但遵守最小帧阈值，避免小幅更新导致抖动
                 _animProgressDampingCurrent = _animProgressDampingTarget; // 直接设置为目标进度值
-#if HAS_SPINE
+#if ASS_SPINE
                 // 获取 当前动画轨道
                 var trackEntry = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
                 // 直接设置 Sp动画 进度值
@@ -845,7 +845,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         private float GetAnimProgress()
         {
             float progress = 0f;
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator)
             {
                 // 检查 动画轨道 有效性
@@ -861,7 +861,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             return progress;
         }
         
-#if HAS_SPINE
+#if ASS_SPINE
         /// <summary>
         /// 协程 拖拽阻尼。动画进度值 平滑变化。
         /// </summary>
@@ -882,7 +882,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             // 平滑过渡 到 目标进度值
             while (_animProgressDampingElapsedTime < _animProgressDampingDurationTime)
             {
-#if HAS_SPINE
+#if ASS_SPINE
                 // 检查 当前轨道 未被替换
                 var trackEntryCurrent = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
                 if (trackEntryCurrent == null || trackEntryCurrent.Animation == null || !ReferenceEquals(trackEntryCurrent, trackEntry))
@@ -910,7 +910,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                     // 计算 新的进度值。到 目标值 的线性插值。
                     progressNew = Mathf.Lerp(_animProgressDampingStart, _animProgressDampingTarget, t);
                 }
-#if HAS_SPINE
+#if ASS_SPINE
                 // 设置 Sp动画 进度值
                 trackEntry.TrackTime = progressNew * trackEntry.Animation.Duration;
 #else
@@ -947,7 +947,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         
         // 当前正在播放的 动画动作
         private AnimAction _animActionCurrent;
-#if HAS_SPINE
+#if ASS_SPINE
         // 当前正在播放的 动画数据
         private SpineAnimator.SpineAnimData _spineAnimDataCurrent;
 #endif
@@ -1071,7 +1071,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             _isAnimActionPlaying = true;
             // 记录 当前正在播放的 动画动作
             _animActionCurrent = animAction; 
-#if HAS_SPINE
+#if ASS_SPINE
             // 记录 当前正在播放的 Spine动画数据
             _spineAnimDataCurrent = new SpineAnimator.SpineAnimData
             (
@@ -1206,7 +1206,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         private void StopAnimActionImmediate()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             // 获取 Spine动画组件
             if (spineAnimator)
                 // 停止 Spine动画
@@ -1220,7 +1220,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 
             // 清除 当前正在播放的 动画动作
             _animActionCurrent = null;
-#if HAS_SPINE
+#if ASS_SPINE
             // 清除 当前正在播放的 Spine动画数据
             _spineAnimDataCurrent = null;
 #endif
@@ -1508,7 +1508,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         [Tooltip("备注：仅用于编辑器查看。")] 
         public string comment;
 #endif
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("UI中显示的动作名称：多语言Key。")]
         public LocalizedString uiDisplayActionName;
 #else
@@ -1554,7 +1554,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         public float actionDirectionZ;
         
         [Header("动画设置")] 
-#if HAS_SPINE
+#if ASS_SPINE
         [Tooltip("动画资源: 播放的Spine动画资源")]
         public AnimationReferenceAsset animReferenceAsset;
 #endif

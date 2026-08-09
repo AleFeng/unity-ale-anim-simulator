@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization;
 #endif
 
-#if HAS_SPINE
+#if ASS_SPINE
 using Spine.Unity;
 #endif
 
@@ -19,7 +19,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     public class AnimActor : MonoBehaviour
     {
         [Header("动画设置")]
-#if HAS_SPINE
+#if ASS_SPINE
         [Tooltip("Spine动画控制器")]
         [SerializeField] private SpineAnimator spineAnimator;
 #else
@@ -53,7 +53,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void Reset()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             // 从自身或子物体上获取 SpineAnimator 组件
             if (!spineAnimator)
             {
@@ -71,7 +71,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             InitSkin();
             
             // 设置 初始状态
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator)
                 spineAnimator.SwitchStateArray(stateInitList);
 #endif
@@ -88,7 +88,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         public void FadeIn()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator)
             {
                 // 淡入 Spine 组件
@@ -107,7 +107,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         /// </summary>
         public void FadeOut()
         {
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator)
             {
                 // clearAnimOnFadeOut=false：临时隐藏，仅禁用对象，保留动画数据
@@ -183,7 +183,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         #region 皮肤管理
         [Header("皮肤设置")]
         [Tooltip("基础皮肤列表：始终显示的 基础皮肤名称列表。")]
-#if HAS_SPINE
+#if ASS_SPINE
         // Spine动画 Skin属性
         [SpineSkin] 
         [SerializeField] private string[] baseSkins;
@@ -242,7 +242,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             }
             
             // 设置 基础皮肤
-#if HAS_SPINE
+#if ASS_SPINE
             if (spineAnimator)
             {
                 // 设置基础皮肤
@@ -310,7 +310,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             selectedSkinList.Add(animActorSkin);
             
             // 添加皮肤到 动画播放器
-#if HAS_SPINE
+#if ASS_SPINE
             // Spine动画播放器
             if (spineAnimator)
                 spineAnimator.AddSkin(animActorSkin.skinName, isRefresh);
@@ -355,7 +355,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             selectedSkinList.Remove(animActorSkin);
             
             // 从 动画播放器中 移除皮肤
-#if HAS_SPINE
+#if ASS_SPINE
             // Spine动画播放器
             if (spineAnimator)
                 spineAnimator.RemoveSkin(animActorSkin.skinName, isRefresh);
@@ -396,14 +396,14 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     public class AnimActorSkin
     {
         [Tooltip("皮肤: 在动画软件中制作时的名称，用于指定皮肤。有文件夹路径时，一般使用 '/' 进行分隔。")]
-#if HAS_SPINE
+#if ASS_SPINE
         // Spine动画 Skin属性 
         [SpineSkin] public string skinName;
 #else
         // Live2D动画 Skin属性
         public string skinName;
 #endif
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("UI中显示的皮肤名称：多语言Key。")]
         public LocalizedString uiDisplaySkinName;
 #else

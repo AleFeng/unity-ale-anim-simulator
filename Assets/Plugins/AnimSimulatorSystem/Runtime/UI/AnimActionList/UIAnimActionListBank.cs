@@ -1,4 +1,4 @@
-﻿#if HAS_LOCALIZATION
+﻿#if ATK_LOCALIZATION
 using UnityEngine.Localization;
 #endif
 
@@ -101,7 +101,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     /// </summary>
     public class UIAnimActionListBoxContent : IListContent
     {
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("UI中显示的动作名称：多语言Key。")]
         public LocalizedString UIDisplayActionName;
 #else
@@ -138,7 +138,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             _animAction = animAction;
 
             // 设置 动画动作 名称
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
             UIDisplayActionName = animAction.uiDisplayActionName;
 #else
             UIDisplayActionName = animAction.uiDisplayActionName;

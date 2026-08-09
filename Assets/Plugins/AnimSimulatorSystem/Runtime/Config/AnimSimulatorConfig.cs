@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization;
 #endif
 
@@ -156,7 +156,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
         [Tooltip("UI画布中的 分组名称：会将 进度条 添加到指定 分组下。若为空，则不显示UI的进度条，但会保留 进度条功能。")]
         public string uiGroupName;
         
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("UI中显示的名称：多语言Key。")]
         public LocalizedString uiDisplayName;
 #else

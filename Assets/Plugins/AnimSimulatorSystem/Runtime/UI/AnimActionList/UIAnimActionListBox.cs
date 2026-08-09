@@ -4,7 +4,7 @@ using TMPro;
 using AirFishLab.ScrollingList;
 using AirFishLab.ScrollingList.ContentManagement;
 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
 #endif
 
@@ -17,7 +17,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     public class UIAnimActionListBox : ListBox
     {
         [Header("UI组件")] 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("本地化文字：动作名称")]
         [SerializeField] private LocalizeStringEvent localizeTxtActionName;
 #else
@@ -49,7 +49,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             if (_uiAnimActionListBoxContent == null)
             {
                 // 无效内容时，清空显示
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
                 // 设置 UI皮肤名称 多语言Key 为空
                 if (localizeTxtActionName)
                     localizeTxtActionName.StringReference = null;
@@ -63,7 +63,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             else
             {
                 // 更新UI显示内容
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
                 // 设置 UI皮肤名称 多语言Key 为空
                 if (localizeTxtActionName)
                     localizeTxtActionName.StringReference = _uiAnimActionListBoxContent.UIDisplayActionName;

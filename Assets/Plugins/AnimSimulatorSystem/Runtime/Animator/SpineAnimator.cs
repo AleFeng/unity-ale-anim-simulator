@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-#if HAS_SPINE
+#if ASS_SPINE
 using Spine;
 using Spine.Unity;
 using Spine.Unity.AttachmentTools;
@@ -19,7 +19,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     /// </summary>
     public class SpineAnimator : MonoBehaviour
     {
-#if HAS_SPINE
+#if ASS_SPINE
         [Header("Spine基础设置")]
 
         [Tooltip("Spine动画组件")]

@@ -25,27 +25,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.esotericsoftware.spine.spine-unity",
-            "expression": "",
-            "define": "HAS_SPINE"
-        },
-        {
-            "name": "com.unity.localization",
-            "expression": "",
-            "define": "HAS_LOCALIZATION"
-        },
-        {
-            "name": "com.unity.inputsystem",
-            "expression": "",
-            "define": "HAS_INPUT_SYSTEM"
-        },
-        {
-            "name": "com.unity.addressables",
-            "expression": "",
-            "define": "HAS_ADDRESSABLES"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

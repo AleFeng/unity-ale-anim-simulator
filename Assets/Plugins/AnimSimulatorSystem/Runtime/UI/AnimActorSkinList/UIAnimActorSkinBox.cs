@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using AirFishLab.ScrollingList;
 using AirFishLab.ScrollingList.ContentManagement;
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
 #endif
 
@@ -17,7 +17,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     {
         [Header("UI组件")]
         [Tooltip("文本：皮肤名称")]
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [SerializeField] private LocalizeStringEvent localizeTxtSkinName;
 #else
         [SerializeField] private Text txtSkinName;
@@ -68,7 +68,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
             if (_uiAnimActorSkinBoxContent == null)
             {
                 // 无效内容时，清空显示
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
                 // 设置 UI皮肤名称 多语言Key 为空
                 if (localizeTxtSkinName)
                     localizeTxtSkinName.StringReference = null;
@@ -92,7 +92,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                     _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin));
             }
             
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
             // 设置 UI皮肤名称 多语言Key
             if (localizeTxtSkinName)
             {

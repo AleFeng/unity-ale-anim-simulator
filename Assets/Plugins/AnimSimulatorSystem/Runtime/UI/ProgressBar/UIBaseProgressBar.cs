@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
 using UnityEngine.Localization.Components;
 #endif
 
@@ -11,7 +11,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
     public class UIBaseProgressBar : MonoBehaviour
     {
         [Header("UI组件")]
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
         [Tooltip("本地化文字 等级名称")]
         [SerializeField] private LocalizeStringEvent localizeTxtName;
 #else
@@ -46,7 +46,7 @@ namespace Fs.GameFramework.Gameplay.AnimSimulatorSystem
                 return;
             }
             
-#if HAS_LOCALIZATION
+#if ATK_LOCALIZATION
             // 设置 名称的本地化Key
             if (localizeTxtName != null)
             {
