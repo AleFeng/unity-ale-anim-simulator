@@ -121,18 +121,39 @@ namespace Ale.AnimSimulatorSystem.Editor
             DrawFooter();
         }
 
-        private void DrawHeader()
+        // ── GUIStyle 缓存 ─────────────────────────────────────────────────────────────
+        // 这些样式原先都在 OnGUI 里 new 出来——OnGUI 每次重绘都会跑，鼠标在窗口上动一下就是几十次。
+        // EditorStyles.* 要等编辑器 GUI 初始化后才可用，故不能写成静态字段初始化器，改为首次绘制时惰性构造。
+        private static GUIStyle _styleHeader;
+        private static GUIStyle _styleSub;
+        private static GUIStyle _styleOk;
+        private static GUIStyle _styleWarn;
+
+        private static void EnsureStyles()
         {
-            var headerStyle = new GUIStyle(EditorStyles.boldLabel)
+            if (_styleHeader != null) return;
+
+            _styleHeader = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 18,
                 alignment = TextAnchor.MiddleCenter
             };
-            var subStyle = new GUIStyle(EditorStyles.label)
+            _styleSub = new GUIStyle(EditorStyles.label)
             {
                 alignment = TextAnchor.MiddleCenter,
                 normal = { textColor = new Color(0.6f, 0.6f, 0.6f) }
             };
+            _styleOk = new GUIStyle(EditorStyles.miniLabel)
+                { normal = { textColor = new Color(0.3f, 0.8f, 0.3f) } };
+            _styleWarn = new GUIStyle(EditorStyles.miniLabel)
+                { normal = { textColor = new Color(0.9f, 0.7f, 0.2f) } };
+        }
+
+        private void DrawHeader()
+        {
+            EnsureStyles();
+            var headerStyle = _styleHeader;
+            var subStyle = _styleSub;
 
             EditorGUILayout.BeginVertical(GUILayout.Height(56));
             GUILayout.FlexibleSpace();
@@ -277,26 +298,17 @@ namespace Ale.AnimSimulatorSystem.Editor
             }
             EditorGUILayout.EndHorizontal();
 
+            EnsureStyles();
             if (runtimeInstalled)
-            {
-                var s = new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.3f, 0.8f, 0.3f) } };
-                EditorGUILayout.LabelField(Fmt("  ✓ {0} 已安装", runtimeName), s);
-            }
+                EditorGUILayout.LabelField(Fmt("  ✓ {0} 已安装", runtimeName), _styleOk);
             else
-            {
-                var s = new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.9f, 0.7f, 0.2f) } };
-                EditorGUILayout.LabelField(string.Format(missingLabel, runtimeName), s);
-            }
+                EditorGUILayout.LabelField(string.Format(missingLabel, runtimeName), _styleWarn);
 
             EditorGUILayout.LabelField(description, EditorStyles.wordWrappedMiniLabel);
 
             if (_pendingRecompile)
             {
-                var s = new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.9f, 0.7f, 0.2f) } };
-                EditorGUILayout.LabelField(Tr("  ⏳ 宏定义已更改，等待 Unity 重新编译…"), s);
+                EditorGUILayout.LabelField(Tr("  ⏳ 宏定义已更改，等待 Unity 重新编译…"), _styleWarn);
                 if (!EditorApplication.isCompiling) _pendingRecompile = false;
             }
 

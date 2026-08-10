@@ -86,15 +86,8 @@ namespace Ale.AnimSimulatorSystem.Editor
                 if (p != null && p.objectReferenceValue is AnimatorBase bound) return bound;
             }
 
-            // ③ 兜底：在自身子树 / 父级链上找一个
-            if (target is Component comp)
-            {
-                var found = comp.GetComponentInChildren<AnimatorBase>(true);
-                if (!found) found = comp.GetComponentInParent<AnimatorBase>();
-                return found;
-            }
-
-            return null;
+            // ③ 兜底：在自身 / 子树 / 父级链上找一个（与运行期各处同一套搜索顺序）
+            return target is Component comp ? AnimatorBase.FindFor(comp) : null;
         }
     }
 }

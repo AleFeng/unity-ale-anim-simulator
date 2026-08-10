@@ -375,6 +375,9 @@ namespace Ale.AnimSimulatorSystem
         private bool _isDragging; // 是否正在拖拽中
         private bool _isLeftClickDown; // 是否 左键按下
         private bool _isRightClickDown; // 是否 右键按下
+
+        /// <summary>右键当前是否处于按下状态。本系统自身不消费右键，此状态供上层业务取用。</summary>
+        public bool IsRightClickDown => _isRightClickDown;
         private Vector2 _cursorScreenPos; // 光标屏幕坐标
         private Vector2 _cursorScreenPosLast; // 上一次光标的屏幕坐标（用于计算增量移动）
         private Vector3 _cursorWorldPos; // 光标世界坐标
@@ -438,9 +441,8 @@ namespace Ale.AnimSimulatorSystem
                         foreach (var animActionPlayer in SnapshotPlayingList())
                         {
                             if (!animActionPlayer) continue;
-                            // 通知模块拖拽移动。屏幕空间
-                            animActionPlayer.OnDragMoveSS(_cursorScreenPos, cursorDeltaDirSs);
                             // 通知模块拖拽移动。世界空间
+                            // （屏幕空间那一路的接收方法体是空的，已随之删除）
                             animActionPlayer.OnDragMoveWS(_cursorWorldPos, cursorDeltaDirWs);
                         }
                     }
@@ -528,24 +530,12 @@ namespace Ale.AnimSimulatorSystem
             // 判断左键按下还是抬起
             bool isDown = Mathf.Approximately(ctx.ReadValue<float>(), 1);
             
+            // 右键目前只维护按下状态：AnimActionPlayer 那两个接收方法的方法体是空的，已一并删除。
+            // 之后要接右键行为时，在这里补上分发即可。
             if (isDown && _isRightClickDown == false)
-            {
-                // 右键按下
                 _isRightClickDown = true;
-                
-                // 通知模块右键按下
-                if (_animActionPlayerHover)
-                    _animActionPlayerHover.OnRightClickDown(_cursorWorldPos);
-            }
-            else if (_isRightClickDown)
-            {
-                // 右键抬起
+            else if (isDown == false && _isRightClickDown)
                 _isRightClickDown = false;
-                
-                // 通知模块 右键抬起
-                if (_animActionPlayerHover)
-                    _animActionPlayerHover.OnRightClickUp(_cursorWorldPos);
-            }
         }
 #endif
         #endregion

@@ -69,6 +69,11 @@ namespace Ale.AnimSimulatorSystem
             }
         }
         // 动画轨道。构造函数时，由外部传参进行设置。-1 表示未指定，改用上面的 主轨道/子轨道 计算。
+        //
+        // 【序列化契约】本字段刻意<b>不</b>加 [SerializeField]：它只服务于「代码 new 出来的一次性 AnimData」，
+        // Inspector 上配置的那些走的是 animTrack / animTrackSub 两个枚举字段。因此从预制体反序列化出来的
+        // 实例，本字段恒为字段初始值 -1，上面的 AnimTrack 便会走「主轨道 * 10 + 子轨道」那条路——
+        // 这个 -1 哨兵在 Inspector 上不可见，改动本字段的可见性会静默改变既有配置的轨道解析结果。
         private int _animTrack = -1;
 
         /// <summary>

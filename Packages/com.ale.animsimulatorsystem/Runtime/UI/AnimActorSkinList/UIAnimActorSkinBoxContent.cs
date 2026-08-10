@@ -23,14 +23,6 @@ namespace Ale.AnimSimulatorSystem
         public AnimActorSkin AnimActorSkin;
 
         /// <summary>
-        /// 构造函数 - 空内容
-        /// </summary>
-        public UIAnimActorSkinBoxContent()
-        {
-            AnimActorSkin = default;
-        }
-
-        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="animActor">动画角色</param>

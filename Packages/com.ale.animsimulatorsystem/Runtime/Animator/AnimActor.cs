@@ -91,13 +91,8 @@ namespace Ale.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void Reset()
         {
-            // 从自身或子物体上获取动画控制器。多态查找天然认得两种后端，无需按宏分支。
-            if (!animator)
-            {
-                animator = GetComponent<AnimatorBase>();
-                if (!animator)
-                    animator = GetComponentInChildren<AnimatorBase>();
-            }
+            // 从自身 / 子树 / 父级链上获取动画控制器。多态查找天然认得两种后端，无需按宏分支。
+            if (!animator) animator = AnimatorBase.FindFor(this);
         }
 
         private void OnValidate()

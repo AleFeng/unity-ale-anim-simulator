@@ -35,14 +35,6 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 构造函数
         /// </summary>
-        public UIAnimActionListBoxContent()
-        {
-
-        }
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
         /// <param name="animAction">动画动作</param>
         public UIAnimActionListBoxContent(AnimAction animAction)
         {

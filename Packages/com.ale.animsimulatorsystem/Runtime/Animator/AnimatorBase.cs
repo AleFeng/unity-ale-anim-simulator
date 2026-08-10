@@ -116,6 +116,40 @@ namespace Ale.AnimSimulatorSystem
 
         #endregion
 
+        #region 查找
+
+        /// <summary>
+        /// 为某个组件查找它该用的动画播放器：<b>从自身开始逐级上溯，每一级都搜索该级的整棵子树</b>，
+        /// 取第一个找到的。
+        ///
+        /// <para>这样依次覆盖：自身 → 自身子树 → 父级 → 父级子树（即<b>兄弟分支</b>）→ 更上层……
+        /// 兄弟分支那一段是必需的：动作播放器与动画组件通常互为兄弟、同挂在角色根节点下，
+        /// 只走「父级链」是找不到的。</para>
+        ///
+        /// <para>包内原先有三处各自为政的实现（<see cref="AnimActor"/>、<see cref="AnimActionPlayer"/>、
+        /// 编辑器的皮肤名 Drawer），<b>搜索顺序互不相同</b>——同一个层级结构在不同入口会解析出不同的结果。
+        /// 本方法取三者的并集。（两个后端的 <c>Reset</c> 找的是各自的渲染器组件，不是本类型，不在此列。）</para>
+        ///
+        /// <para>包含未激活对象：预制体编辑与初始隐藏的角色都属常态。</para>
+        /// </summary>
+        /// <param name="component">发起查找的组件。</param>
+        /// <returns>找到的播放器；找不到返回 <c>null</c>。</returns>
+        public static AnimatorBase FindFor(Component component)
+        {
+            if (!component) return null;
+
+            for (var node = component.transform; node; node = node.parent)
+            {
+                // GetComponentInChildren 含节点自身
+                var found = node.GetComponentInChildren<AnimatorBase>(true);
+                if (found) return found;
+            }
+
+            return null;
+        }
+
+        #endregion
+
         #region 生命周期
 
         /// <summary>默认渲染器。<c>Awake</c> 时由 <see cref="ResolveDefaultRenderer"/> 解析。</summary>

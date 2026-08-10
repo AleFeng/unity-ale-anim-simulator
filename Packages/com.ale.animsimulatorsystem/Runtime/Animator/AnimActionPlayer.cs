@@ -275,15 +275,10 @@ namespace Ale.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            // 多态查找天然认得两种后端，无需按宏分支
-            if (animator == false)
-            {
-                // 尝试从父物体获取 动画控制器
-                animator = GetComponentInParent<AnimatorBase>();
-                // 尝试从其他子物体获取 动画控制器
-                if (!animator && transform.parent)
-                    animator = transform.parent.GetComponentInChildren<AnimatorBase>();
-            }
+            // 多态查找天然认得两种后端，无需按宏分支。
+            // 动作播放器通常挂在角色的子物体上，播放器本体又不带动画组件，
+            // 所以 FindFor 的「自身 → 子树 → 父级链」里真正命中的一般是最后一段。
+            if (!animator) animator = AnimatorBase.FindFor(this);
         }
 #endif
 
@@ -394,16 +389,6 @@ namespace Ale.AnimSimulatorSystem
         }
         
         /// <summary>
-        /// 拖拽移动（屏幕空间）
-        /// </summary>
-        /// <param name="cursorScreenPos"></param>
-        /// <param name="cursorDeltaDir"></param>
-        public void OnDragMoveSS(Vector3 cursorScreenPos, Vector3 cursorDeltaDir)
-        {
-            // 不检查 是否允许操作，确保操作中的 动画动作 能够响应拖拽
-        }
-        
-        /// <summary>
         /// 拖拽移动（世界空间）
         /// </summary>
         /// <param name="cursorWorldPos">光标当前的世界坐标</param>
@@ -414,24 +399,10 @@ namespace Ale.AnimSimulatorSystem
             // 拖拽 动画动作
             DragAnimAction(cursorWorldPos);
         }
-    
-        /// <summary>
-        /// 光标右键按下
-        /// </summary>
-        /// <param name="cursorWorldPos">光标当前的世界坐标</param>
-        public void OnRightClickDown(Vector3 cursorWorldPos)
-        {
-            
-        }
-    
-        /// <summary>
-        /// 光标右键抬起
-        /// </summary>
-        /// <param name="cursorWorldPos">光标当前的世界坐标</param>
-        public void OnRightClickUp(Vector3 cursorWorldPos)
-        {
-            
-        }
+
+        // 这里原本还有 OnDragMoveSS（屏幕空间拖拽）与 OnRightClickDown / OnRightClickUp 三个方法，
+        // 方法体是空的，却由管理器在每次指针移动 / 每次右键时照常调用。本类是 sealed 的，
+        // 空实现也不可能作为子类的扩展点，故一并删除，管理器侧的调用同时移除。
         #endregion
 
         #region 动画 控制
@@ -515,7 +486,7 @@ namespace Ale.AnimSimulatorSystem
         private void SetAnimDragMode()
         {
             // 设置为 动画-进度控制模式。等待 光标拖拽 控制 动画播放进度
-            SetAnimProgressMode(_animActionCurrent);
+            SetAnimProgressMode();
         }
 
         /// <summary>
@@ -549,7 +520,7 @@ namespace Ale.AnimSimulatorSystem
         private void SetAnimRotateMode()
         {
             // 设置为 动画-进度控制模式。等待 光标旋转 控制 动画播放进度
-            SetAnimProgressMode(_animActionCurrent);
+            SetAnimProgressMode();
         }
         
         /// <summary>
@@ -630,7 +601,7 @@ namespace Ale.AnimSimulatorSystem
             float progressStart = GetAnimProgress();
             
             // 设置为 动画-进度控制模式。等待 光标按压 控制 动画播放进度
-            SetAnimProgressMode(_animActionCurrent);
+            SetAnimProgressMode();
             
             // 检查 是否已经处于 按压模式 动画播放中
             if (_isPressModeAnimPlaying)
@@ -741,10 +712,11 @@ namespace Ale.AnimSimulatorSystem
         private float _animProgressDampingDeltaLoop;
         
         /// <summary>
-        /// 设置 动画-进度控制模式
+        /// 设置 动画-进度控制模式。作用对象是 <see cref="_animDataCurrent"/>。
+        /// <para>原先带一个 <c>AnimAction</c> 入参，但方法体从不使用它，三个调用点又都传的
+        /// <c>_animActionCurrent</c>——徒增「传进去的会被用到」的错觉，故去掉。</para>
         /// </summary>
-        /// <param name="animAction"></param>
-        private void SetAnimProgressMode(AnimAction animAction)
+        private void SetAnimProgressMode()
         {
             if (!animator || _animDataCurrent == null) return;
             // 不循环，播放速度为0。由玩家操作 直接设置动画进度。
@@ -879,9 +851,9 @@ namespace Ale.AnimSimulatorSystem
         [Header("动作列表")]
         [Tooltip("动画动作播放器 类型：用于区分不同的 动画动作播放器类别。[Operate玩家操作 / ProgressBar进度条控制]。")]
         [SerializeField] private EAnimActionPlayerType animActionPlayerType;
-        [FormerlySerializedAs("animActionPlayerSelectType")]
-        [Tooltip("动画动作 选择类型：动作组的选择方式。[Select选择 / Order顺序 / Random随机]。")]
-        [SerializeField] private EAnimActionSelectType animActionSelectType;
+        // 这里原本还有一个序列化的「动画动作 选择类型」字段，但全包无人读取——实际生效的是
+        // ActionPlayConfig.animActionSelectType（由进度条配置给出，见 UIActionProgressBar），
+        // 以及 PlayAnimActionByType 的入参。留着只会让人在 Inspector 上配了却不起作用，故删除。
         [Tooltip("动画动作列表：包含的动画动作。")]
         [SerializeField] private AnimAction[] animActions;
         
@@ -1320,28 +1292,6 @@ namespace Ale.AnimSimulatorSystem
         }
         
         /// <summary>
-        /// 获取 选中的动画动作
-        /// </summary>
-        /// <param name="actionIndex"></param>
-        /// <param name="animAction"></param>
-        /// <returns></returns>
-        private bool GetAnimActionByIndex(int actionIndex, out AnimAction animAction)
-        {
-            animAction = default;
-            // 索引无效，直接返回
-            if (actionIndex < 0 || actionIndex >= animActions.Length)
-            {
-                AnimSimLog.Warn(this, $"Invalid action index {actionIndex}.");
-                return false;
-            }
-            
-            // 获取 动画动作
-            animAction = animActions[actionIndex];
-
-            return true;
-        }
-        
-        /// <summary>
         /// 获取 光标向量 和 动作向量
         /// </summary>
         /// <param name="cursorWorldPos"></param>
@@ -1427,6 +1377,7 @@ namespace Ale.AnimSimulatorSystem
     /// <summary>
     /// 动画动作 播放类型。
     /// </summary>
+    [Serializable]
     public enum EAnimActionPlayType
     {
         /// <summary>
@@ -1795,6 +1746,7 @@ namespace Ale.AnimSimulatorSystem
     /// 操作方式 建议与动画的表现相匹配。
     /// 例如，来回拖拽模拟 锯木头 的动作。
     /// </summary>
+    [Serializable]
     public enum EAnimActionOperationType
     {
         /// <summary>

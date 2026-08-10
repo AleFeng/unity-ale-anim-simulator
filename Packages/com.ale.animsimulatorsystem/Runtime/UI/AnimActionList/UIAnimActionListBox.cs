@@ -23,12 +23,12 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("文本：动作名称")] 
         [SerializeField] private Text textActionName;
 #endif
-        [Tooltip("动作图标")] 
+        [Tooltip("动作图标")]
         [SerializeField] private Image imageActionIcon;
-        [Tooltip("按钮：播放动作")] 
-        // 按钮仅作为视觉元素使用。点击并操作 AnimActionPlayer组件 的行为由 AnimSimulatorManager 处理。
-        [SerializeField] private Button btnPlayAction;
-        
+        // 这里原本还有一个序列化的「按钮：播放动作」字段，但全类无人引用——点击并操作
+        // AnimActionPlayer 的行为由 AnimSimulatorManager 处理，按钮纯粹是预制体上的视觉元素，
+        // 不需要在脚本里持有。已删除。
+
         // 当前列表内容（动画动作数据）
         private UIAnimActionListBoxContent _uiAnimActionListBoxContent;
         
