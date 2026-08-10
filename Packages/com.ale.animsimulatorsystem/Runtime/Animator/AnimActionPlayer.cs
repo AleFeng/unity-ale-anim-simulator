@@ -25,21 +25,28 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 在编辑器中绘制 Gizmos可视化
         /// </summary>
-        public void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             // 绘制 动画动作组的Gizmos可视化
             OnDrawGizmosAnimActionGroup();
         }
-        
+
         /// <summary>
         /// 绘制 动画动作组的Gizmos可视化
         /// </summary>
         private void OnDrawGizmosAnimActionGroup()
         {
+            if (animActions == null) return;
+
+            // 场景视图未必存在（Game 视图最大化、或尚未打开任何 Scene 视图时 lastActiveSceneView 为 null）。
+            // 在循环外取一次即可：这一帧里它对所有动作都是同一个。
+            var sceneView = SceneView.lastActiveSceneView;
+            Camera sceneCamera = sceneView ? sceneView.camera : null;
+
             foreach (var animAction in animActions)
             {
                 // 如果不显示Gizmos，则跳过
-                if (animAction.showGizmos == false) continue;
+                if (animAction == null || animAction.showGizmos == false) continue;
 
                 // 计算动作区域的方向
                 Quaternion actionRotation = Quaternion.Euler
@@ -54,8 +61,7 @@ namespace Ale.AnimSimulatorSystem
                 Gizmos.matrix = rotationMatrix;
                 Gizmos.DrawWireSphere(Vector3.zero, animAction.actionRange * 0.5f);
                 // 绘制一个圆形，始终面向摄像机 以增强球形边缘的可视化
-                Camera sceneCamera = SceneView.lastActiveSceneView.camera;
-                if (sceneCamera != null)
+                if (sceneCamera)
                 {
                     Vector3 toCamera = (sceneCamera.transform.position - transform.position).normalized;
                     Quaternion toCameraRotation = Quaternion.LookRotation(toCamera);
@@ -116,9 +122,9 @@ namespace Ale.AnimSimulatorSystem
                         float radiusInner = radiusOuter * 0.7f; // 内环半径为外环的70%
                         // 绘制 环形区域
                         Vector3 centerPosWs = transform.position; // 中心锚点
-                        // 摄像机向量
-                        Camera sceneCam = SceneView.lastActiveSceneView.camera;
-                        Vector3 cameraDirWs = (sceneCam.transform.position - centerPosWs).normalized;
+                        // 摄像机向量。环形所在的平面是由它定的，没有场景视图就无从确定，整段跳过。
+                        if (!sceneCamera) break;
+                        Vector3 cameraDirWs = (sceneCamera.transform.position - centerPosWs).normalized;
                         // 计算 旋转平面的 法向量 轴心
                         Vector3 rotateAxisWs = Vector3.Cross(actionDirWs, Vector3.Cross(actionDirWs, cameraDirWs).normalized).normalized;
 
@@ -150,9 +156,11 @@ namespace Ale.AnimSimulatorSystem
                             // 夹角线
                             Gizmos.DrawLine(inner1, outer1);
                             
-                            // 绘制两个三角形填充
-                            Handles.DrawAAConvexPolygon(new[] { outer0, outer1, inner1 });
-                            Handles.DrawAAConvexPolygon(new[] { outer0, inner1, inner0 });
+                            // 绘制两个三角形填充。复用同一个缓冲：DrawAAConvexPolygon 立即绘制、不持有传入的数组。
+                            _gizmoTriBuffer[0] = outer0; _gizmoTriBuffer[1] = outer1; _gizmoTriBuffer[2] = inner1;
+                            Handles.DrawAAConvexPolygon(_gizmoTriBuffer);
+                            _gizmoTriBuffer[0] = outer0; _gizmoTriBuffer[1] = inner1; _gizmoTriBuffer[2] = inner0;
+                            Handles.DrawAAConvexPolygon(_gizmoTriBuffer);
                         }
                         // 头部绘制 圆锥箭头
                         // 末端方向和位置
@@ -187,6 +195,10 @@ namespace Ale.AnimSimulatorSystem
         #region Gizmos Mesh生成
         // 缓存的圆锥 Mesh（仅编辑器使用）
         private static Mesh _coneMesh;
+
+        // 扇形填充用的三角形顶点缓冲。原先在 36 次的循环里各 new 一个数组，
+        // 每个「旋转」动作每帧就是 72 个短命数组——Gizmo 是每帧重绘的，累积起来相当可观。
+        private static readonly Vector3[] _gizmoTriBuffer = new Vector3[3];
 
         /// <summary>
         /// 获取一个通用的单位圆锥 Mesh，轴向为 +Y（顶点在 y=1，基底在 y=0，基底半径为 0.5）
@@ -471,11 +483,7 @@ namespace Ale.AnimSimulatorSystem
             if (_animActionCurrent.isLoop)
             {
                 // 停止 旧的协程
-                if (_corPlayAnimNormalModeIsLoopOnComplete != null)
-                {
-                    try { StopCoroutine(_corPlayAnimNormalModeIsLoopOnComplete); }
-                    catch (Exception ex) { Debug.LogWarning($"[AnimActionPlayer] Stop coroutine failed: {ex.Message}"); }
-                }
+                KillCor(ref _corPlayAnimNormalModeIsLoopOnComplete);
                 // 启动 新的协程
                 _corPlayAnimNormalModeIsLoopOnComplete = StartCoroutine(CorPlayAnimNormalModeIsLoopOnComplete(stopAnimActionDelayTime));
             }
@@ -639,12 +647,7 @@ namespace Ale.AnimSimulatorSystem
         private void PlayAnimPressMode()
         {
             // 停止 松开协程
-            if (_pressModeAnimReleaseCor != null)
-            {
-                try { StopCoroutine(_pressModeAnimReleaseCor); }
-                catch (Exception ex) { Debug.LogWarning($"[AnimActionPlayer] Stop press-mode release coroutine failed: {ex.Message}"); }
-                _pressModeAnimReleaseCor = null;
-            }
+            KillCor(ref _pressModeAnimReleaseCor);
             // 启动 按下协程
             if (_pressModeAnimPressCor == null)
                 _pressModeAnimPressCor = StartCoroutine(CorPressModeAnimPress());
@@ -656,12 +659,7 @@ namespace Ale.AnimSimulatorSystem
         private void StopAnimPressMode()
         {
             // 停止 按下协程
-            if (_pressModeAnimPressCor != null)
-            {
-                try { StopCoroutine(_pressModeAnimPressCor); }
-                catch (Exception ex) { Debug.LogWarning($"[AnimActionPlayer] Stop press-mode press coroutine failed: {ex.Message}"); }
-                _pressModeAnimPressCor = null;
-            }
+            KillCor(ref _pressModeAnimPressCor);
             // 启动 松开协程
             if (_pressModeAnimReleaseCor == null)
                 _pressModeAnimReleaseCor = StartCoroutine(CorPressModeAnimRelease());
@@ -716,12 +714,14 @@ namespace Ale.AnimSimulatorSystem
 
             // 等待 延迟时间后 结束动作
             yield return new WaitForSeconds(_animActionCurrent.pressModeAnimActionStopDelay);
-            // 立即停止 当前动画动作
-            StopAnimActionImmediate();
+
+            // 先摘掉自己的句柄再收尾：StopAnimActionImmediate 现在会停掉本播放器全部在途协程，
+            // 句柄还挂着的话那就是「协程停自己」——能跑通只是因为后面恰好没有 yield 了，太脆。
+            _pressModeAnimReleaseCor = null;
             // 标记为 未在播放 按压模式动画
             _isPressModeAnimPlaying = false;
-
-            _pressModeAnimReleaseCor = null;
+            // 立即停止 当前动画动作
+            StopAnimActionImmediate();
         }
         #endregion
 
@@ -1151,6 +1151,11 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void StopAnimActionImmediate()
         {
+            // 必须最先做：下面会把 _animActionCurrent / _animDataCurrent 置空，而按压、松开、进度阻尼、
+            // 循环完成这四类协程每帧都在解引用它们。原先这里只停了「延迟停止」一条，于是
+            // 「按着不放时切换到另一个动作」（PlayAnimAction 会先调本方法）必然抛空引用。
+            StopAllAnimActionCoroutines();
+
             if (animator)
                 // 停止动画
                 animator.StopAnim(_animDataCurrent);
@@ -1165,23 +1170,46 @@ namespace Ale.AnimSimulatorSystem
             _animActionCurrent = null;
             // 清除 当前正在播放的 动画数据
             _animDataCurrent = null;
-            // 重置计时与协程状态
+            // 重置计时
             _animActionStartTime = -1f;
-            // 清除 延迟停止 动画动作 的协程
-            ClearCorDelayStopAnimAction();
         }
         
         /// <summary>
         /// 清除 延迟停止 动画动作 的协程
         /// </summary>
-        private void ClearCorDelayStopAnimAction()
+        private void ClearCorDelayStopAnimAction() => KillCor(ref _delayStopAnimActionCor);
+
+        /// <summary>
+        /// 停止本播放器全部在途的协程，并复位按压模式标记。
+        ///
+        /// <para>按压 / 松开 / 阻尼 / 循环完成 这四类协程都会逐帧解引用 <see cref="_animActionCurrent"/>
+        /// 或 <see cref="_animDataCurrent"/>，所以必须在清空这两个字段之前先把它们停掉。</para>
+        /// </summary>
+        private void StopAllAnimActionCoroutines()
         {
-            if (_delayStopAnimActionCor != null)
-            {
-                try { StopCoroutine(_delayStopAnimActionCor); }
-                catch (Exception ex) { Debug.LogWarning($"[AnimActionPlayer] Stop delay-stop coroutine failed: {ex.Message}"); }
-                _delayStopAnimActionCor = null;
-            }
+            KillCor(ref _delayStopAnimActionCor);
+            KillCor(ref _corPlayAnimNormalModeIsLoopOnComplete);
+            KillCor(ref _pressModeAnimPressCor);
+            KillCor(ref _pressModeAnimReleaseCor);
+            KillCor(ref _animProgressDampingCor);
+
+            // 按压被中途打断（例如按着不放时切到另一个动作）后，这个标记必须跟着复位，
+            // 否则下次进入按压模式会误判为「已在按压中」而去恢复上一次的旧进度。
+            _isPressModeAnimPlaying = false;
+        }
+
+        /// <summary>
+        /// 停止一条协程并置空其句柄；句柄为空时什么也不做。
+        ///
+        /// <para>原先四处都写成 <c>try { StopCoroutine(...) } catch</c>——传入一个活着的
+        /// <see cref="Coroutine"/> 句柄时 <c>StopCoroutine</c> 不会抛异常，那几个 catch 是无效防御，
+        /// 反而掩盖了「句柄该不该置空」这件真正要紧的事。</para>
+        /// </summary>
+        private void KillCor(ref Coroutine cor)
+        {
+            if (cor == null) return;
+            StopCoroutine(cor);
+            cor = null;
         }
         #endregion
         
@@ -1354,6 +1382,9 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="progressValueModify">进度值的修改差值。</param>
         private void ModifyProgressBarsValue(float progressValueModify)
         {
+            // 动作已被停止时 _animActionCurrent 为 null（StopAnimActionImmediate 会清掉它），
+            // 而本方法有从协程与回调里调用的路径，两者未必与停止同帧。
+            if (_animActionCurrent == null) return;
             if (_animActionCurrent.progressBarConfigs == null || _animActionCurrent.progressBarConfigs.Length == 0)
                 return;
 
