@@ -24,6 +24,11 @@
     - [皮肤组](#皮肤组)
   - [动画动作播放器](#动画动作播放器)
     - [动画动作列表](#动画动作列表)
+    - [动画动作列表UI 制作与排错](#动画动作列表ui-制作与排错)
+      - [预制体结构](#预制体结构)
+      - [配置要点](#配置要点)
+      - [排错速查](#排错速查)
+      - [运行期自检片段](#运行期自检片段)
   - [背景预制体](#背景预制体)
 
 # 官方教程
@@ -456,6 +461,119 @@
         - Condition Target Parameter：条件目标参数值，道具数量。拥有指定数量的道具后，满足条件。
     - Condition Target Name：条件目标名称。根据条件类型的不同，指定不同的目标名称。
     - Condition Target Parameter：条件目标参数值。根据条件类型的不同，指定不同的目标参数值。
+
+### 动画动作列表UI 制作与排错
+
+上面的 [动画动作列表](#动画动作列表) 讲的是**数据**（AnimActionPlayer 上配置了哪些动作）。这一节讲的是**显示这些数据的 UI 预制体**（`UIAnimActionList.prefab`）：玩家把光标移到角色身上时淡入、滚动选择动作的那个列表。
+
+自 2.0.0 起，这个列表由第三方的 CircularScrollingList 改为 Unity 原生 `ScrollRect` + toolkit 的虚拟滚动列表（`UiwFocusOrderList`）。两者的驱动方式完全不同，**下面这些点在原来的实现里都不存在**，是重做后新增的约束——不满足时的表现往往非常具有迷惑性（比如"列表明明显示出来了却一动不动"），故单列一节。
+
+#### 预制体结构
+
+```
+UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIAnimActionList 脚本
+├─ CircularScrollingList      ← CanvasGroup + ScrollRect + UIAnimActionScrollList
+│  └─ Viewport                ← RectMask2D + 透明 Image（必需，见要点 ②）
+│     └─ Content              ← 空 RectTransform，格子由脚本实例化到此
+└─ CircleClickTip             ← 纯视觉的点击提示，不参与射线
+   └─ ImgCircleClickTip
+```
+
+- `CircularScrollingList` 这个**节点名是历史遗留**（2.0.0 之前挂的是同名的第三方组件），现在挂的是 Unity 原生 ScrollRect。不要改名——4 个动画剪辑（`A_FadeIn` / `A_FadeOut` / `A_ListOpen` / `A_ListClose`）的曲线是**按节点路径名绑定**的，改名会让整套开合动画失配。同理，`CircleClickTip` 也不要挪层级。
+- 列表的显示 / 隐藏由 Animator 驱动 `CircularScrollingList` 上 CanvasGroup 的 `Alpha` 与 `Blocks Raycasts`：`A_ListOpen` 置 1、`A_ListClose` / `A_FadeOut` 置 0。**收起状态下列表是收不到任何 UI 射线的**，这是有意为之。
+- 格子预制体（`UIAnimActionListBox.prefab`）挂在 `UIAnimActionScrollList` 的 `Cell Prefab` 上，不要作为子物体预先摆进 Content —— 格子由虚拟滚动按需实例化与复用。
+
+#### 配置要点
+
+**① Content 的尺寸由脚本接管，不要手动设置，也不要挂 Layout Group / Content Size Fitter。**
+
+- **行高**自动取自 `Cell Prefab` 根 RectTransform 的高度（示例中为 60）。想改行距就改格子预制体的高度。
+- **Content 高度** = 条目数 × 行高 **+ 首尾留白**。
+- **首尾留白**是焦点列表特有的：`Focus Anchor` 设为 `Center` 时，第一条和最后一条也必须能滚到视口正中，所以 Content 头尾各补 `(视口高 − 行高) / 2`。
+- ⚠️ 这一项需要 **`com.ale.toolkit` ≥ 1.7.1**。低于该版本时没有留白，动作只有 3 条时 Content 仅 180px、比 400px 的视口还矮，ScrollRect 判定"无内容可滚"——表现为**条目全挤在列表顶部、滚轮完全没反应**；即便动作很多，首尾各半个视口的条目也**永远无法被选中**。
+
+**② Viewport 上必须有一张"透明但可命中"的 Image。**
+
+原生 ScrollRect 靠 UI 射线收滚轮：光标必须命中某个 Raycast Target，事件才会沿父链冒泡到 ScrollRect。原来的 CircularScrollingList 是自己轮询鼠标滚轮的，不依赖射线，所以旧预制体上没有这张图——重做后必须补。两个设置**缺一不可**：
+
+- `Image`：`Color` 的 **A = 0**、**`Raycast Target` 勾选**
+- `CanvasRenderer`：**`Cull Transparent Mesh` 不要勾** ← 最容易漏。勾上后 alpha 为 0 的图形会被剔除，**连带失去射线命中**，等于白加
+
+漏掉时的表现：只有光标恰好压在某个格子的图标或文字上才滚得动，格子之间的空隙一滚就停。
+
+**③ Viewport 宽度必须容得下动作名标签。**
+
+`RectMask2D` 是按 Viewport 矩形裁剪的，而动作名标签是自格子中心**向右伸出**的（示例中 `ImgNameLabel` 伸到 +150px）。Viewport 只有 100px 宽时，动作名会被齐根切掉、只剩中间的图标。示例取 500×400（**关于中心对称**加宽，格子与其子物体的相对位置不受影响）。调整动作名排版时，记得同步复查这个宽度。
+
+**④ 滚轮灵敏度建议等于行高。**
+
+`Scroll Sensitivity` 设为行高（示例 60），一档滚轮正好走一条动作，还原原实现的步进手感；否则会停在两条之间。`Movement Type` 建议 `Clamped`，滚到两端不回弹过冲。
+
+> 已知限制：**拖拽滚动松手后不做吸附对齐**。停在两条之间时，焦点缩放曲线会让上下两条都呈半放大态。只用滚轮不受影响。
+
+**⑤ 场景 EventSystem 的输入模块必须接线（最隐蔽的一条）。**
+
+本系统有**两条互相独立**的输入通路，务必先分清：
+
+| 通路 | 走什么 | 负责什么 |
+|---|---|---|
+| 角色交互 | `AnimSimulatorManager` 的 `ToolkitInputBinder` + **物理射线**（`Physics2D.GetRayIntersection`） | 光标移动、列表的悬停淡入 / 展开、点击 / 拖拽 / 旋转 / 按压驱动动画 |
+| 列表交互 | **UI EventSystem**（`GraphicRaycaster` + `InputSystemUIInputModule`） | 列表滚轮、格子点击 |
+
+角色交互**完全绕开 EventSystem**。所以 EventSystem 一旦坏掉，**悬停展开一切正常，只有列表滚不动、格子点不动**——极易误判成列表本身的问题。检查项：
+
+- EventSystem 上 `InputSystemUIInputModule` 的 `Actions Asset`，以及 `Point` / `Left Click` / `Scroll Wheel` 等动作引用，必须都指向工程内**确实存在**的 `.inputactions` 资产。引用指向一份已被删除的资产时，Inspector 里**看起来仍有名字**（如 `UI/ScrollWheel`），但实际解析为 null，不会有任何报错。
+- 场景里的 `PlayerInput` 若设置了 `UI Input Module`，它会在运行时用**自己的** Actions 覆盖模块的 Actions Asset，并按「动作图名/动作名」重映射引用。**两边应指向同一份资产**，否则重映射可能整体落空、把引用全部洗成 null。
+- Demo 场景就踩过这个坑：模块引用的是一份随 Fs 插件一起消失的 `.inputactions`（GUID 在工程中已不存在），十个动作引用全部解析失败，UI 指针事件一个都产不出来。现已改为与 `PlayerInput` 共用 `Assets/InputSystem_Actions.inputactions`。
+
+#### 排错速查
+
+| 症状 | 最可能的原因 | 怎么确认 |
+|---|---|---|
+| 条目全挤在列表顶部，滚轮完全没反应 | ① 缺首尾留白（toolkit < 1.7.1） | 比一下 Content 高度是否 ≤ Viewport 高度 |
+| 首尾几条动作永远选不中，中间的正常 | ① 同上 | 滚到底，看焦点能否落到最后一条 |
+| 只有压在格子上才滚得动，空隙处滚不动 | ② Viewport 缺可命中 Image，或勾了 Cull Transparent Mesh | 查 Viewport 的 Image 与 CanvasRenderer |
+| 滚轮和格子点击都没反应，但悬停展开正常 | ⑤ EventSystem 输入模块引用失效 | 播放时查模块的 `scrollWheel` / `point` 是否为空 |
+| 动作名看不见，只剩中间的图标 | ③ Viewport 太窄，被 RectMask2D 裁掉 | 把 Viewport 加宽，看标签是否回来 |
+| 一档滚轮跳过好几条，或总停在两条之间 | ④ Scroll Sensitivity 与行高不一致 | 令其等于 Cell Prefab 的高度 |
+| 格子位置错乱 / 相互重叠 | Content 上挂了 Layout Group 或 Content Size Fitter | 移除这些组件，定位交回虚拟滚动 |
+| 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` 的曲线 |
+
+#### 运行期自检片段
+
+排查"到底是列表的问题还是 EventSystem 的问题"时，进入播放模式后执行下面这段即可分辨。它先看输入模块有没有动作，再直接给列表合成一个滚轮事件——**若合成事件能滚而实际滚轮不能，问题就一定在 EventSystem 一侧**。
+
+```csharp
+// 1) 输入模块是否拿得到动作
+var uim = UnityEngine.EventSystems.EventSystem.current.currentInputModule
+          as UnityEngine.InputSystem.UI.InputSystemUIInputModule;
+Debug.Log($"scrollWheel = {(uim.scrollWheel?.action == null ? "未接线!" : uim.scrollWheel.action.name)}");
+Debug.Log($"point       = {(uim.point?.action == null ? "未接线!" : uim.point.action.name)}");
+
+// 2) 给列表合成一个滚轮事件，看 Content 会不会动
+var scrollRect = /* 列表上的 ScrollRect */;
+var ped = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+{
+    position    = RectTransformUtility.WorldToScreenPoint(null, scrollRect.viewport.position),
+    scrollDelta = new Vector2(0f, -1f),   // 向下滚一档
+};
+var hits = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+UnityEngine.EventSystems.EventSystem.current.RaycastAll(ped, hits);
+Debug.Log($"射线命中 {hits.Count} 个，最上层 = {(hits.Count > 0 ? hits[0].gameObject.name : "无")}");
+if (hits.Count > 0)
+{
+    ped.pointerCurrentRaycast = hits[0];
+    var handler = UnityEngine.EventSystems.ExecuteEvents.ExecuteHierarchy(
+        hits[0].gameObject, ped, UnityEngine.EventSystems.ExecuteEvents.scrollHandler);
+    Debug.Log($"滚轮由 {(handler ? handler.name : "无人")} 处理，Content = {scrollRect.content.anchoredPosition}");
+}
+```
+
+判读方式：
+
+- **射线命中 0 个** → 列表处于收起态（`Blocks Raycasts` 为 0），或要点 ② 没配好。
+- **命中了但"无人处理"** → 命中的对象不在 ScrollRect 的子树下（例如被某个兄弟节点的图形挡在了上层）。
+- **Content 动了，但实际滚轮不动** → 列表侧没问题，去查要点 ⑤ 的输入模块。
 
 ## 背景预制体
 

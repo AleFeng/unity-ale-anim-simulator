@@ -42,6 +42,7 @@
   - **`ScrollRect` 全域没有 raycast 目标**。原 `CircularScrollingList` 是自己轮询鼠标滚轮的（`controlMode = 2`），不依赖 UI 射线；换成原生 `ScrollRect` 后必须命中一个 `raycastTarget` 才会收到滚轮事件，而重搭出的 Viewport 只有 `RectMask2D`、没有任何 `Graphic`——只有光标恰好压在某个格子上时才滚得动。现于 Viewport 补一张全透明 `Image`（`cullTransparentMesh = false`，否则 alpha 为 0 的图形会被剔除，连带失去射线命中）。
   - **动作名标签被遮罩裁掉**。名称标签自格子中心向右伸到 +150px，而重搭出的 Viewport 只有 100px 宽，`RectMask2D` 把它们齐根切掉。视口加宽到 400×400（关于中心对称，格子与其子物体的相对位置不变）。
   - 顺带：滚轮灵敏度 20 → 60（= 行高，一档一条动作，还原原库的步进手感）；`movementType` 改 `Clamped`，两端不再回弹过冲。皮肤列表的 Viewport 同样缺 raycast 目标，一并补上。
+- **Demo 场景的 UI 事件系统整体失效**（滚轮只是其中一个症状，UI 点击 / 拖拽同样全废）。`EventSystem` 上 `InputSystemUIInputModule` 的十个 `InputActionReference` 是内联序列化在场景里的，全部指向一份 GUID 为 `2bcd2660…`、**已不存在于工程**的 InputActions 资产（Fs 时代遗留，随 `PluginsIgnore` 一同消失），因此 `point` / `scrollWheel` 等无一能解析，EventSystem 产不出任何指针事件。现改为指向工程内的 `Assets/InputSystem_Actions.inputactions`——与场景中 `PlayerInput` 用的是同一份，故 `PlayerInput.uiInputModule` 在运行时的资产覆盖成为空操作，不会再把引用洗成 null。
 - **测试用角色 / 背景增加 `AssetReference` 字段**，可直接拖预制体引用加载（引用优先于名称，`#if UNITY_EDITOR && ATK_ADDRESSABLE` 门控）；同时修正 Demo `AnimSimulatorConfig` 中指向 Fs 时代旧路径（`Assets/Plugins/Fs/...`）的角色 / 背景文件夹配置——此前运行 Demo 会抛 `InvalidKeyException`。
 
 ### 已知问题
