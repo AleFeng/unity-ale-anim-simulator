@@ -541,7 +541,6 @@ MonoBehaviour:
     spineSkeletonAnimation: {fileID: 0}
     spineAnimDatas:
     - animName: idle
-      animRefAsset: {fileID: 0}
       animTrack: 1
       animTrackSub: 0
       isLoop: 1
@@ -550,7 +549,6 @@ MonoBehaviour:
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 0}
     - animName: blink
-      animRefAsset: {fileID: 0}
       animTrack: 4
       animTrackSub: 0
       isLoop: 1
@@ -571,24 +569,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u8EAB\u4F53"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -633,7 +619,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u8D70\u8DEF-\u5FAA\u73AF"
@@ -645,7 +631,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u52A8\u4F5C-\u8033\u6735"
@@ -663,41 +649,9 @@ PrefabInstance:
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animTrackIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionOperationType
       value: 0
@@ -737,118 +691,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionParameter
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8|1"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u81C0\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetParameter
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -894,10 +736,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -921,10 +759,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u5174\u594B\u5EA6"
       objectReference: {fileID: 0}
@@ -933,16 +767,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActionPlayerType
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -987,7 +813,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u6253\u91CF-\u81EA\u52A8"
@@ -999,7 +825,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u52A8\u4F5C-\u8033\u6735"
@@ -1017,41 +843,9 @@ PrefabInstance:
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animTrackIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionOperationType
       value: 0
@@ -1091,106 +885,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u624B\u81C2"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1236,10 +930,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1263,24 +953,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u81C0\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1301,7 +979,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionName
       value: "\u8DF3\u821E-\u65CB\u8F6C"
@@ -1313,7 +991,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u52A8\u4F5C-\u65CB\u8F6C"
@@ -1335,29 +1013,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionOperationType
       value: 2
@@ -1401,110 +1059,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].conditions.Array.data[0].conditionParameter
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8|1"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1550,10 +1104,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1577,28 +1127,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u817F\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1643,7 +1177,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionName
       value: "\u4E0B\u8E72-\u62D6\u62FD"
@@ -1655,14 +1189,10 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 90da2212637d7ba4f8a2aa2048366bcf, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u4E0B\u8E72-\u6309\u538B"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].actionType
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].showGizmos
@@ -1671,14 +1201,10 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 90da2212637d7ba4f8a2aa2048366bcf, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u4E0B\u8E72-\u6309\u538B"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].actionType
-      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].showGizmos
@@ -1709,18 +1235,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 4f0df283cf04bb3468754ce976dbcac3, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionOperationType
       value: 1
       objectReference: {fileID: 0}
@@ -1743,58 +1257,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].progressBarConfigs.Array.size
       value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u817F\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1840,10 +1302,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1867,28 +1325,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u5934\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1907,40 +1349,8 @@ PrefabInstance:
       value: "\u6253\u91CF-\u70B9\u51FB"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
-      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1985,10 +1395,6 @@ PrefabInstance:
     - target: {fileID: 4851507608177750342, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
