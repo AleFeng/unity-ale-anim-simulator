@@ -7,7 +7,6 @@ using UnityEngine.Localization;
 #endif
 
 #if ASS_SPINE
-using Spine;
 using Spine.Unity;
 #endif
 
@@ -267,16 +266,15 @@ namespace Ale.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void OnValidate()
         {
-#if ASS_SPINE
-            if (spineAnimator == false)
+            // 多态查找天然认得两种后端，无需按宏分支
+            if (animator == false)
             {
-                // 尝试从父物体获取 SpineAnimator 组件
-                spineAnimator = GetComponentInParent<SpineAnimator>();
-                // 尝试从其他子物体获取 SpineAnimator 组件
-                if (!spineAnimator && transform.parent)
-                    spineAnimator = transform.parent.GetComponentInChildren<SpineAnimator>();
+                // 尝试从父物体获取 动画控制器
+                animator = GetComponentInParent<AnimatorBase>();
+                // 尝试从其他子物体获取 动画控制器
+                if (!animator && transform.parent)
+                    animator = transform.parent.GetComponentInChildren<AnimatorBase>();
             }
-#endif
         }
 #endif
 
@@ -430,10 +428,10 @@ namespace Ale.AnimSimulatorSystem
 
         #region 动画 控制
         [Header("动画设置")]
-#if ASS_SPINE
-        [Tooltip("Spine动画播放器")]
-        [SerializeField] private SpineAnimator spineAnimator;
-#endif
+        // 面向基类编程；FormerlySerializedAs 保住旧字段名 spineAnimator 上已配置的引用
+        [FormerlySerializedAs("spineAnimator")]
+        [Tooltip("动画播放器：Spine Animator 或 Live2D Animator")]
+        [SerializeField] private AnimatorBase animator;
         [Tooltip("动画轨道 默认：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。")]
         [SerializeField] private EAnimTrack animTrackDefault = EAnimTrack.Other;
         [Tooltip("动画子轨道 默认：用于同一类型动画的区分。不同子轨道的动画 可以同时播放。"), Range(0, 9)]
@@ -457,27 +455,22 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void PlayAnimNormalMode()
         {
-#if ASS_SPINE
-            if (spineAnimator == null || _animActionCurrent.animReferenceAsset == null) return;
+            if (!animator || _animDataCurrent == null) return;
             // 播放动画
-            spineAnimator.PlaySpineAnim
+            animator.PlayAnim
             (
-                _spineAnimDataCurrent,
-                (trackEntry) =>
+                _animDataCurrent,
+                animDataCompleted =>
                 {
-                    if (trackEntry.Animation == null) return;
-
                     // 已经停止播放、或正在延迟停止中，忽略本次回调
-                    if (_delayStopAnimActionCor == null &&
-                        _animActionCurrent != null &&
-                        _animActionCurrent.animReferenceAsset)
+                    if (_delayStopAnimActionCor == null && _animActionCurrent != null)
                     {
                         // 停止 当前选中的 动画动作
                         StopAnimActionCheckDelayTime();
                     }
                 }
             );
-#endif
+
             // 如果是 循环模式，启动 协程 在动画完成后调用 动作完成事件回调
             if (_animActionCurrent.isLoop)
             {
@@ -736,7 +729,7 @@ namespace Ale.AnimSimulatorSystem
         }
         #endregion
 
-        #region Sp动画 动画进度控制
+        #region 动画进度控制
         // 拖拽阻尼 协程
         private Coroutine _animProgressDampingCor;
         // 拖拽阻尼 起始进度值
@@ -761,14 +754,12 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="animAction"></param>
         private void SetAnimProgressMode(AnimAction animAction)
         {
-#if ASS_SPINE
-            if (spineAnimator == false || animAction.animReferenceAsset == false) return;
+            if (!animator || _animDataCurrent == null) return;
             // 不循环，播放速度为0。由玩家操作 直接设置动画进度。
-            _spineAnimDataCurrent.isLoop = false;
-            _spineAnimDataCurrent.speed = 0f;
-            // 播放Spine动画。
-            spineAnimator.PlaySpineAnim(_spineAnimDataCurrent);
-#endif
+            _animDataCurrent.isLoop = false;
+            _animDataCurrent.speed = 0f;
+            // 播放动画
+            animator.PlayAnim(_animDataCurrent);
         }
 
         /// <summary>
@@ -810,87 +801,53 @@ namespace Ale.AnimSimulatorSystem
                 // 不会重复启动协程
                 if (_animProgressDampingCor == null)
                 {
-#if ASS_SPINE
-                    // 获取 当前动画轨道
-                    var trackEntry = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
-                    // Spine动画 进度控制的阻尼协程
-                    _animProgressDampingCor = StartCoroutine(CorAnimProgressDamping(trackEntry));
-#else
-                    // Live2D动画 进度控制的阻尼协程
-                    _animProgressDampingCor = StartCoroutine(CorAnimProgressDamping());
-#endif
+                    // 记下发起时的轨道与播放令牌，协程逐帧比对，轨道被别的播放顶替时自行退出
+                    int trackIndex = GetCurrentAnimActionTrackIndex();
+                    _animProgressDampingCor = StartCoroutine(
+                        CorAnimProgressDamping(trackIndex, animator ? animator.GetAnimPlayToken(trackIndex) : 0));
                 }
             }
             else
             {
                 // 无阻尼时间，直接设置进度，但遵守最小帧阈值，避免小幅更新导致抖动
                 _animProgressDampingCurrent = _animProgressDampingTarget; // 直接设置为目标进度值
-#if ASS_SPINE
-                // 获取 当前动画轨道
-                var trackEntry = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
-                // 直接设置 Sp动画 进度值
-                trackEntry.TrackTime = trackEntry.Animation.Duration * _animProgressDampingTarget;
-#else
-                // 直接设置 Live2D动画 进度值
-#endif
+                // 直接设置 动画进度值。轨道为空时 SetAnimProgress 返回 false 而非空引用。
+                if (animator)
+                    animator.SetAnimProgress(GetCurrentAnimActionTrackIndex(), _animProgressDampingTarget);
                 // 修改 进度条的值
                 ModifyProgressBarsValue(_animProgressDampingTarget - _animProgressDampingStart);
             }
         }
-        
+
         /// <summary>
         /// 获取 动画的进度值。
         /// </summary>
         /// <returns>进度值 [0.0, 1.0]</returns>
         private float GetAnimProgress()
-        {
-            float progress = 0f;
-#if ASS_SPINE
-            if (spineAnimator)
-            {
-                // 检查 动画轨道 有效性
-                var entry = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
-                // 计算 当前进度值
-                if (entry != null && entry.Animation != null && entry.Animation.Duration > 0f)
-                    progress = Mathf.Clamp01(entry.TrackTime / entry.Animation.Duration);
-            }
-#else
-            // 获取 Live2D动画的当前进度
-            progress = 0f;
-#endif
-            return progress;
-        }
-        
-#if ASS_SPINE
+            => animator ? animator.GetAnimProgress(GetCurrentAnimActionTrackIndex()) : 0f;
+
         /// <summary>
         /// 协程 拖拽阻尼。动画进度值 平滑变化。
         /// </summary>
-        /// <param name="trackEntry">播放的Spine动画轨道</param>
-        private IEnumerator CorAnimProgressDamping(TrackEntry trackEntry)
+        /// <param name="trackIndex">发起阻尼时的动画轨道</param>
+        /// <param name="playToken">发起阻尼时该轨道的播放令牌。令牌变化即说明轨道已被顶替，协程退出。</param>
+        private IEnumerator CorAnimProgressDamping(int trackIndex, int playToken)
         {
-            if (trackEntry == null || trackEntry.Animation == null)
-                yield break;
-#else   
-        /// <summary>
-        /// 协程 拖拽阻尼。动画进度值 平滑变化。
-        /// </summary>
-        /// <param name="trackEntry">播放的Live2D动画轨道</param>
-        private IEnumerator CorAnimProgressDamping()
-        {
-#endif
+            if (!animator || playToken == 0) yield break;
+
             _animProgressDampingElapsedTime = 0f; // 重置 已经过的时间
             // 平滑过渡 到 目标进度值
             while (_animProgressDampingElapsedTime < _animProgressDampingDurationTime)
             {
-#if ASS_SPINE
-                // 检查 当前轨道 未被替换
-                var trackEntryCurrent = spineAnimator.GetTrackEntry(GetCurrentAnimActionTrackIndex());
-                if (trackEntryCurrent == null || trackEntryCurrent.Animation == null || !ReferenceEquals(trackEntryCurrent, trackEntry))
+                // 检查 当前轨道 未被替换。
+                // 用令牌比对而非持有后端播放句柄做引用比较：后端句柄普遍有对象池复用，
+                // 回收再分配后引用比较会假阳性，协程会继续去写一条早已不属于它的轨道。
+                if (!animator || animator.GetAnimPlayToken(trackIndex) != playToken)
                 {
                     _animProgressDampingCor = null;
                     yield break;
                 }
-#endif
+
                 // 累计时间
                 _animProgressDampingElapsedTime += Time.deltaTime;
                 
@@ -910,12 +867,8 @@ namespace Ale.AnimSimulatorSystem
                     // 计算 新的进度值。到 目标值 的线性插值。
                     progressNew = Mathf.Lerp(_animProgressDampingStart, _animProgressDampingTarget, t);
                 }
-#if ASS_SPINE
-                // 设置 Sp动画 进度值
-                trackEntry.TrackTime = progressNew * trackEntry.Animation.Duration;
-#else
-                // 设置 Live2D动画 进度值
-#endif
+                // 设置 动画进度值
+                animator.SetAnimProgress(trackIndex, progressNew);
                 // 修改 进度条的值
                 ModifyProgressBarsValue(progressNew - _animProgressDampingCurrent);
                 // 更新 当前进度值
@@ -947,10 +900,8 @@ namespace Ale.AnimSimulatorSystem
         
         // 当前正在播放的 动画动作
         private AnimAction _animActionCurrent;
-#if ASS_SPINE
         // 当前正在播放的 动画数据
-        private AnimData _spineAnimDataCurrent;
-#endif
+        private AnimData _animDataCurrent;
         // 顺序播放时，当前的 动画动作索引
         private int _animActionIndexOrder;
         // 随机播放时，各动画动作 已播放次数（用于 randomTypePlayLimit 次数限制）
@@ -1071,18 +1022,16 @@ namespace Ale.AnimSimulatorSystem
             _isAnimActionPlaying = true;
             // 记录 当前正在播放的 动画动作
             _animActionCurrent = animAction; 
-#if ASS_SPINE
-            // 记录 当前正在播放的 Spine动画数据
-            _spineAnimDataCurrent = new AnimData
+            // 记录 当前正在播放的 动画数据
+            _animDataCurrent = new AnimData
             (
-                _animActionCurrent.animReferenceAsset,
+                _animActionCurrent.ResolveAnimName(),
                 GetCurrentAnimActionTrackIndex(),
                 _animActionCurrent.isLoop,
                 _animActionCurrent.isReverse,
                 _animActionCurrent.clickModeAnimPlaySpeed,
                 _animActionCurrent.startDelayTime
             );
-#endif
             // 记录动作完成的回调
             if (onActionComplete != null)
                 _onActionCompleteEvent = onActionComplete;
@@ -1206,24 +1155,20 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void StopAnimActionImmediate()
         {
-#if ASS_SPINE
-            // 获取 Spine动画组件
-            if (spineAnimator)
-                // 停止 Spine动画
-                spineAnimator.StopSpineAnim(_spineAnimDataCurrent);
+            if (animator)
+                // 停止动画
+                animator.StopAnim(_animDataCurrent);
             else
-                Debug.LogWarning($"[AnimActionPlayer] StopAnimActionByIndex: {gameObject.name}的Spine动画组件 未设置。");
-#endif
+                Debug.LogWarning($"[AnimActionPlayer] StopAnimActionImmediate: {gameObject.name} 的动画控制器 未设置。", this);
+
             // 触发 动作完成的回调
             _onActionCompleteEvent?.Invoke(this);
             _onActionCompleteEvent = null; // 清除回调，避免重复调用
 
             // 清除 当前正在播放的 动画动作
             _animActionCurrent = null;
-#if ASS_SPINE
-            // 清除 当前正在播放的 Spine动画数据
-            _spineAnimDataCurrent = null;
-#endif
+            // 清除 当前正在播放的 动画数据
+            _animDataCurrent = null;
             // 重置计时与协程状态
             _animActionStartTime = -1f;
             // 清除 延迟停止 动画动作 的协程
@@ -1553,11 +1498,30 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("动作交互方向 Z轴：动作交互区域的朝向，Z轴的旋转角度。(单位：度)"), Range(0f, 360f)]
         public float actionDirectionZ;
         
-        [Header("动画设置")] 
+        [Header("动画设置")]
+        [Tooltip("动画名称：在动画软件中制作时的名称。Spine 与 Live2D 使用相同的命名规则。\n" +
+                 "留空时回退读取下方的 动画资源（仅 Spine，兼容旧配置用）。")]
+        public string animName;
 #if ASS_SPINE
-        [Tooltip("动画资源: 播放的Spine动画资源")]
+        [Tooltip("动画资源: 播放的Spine动画资源。\n" +
+                 "【兼容字段】仅在 动画名称 留空时作为回退使用，新配置请直接填写 动画名称。")]
         public AnimationReferenceAsset animReferenceAsset;
 #endif
+
+        /// <summary>
+        /// 解析实际要播放的动画名：<see cref="animName"/> 优先；留空时回退到旧版的 Spine 动画引用资源
+        /// （取其引用的动画名，取不到则退而取资产文件名）。两者都没有时返回 <c>null</c>。
+        /// </summary>
+        public string ResolveAnimName()
+        {
+            if (!string.IsNullOrEmpty(animName)) return animName;
+#if ASS_SPINE
+            if (animReferenceAsset)
+                return animReferenceAsset.Animation != null ? animReferenceAsset.Animation.Name : animReferenceAsset.name;
+#endif
+            return null;
+        }
+
         [Tooltip("动画阻尼时间：用于平滑过渡动画变化的时间（秒）")]
         public float dampingTime = 0.06f;
         [Tooltip("是否 循环播放")]
