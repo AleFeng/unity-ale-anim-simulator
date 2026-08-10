@@ -33,7 +33,7 @@
 
 ### 必需：Ale Toolkit
 
-本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.1**）之上，用到的底层能力：
+本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.2**）之上，用到的底层能力：
 
 | toolkit 能力 | 插件中的用途 |
 |---|---|

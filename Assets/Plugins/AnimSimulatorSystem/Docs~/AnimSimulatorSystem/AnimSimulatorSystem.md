@@ -505,11 +505,22 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 
 `RectMask2D` 是按 Viewport 矩形裁剪的，而动作名标签是自格子中心**向右伸出**的（示例中 `ImgNameLabel` 伸到 +150px）。Viewport 只有 100px 宽时，动作名会被齐根切掉、只剩中间的图标。示例取 500×400（**关于中心对称**加宽，格子与其子物体的相对位置不受影响）。调整动作名排版时，记得同步复查这个宽度。
 
-**④ 滚轮灵敏度建议等于行高。**
+**④ 滚轮的步长与平滑位移，分别由两个组件上的两个字段控制。**
 
-`Scroll Sensitivity` 设为行高（示例 60），一档滚轮正好走一条动作，还原原实现的步进手感；否则会停在两条之间。`Movement Type` 建议 `Clamped`，滚到两端不回弹过冲。
+| 字段 | 在哪 | 含义 |
+|---|---|---|
+| `Scroll Sensitivity` | ScrollRect | **一档滚轮走多远**（像素）。设为行高（示例 60），一档正好一条动作；否则会停在两条之间 |
+| `Scroll Tween Duration` | UIAnimActionScrollList | **一档走完用多久**（秒）。默认 0.1；设为 0 则恢复瞬间跳变 |
 
-> 已知限制：**拖拽滚动松手后不做吸附对齐**。停在两条之间时，焦点缩放曲线会让上下两条都呈半放大态。只用滚轮不受影响。
+`Movement Type` 建议 `Clamped`，滚到两端不回弹过冲。
+
+⚠️ **`Scroll Sensitivity` 在运行期会被列表取走并置 0**，这是有意的，不是 bug。原因是 `ScrollRect` 与 `UIAnimActionScrollList` 挂在同一个 GameObject 上，而 `ExecuteEvents` 会把滚轮事件派发给该物体上**全部** `IScrollHandler`——两者都会收到。不把 `ScrollRect` 的灵敏度清零，就会先被它瞬间挪一档、再被补间从头拉回，白抖一帧。清零后位移完全由列表给出，行为唯一。
+
+- 这只改运行期的字段值，**不动预制体**——Inspector 上的 `Scroll Sensitivity` 仍是「一档滚多远」的唯一可调入口，只是改由列表来应用它。
+- 所以**运行时读到 `scrollSensitivity` 为 0 属正常**，别照着它去反推「滚轮坏了」。
+- 连滚数档时按**目标位置**累加，而非按当前位置——否则每档都从半路重新起算，越滚越短、最后停在两条之间。
+
+> 已知限制：**拖拽滚动松手后不做吸附对齐**。停在两条之间时，焦点缩放曲线会让上下两条都呈半放大态。只用滚轮不受影响（一档整格步进，且拖拽开始时会取消进行中的补间）。
 
 **⑤ 场景 EventSystem 的输入模块必须接线（最隐蔽的一条）。**
 
@@ -536,6 +547,9 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | 滚轮和格子点击都没反应，但悬停展开正常 | ⑤ EventSystem 输入模块引用失效 | 播放时查模块的 `scrollWheel` / `point` 是否为空 |
 | 动作名看不见，只剩中间的图标 | ③ Viewport 太窄，被 RectMask2D 裁掉 | 把 Viewport 加宽，看标签是否回来 |
 | 一档滚轮跳过好几条，或总停在两条之间 | ④ Scroll Sensitivity 与行高不一致 | 令其等于 Cell Prefab 的高度 |
+| 滚轮切换条目是瞬间跳变的 | ④ Scroll Tween Duration 为 0，或 toolkit < 1.7.2 | 把它设为 0.1 左右 |
+| 滚轮位移过慢 / 拖沓 | ④ Scroll Tween Duration 过大 | 0.1 秒是较跟手的取值，超过 0.2 会明显发黏 |
+| 运行时看到 Scroll Sensitivity 变成 0 | 正常现象，列表按 ④ 接管了滚轮 | 看预制体上的值是否仍是行高 |
 | 格子位置错乱 / 相互重叠 | Content 上挂了 Layout Group 或 Content Size Fitter | 移除这些组件，定位交回虚拟滚动 |
 | 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` 的曲线 |
 

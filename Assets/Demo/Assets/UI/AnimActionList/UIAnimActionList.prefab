@@ -247,6 +247,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  scrollTweenDuration: 0.1
 --- !u!1 &3217993499992300768
 GameObject:
   m_ObjectHideFlags: 0
