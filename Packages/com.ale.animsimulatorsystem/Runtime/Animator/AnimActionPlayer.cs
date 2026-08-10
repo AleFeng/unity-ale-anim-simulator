@@ -9,6 +9,7 @@ using UnityEngine.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Ale.Toolkit.Runtime;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -726,19 +727,15 @@ namespace Ale.AnimSimulatorSystem
         #endregion
 
         #region 动画进度控制
-        // 拖拽阻尼 协程
-        private Coroutine _animProgressDampingCor;
+        // 拖拽阻尼 补间句柄
+        private ToolkitTweenHandle _animProgressDampingHandle;
         // 拖拽阻尼 起始进度值
         private float _animProgressDampingStart;
         // 拖拽阻尼 目标进度值
         private float _animProgressDampingTarget;
         // 拖拽阻尼 当前进度值
         private float _animProgressDampingCurrent;
-        
-        // 拖拽阻尼 持续时间
-        private float _animProgressDampingDurationTime;
-        // 拖拽阻尼 已经过的时间
-        private float _animProgressDampingElapsedTime;
+
         // 是否为 循环进度模式（头尾相连）
         private bool _animProgressIsLoop;
         // 循环模式下的进度增量（可能为负），表示从 start 到 target 的最短环绕增量（单位：0..1）
@@ -787,21 +784,10 @@ namespace Ale.AnimSimulatorSystem
                 float deltaAngleDeg = Mathf.DeltaAngle(startAngleDeg, targetAngleDeg); // -180..180
                 _animProgressDampingDeltaLoop = deltaAngleDeg / 360f; // -0.5 .. 0.5
             }
-            // 设置了阻尼时间，启动阻尼协程
+            // 设置了阻尼时间，启动阻尼补间
             if (dampingTime > 0f)
             {
-                // 记录 阻尼持续时间
-                _animProgressDampingDurationTime = dampingTime;
-                // 重置 已经过的时间
-                _animProgressDampingElapsedTime = 0f;
-                // 不会重复启动协程
-                if (_animProgressDampingCor == null)
-                {
-                    // 记下发起时的轨道与播放令牌，协程逐帧比对，轨道被别的播放顶替时自行退出
-                    int trackIndex = GetCurrentAnimActionTrackIndex();
-                    _animProgressDampingCor = StartCoroutine(
-                        CorAnimProgressDamping(trackIndex, animator ? animator.GetAnimPlayToken(trackIndex) : 0));
-                }
+                StartAnimProgressDamping(dampingTime);
             }
             else
             {
@@ -823,57 +809,69 @@ namespace Ale.AnimSimulatorSystem
             => animator ? animator.GetAnimProgress(GetCurrentAnimActionTrackIndex()) : 0f;
 
         /// <summary>
-        /// 协程 拖拽阻尼。动画进度值 平滑变化。
+        /// 启动 拖拽阻尼：动画进度值 平滑变化到目标值。
+        ///
+        /// <para>起止值与循环增量在调用前已由 <see cref="SetAnimProgress"/> 算好，这里按快照捕获——
+        /// 拖拽期间每次指针移动都会重新发起，届时会打断在途的这一次并以当前实际进度为新起点，
+        /// 与改造前「重置经过时间、重写起止值」的效果一致。</para>
         /// </summary>
-        /// <param name="trackIndex">发起阻尼时的动画轨道</param>
-        /// <param name="playToken">发起阻尼时该轨道的播放令牌。令牌变化即说明轨道已被顶替，协程退出。</param>
-        private IEnumerator CorAnimProgressDamping(int trackIndex, int playToken)
+        /// <param name="dampingTime">阻尼的持续时间。</param>
+        private void StartAnimProgressDamping(float dampingTime)
         {
-            if (!animator || playToken == 0) yield break;
+            // 打断在途的：起点已经重新取过（就是当前实际进度），继续用旧作业只会把插值算错
+            _animProgressDampingHandle.Kill();
+            _animProgressDampingHandle = default;
 
-            _animProgressDampingElapsedTime = 0f; // 重置 已经过的时间
-            // 平滑过渡 到 目标进度值
-            while (_animProgressDampingElapsedTime < _animProgressDampingDurationTime)
-            {
-                // 检查 当前轨道 未被替换。
-                // 用令牌比对而非持有后端播放句柄做引用比较：后端句柄普遍有对象池复用，
-                // 回收再分配后引用比较会假阳性，协程会继续去写一条早已不属于它的轨道。
-                if (!animator || animator.GetAnimPlayToken(trackIndex) != playToken)
+            if (!animator) return;
+
+            // 记下发起时的轨道与播放令牌，逐帧比对，轨道被别的播放顶替时不再写入
+            int trackIndex = GetCurrentAnimActionTrackIndex();
+            int playToken = animator.GetAnimPlayToken(trackIndex);
+            if (playToken == 0) return;
+
+            // 快照本次的插值参数，避免回调里读到后续调用改写过的字段
+            float progressStart = _animProgressDampingStart;
+            float progressTarget = _animProgressDampingTarget;
+            bool isProgressLoop = _animProgressIsLoop;
+            float deltaLoop = _animProgressDampingDeltaLoop;
+
+            // 走线性、由回调自行算进度：本处需要的不是缓动曲线，而是「循环模式下沿最短环绕路径插值」。
+            // unscaled: false —— 原先协程用的是 Time.deltaTime（受 timeScale 影响），保持一致。
+            // owner 传 this：组件销毁后补间自动作废。
+            _animProgressDampingHandle = ToolkitTween.To(
+                0f, 1f, dampingTime,
+                t =>
                 {
-                    _animProgressDampingCor = null;
-                    yield break;
-                }
+                    // 检查 当前轨道 未被替换。
+                    // 用令牌比对而非持有后端播放句柄做引用比较：后端句柄普遍有对象池复用，
+                    // 回收再分配后引用比较会假阳性，会继续去写一条早已不属于它的轨道。
+                    if (!animator || animator.GetAnimPlayToken(trackIndex) != playToken) return;
 
-                // 累计时间
-                _animProgressDampingElapsedTime += Time.deltaTime;
-                
-                // 计算 新的进度值
-                float t = Mathf.Clamp01(_animProgressDampingElapsedTime / _animProgressDampingDurationTime);
-                float progressNew;
-                // 循环模式：沿最短环绕路径插值，然后规整到 [0,1]
-                if (_animProgressIsLoop)
-                {
-                    // 计算 新的进度值。只保留小数部分，将结果规整到 [0,1]。
-                    progressNew = _animProgressDampingStart + _animProgressDampingDeltaLoop * t;
-                    progressNew -= Mathf.Floor(progressNew);
-                }
-                // 非循环模式：线性插值
-                else
-                {
-                    // 计算 新的进度值。到 目标值 的线性插值。
-                    progressNew = Mathf.Lerp(_animProgressDampingStart, _animProgressDampingTarget, t);
-                }
-                // 设置 动画进度值
-                animator.SetAnimProgress(trackIndex, progressNew);
-                // 修改 进度条的值
-                ModifyProgressBarsValue(progressNew - _animProgressDampingCurrent);
-                // 更新 当前进度值
-                _animProgressDampingCurrent = progressNew;
+                    float progressNew;
+                    // 循环模式：沿最短环绕路径插值，然后规整到 [0,1]
+                    if (isProgressLoop)
+                    {
+                        // 计算 新的进度值。只保留小数部分，将结果规整到 [0,1]。
+                        progressNew = progressStart + deltaLoop * t;
+                        progressNew -= Mathf.Floor(progressNew);
+                    }
+                    // 非循环模式：线性插值
+                    else
+                    {
+                        // 计算 新的进度值。到 目标值 的线性插值。
+                        progressNew = Mathf.Lerp(progressStart, progressTarget, t);
+                    }
 
-                yield return null;
-            }
-
-            _animProgressDampingCor = null;
+                    // 设置 动画进度值
+                    animator.SetAnimProgress(trackIndex, progressNew);
+                    // 修改 进度条的值
+                    ModifyProgressBarsValue(progressNew - _animProgressDampingCurrent);
+                    // 更新 当前进度值
+                    _animProgressDampingCurrent = progressNew;
+                },
+                EToolkitEase.Linear, unscaled: false,
+                onComplete: () => _animProgressDampingHandle = default,
+                owner: this);
         }
         #endregion
         #endregion
@@ -1152,9 +1150,9 @@ namespace Ale.AnimSimulatorSystem
         private void StopAnimActionImmediate()
         {
             // 必须最先做：下面会把 _animActionCurrent / _animDataCurrent 置空，而按压、松开、进度阻尼、
-            // 循环完成这四类协程每帧都在解引用它们。原先这里只停了「延迟停止」一条，于是
+            // 循环完成这几类每帧都在解引用它们。原先这里只停了「延迟停止」一条，于是
             // 「按着不放时切换到另一个动作」（PlayAnimAction 会先调本方法）必然抛空引用。
-            StopAllAnimActionCoroutines();
+            StopAllAnimActionRoutines();
 
             if (animator)
                 // 停止动画
@@ -1180,18 +1178,21 @@ namespace Ale.AnimSimulatorSystem
         private void ClearCorDelayStopAnimAction() => KillCor(ref _delayStopAnimActionCor);
 
         /// <summary>
-        /// 停止本播放器全部在途的协程，并复位按压模式标记。
+        /// 停止本播放器全部在途的协程与补间，并复位按压模式标记。
         ///
-        /// <para>按压 / 松开 / 阻尼 / 循环完成 这四类协程都会逐帧解引用 <see cref="_animActionCurrent"/>
+        /// <para>按压 / 松开 / 阻尼 / 循环完成 这几类都会逐帧解引用 <see cref="_animActionCurrent"/>
         /// 或 <see cref="_animDataCurrent"/>，所以必须在清空这两个字段之前先把它们停掉。</para>
         /// </summary>
-        private void StopAllAnimActionCoroutines()
+        private void StopAllAnimActionRoutines()
         {
             KillCor(ref _delayStopAnimActionCor);
             KillCor(ref _corPlayAnimNormalModeIsLoopOnComplete);
             KillCor(ref _pressModeAnimPressCor);
             KillCor(ref _pressModeAnimReleaseCor);
-            KillCor(ref _animProgressDampingCor);
+
+            // 阻尼已改用 ToolkitTween，不再是协程
+            _animProgressDampingHandle.Kill();
+            _animProgressDampingHandle = default;
 
             // 按压被中途打断（例如按着不放时切到另一个动作）后，这个标记必须跟着复位，
             // 否则下次进入按压模式会误判为「已在按压中」而去恢复上一次的旧进度。

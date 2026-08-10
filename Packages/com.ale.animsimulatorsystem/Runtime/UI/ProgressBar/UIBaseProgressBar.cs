@@ -1,4 +1,4 @@
-using System.Collections;
+using Ale.Toolkit.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -128,16 +128,8 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("滑动条 数值平滑过渡的基础时长（秒）：实际时长会根据变化幅度进行调整。")]
         [SerializeField] private float sliderTweenBaseDuration = 0.5f;
         
-        // 协程 平滑设置 slider 的值
-        private Coroutine _sliderTweenCor;
-        // 进度百分比 起始值
-        private float _progressPercentStart;
-        // 进度百分比 目标值
-        private float _progressPercentTarget;
-        // 进度时间 经过时间
-        private float _progressTimeElapsed;
-        // 进度时间 持续时间
-        private float _progressTimeDuration;
+        // 平滑过渡 slider 值的补间句柄
+        private ToolkitTweenHandle _sliderTweenHandle;
 
         /// <summary>
         /// 设置 进度百分比
@@ -146,84 +138,50 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="isImmediate">立即设置</param>
         protected void SetProgressPercent(float progressPercent, bool isImmediate = false)
         {
-            if (sliderProgress != null)
-            {
-                // 限制 进度百分比 在[0,1]
-                progressPercent = Mathf.Clamp01(progressPercent);
-                
-                // 记录 起始值 与 目标值
-                _progressPercentStart = sliderProgress.value;
-                _progressPercentTarget = progressPercent;
-                
-                // 立即设置
-                if (isImmediate)
-                {
-                    // 停止 协程
-                    if (_sliderTweenCor != null)
-                    {
-                        StopCoroutine(_sliderTweenCor);
-                        _sliderTweenCor = null;
-                    }
-                    // 直接设置 目标值
-                    sliderProgress.value = _progressPercentTarget;
-                }
-                // 平滑过渡
-                else
-                {
-                    // 计算 过渡时长
-                    float modify = Mathf.Abs(_progressPercentTarget - _progressPercentStart);
-                    _progressTimeDuration = Mathf.Clamp(
-                        sliderTweenBaseDuration * (0.6f + modify), sliderTweenBaseDuration * 0.1f, sliderTweenBaseDuration * 2f);
-                    // 重置 经过时间
-                    _progressTimeElapsed = 0f;
-                
-                    // 不要重复启动协程
-                    if (_sliderTweenCor == null)
-                        // 启动新的 平滑过渡协程
-                        _sliderTweenCor = StartCoroutine(CorTweenSliderValue());
-                }
-            }
-        }
+            if (!sliderProgress) return;
 
-        /// <summary>
-        /// 协程 平滑过渡 滑动条的值
-        /// </summary>
-        private IEnumerator CorTweenSliderValue()
-        {
-            // 检查 slider有效性
-            if (sliderProgress == null)
+            // 限制 进度百分比 在[0,1]
+            progressPercent = Mathf.Clamp01(progressPercent);
+
+            // 记录 起始值
+            float progressPercentStart = sliderProgress.value;
+
+            // 无论立即设置还是重新过渡，都先打断在途的那次
+            _sliderTweenHandle.Kill();
+
+            // 立即设置，或起止几乎相等：直接写目标值
+            if (isImmediate || Mathf.Approximately(progressPercentStart, progressPercent))
             {
-                _sliderTweenCor = null;
-                yield break;
+                sliderProgress.value = progressPercent;
+                return;
             }
-            
-            // 几乎相等，直接设置并结束
-            if (Mathf.Approximately(_progressPercentStart, _progressPercentTarget))
-            {
-                sliderProgress.value = _progressPercentTarget;
-                _sliderTweenCor = null;
-                yield break;
-            }
-            
-            // 平滑过渡 设置 slider 的值
-            while (_progressTimeElapsed < _progressTimeDuration)
-            {
-                // 增加 经过时间
-                _progressTimeElapsed += Time.deltaTime;
-                // 计算 插值比例（0-1）
-                float t = Mathf.Clamp01(_progressTimeElapsed / _progressTimeDuration);
-                
-                // 设置 slider 的值
-                float eased = 1f - Mathf.Pow(1f - t, 3f); // 先快后慢（f(t) = 1 - (1 - t)^3）
-                sliderProgress.value = Mathf.Lerp(_progressPercentStart, _progressPercentTarget, eased);
-                
-                yield return null;
-            }
-            // 确保 最终值正确
-            sliderProgress.value = _progressPercentTarget;
-            
-            // 结束 协程
-            _sliderTweenCor = null;
+
+            // 计算 过渡时长：变化幅度越大越久
+            float modify = Mathf.Abs(progressPercent - progressPercentStart);
+            float duration = Mathf.Clamp(
+                sliderTweenBaseDuration * (0.6f + modify), sliderTweenBaseDuration * 0.1f, sliderTweenBaseDuration * 2f);
+
+            // 缓动刻意手写在回调里、而不是交给 EToolkitEase：原先用的是 OutCubic（1-(1-t)^3），
+            // 而 toolkit 只提供到 Quad 一档，换成 OutQuad 手感会变。让补间走线性、曲线仍在此处施加，
+            // 观感与改造前完全一致。
+            // unscaled: false —— 原先用的是 Time.deltaTime（受 timeScale 影响），保持一致。
+            _sliderTweenHandle = ToolkitTween.To(
+                0f, 1f, duration,
+                t =>
+                {
+                    if (!sliderProgress) return;
+                    float eased = 1f - Mathf.Pow(1f - t, 3f); // 先快后慢（f(t) = 1 - (1 - t)^3）
+                    sliderProgress.value = Mathf.Lerp(progressPercentStart, progressPercent, eased);
+                },
+                EToolkitEase.Linear, unscaled: false,
+                onComplete: () =>
+                {
+                    // 确保 最终值正确
+                    if (sliderProgress) sliderProgress.value = progressPercent;
+                    _sliderTweenHandle = default;
+                },
+                // owner 传 this：组件销毁后补间自动作废，不再向已失效的 Slider 写值
+                owner: this);
         }
         #endregion
         #endregion
