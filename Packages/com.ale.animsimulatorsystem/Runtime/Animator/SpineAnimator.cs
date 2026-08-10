@@ -122,9 +122,9 @@ namespace Ale.AnimSimulatorSystem
         #region 后端契约实现-播放
 
         /// <inheritdoc/>
-        protected override bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex)
+        protected override bool PlayAnimOnRenderer(Component rendererParam, AnimData animData, int trackIndex)
         {
-            var skeletonAnimation = AsSkeleton(renderer);
+            var skeletonAnimation = AsSkeleton(rendererParam);
             if (!skeletonAnimation || skeletonAnimation.AnimationState == null) return false;
 
             // 交给 Spine 的轨道号一律先压缩
@@ -134,20 +134,20 @@ namespace Ale.AnimSimulatorSystem
             if (skeletonData == null) return false;
 
             string animName = animData.ResolveAnimName();
-            var animation = skeletonData.FindAnimation(animName);
-            if (animation == null)
+            var anim = skeletonData.FindAnimation(animName);
+            if (anim == null)
             {
                 AnimSimLog.Warn(this, $"骨架中不存在动画 '{animName}'，播放失败，GameObject={gameObject.name}");
                 return false;
             }
 
             // 设置动画
-            var trackEntryPlay = skeletonAnimation.AnimationState.SetAnimation(trackIndex, animation, animData.isLoop);
+            var trackEntryPlay = skeletonAnimation.AnimationState.SetAnimation(trackIndex, anim, animData.isLoop);
             if (trackEntryPlay == null) return false;
 
             // 设置 混合时间
             float defaultMixDuration = skeletonAnimation.SkeletonDataAsset.defaultMix; // 默认混合时间
-            float maxMixDuration = animation.Duration * 0.3f;                          // 最大混合时间
+            float maxMixDuration = anim.Duration * 0.3f;                          // 最大混合时间
             if (defaultMixDuration > maxMixDuration)
                 // 限制 混合时间 不超过 最大混合时间。避免 动画播放效果异常
                 trackEntryPlay.MixDuration = maxMixDuration;
@@ -155,7 +155,7 @@ namespace Ale.AnimSimulatorSystem
             // 设置 初始进度值。若反转，则从结束位置起、速度取负。
             if (animData.isReverse)
             {
-                trackEntryPlay.TrackTime = animation.Duration;
+                trackEntryPlay.TrackTime = anim.Duration;
                 trackEntryPlay.TimeScale = -Mathf.Abs(animData.speed);
             }
             else
@@ -168,9 +168,9 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <inheritdoc/>
-        protected override void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData)
+        protected override void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData)
         {
-            var skeletonAnimation = AsSkeleton(renderer);
+            var skeletonAnimation = AsSkeleton(rendererParam);
             if (!skeletonAnimation || skeletonAnimation.AnimationState == null) return;
 
             // 交给 Spine 的轨道号一律先压缩
@@ -180,10 +180,10 @@ namespace Ale.AnimSimulatorSystem
             {
                 // 栈里还压着上一条：恢复播放它（循环）
                 var skeletonData = GetSkeletonData(skeletonAnimation);
-                var animation = skeletonData?.FindAnimation(resumeAnimData.ResolveAnimName());
-                if (animation != null)
+                var anim = skeletonData?.FindAnimation(resumeAnimData.ResolveAnimName());
+                if (anim != null)
                 {
-                    skeletonAnimation.AnimationState.SetAnimation(trackIndex, animation, true);
+                    skeletonAnimation.AnimationState.SetAnimation(trackIndex, anim, true);
                     return;
                 }
             }
@@ -193,9 +193,9 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <inheritdoc/>
-        protected override void ClearRendererAnim(Component renderer)
+        protected override void ClearRendererAnim(Component rendererParam)
         {
-            var skeletonAnimation = AsSkeleton(renderer);
+            var skeletonAnimation = AsSkeleton(rendererParam);
             if (!skeletonAnimation || skeletonAnimation.state == null) return;
 
             // 清除所有轨道动画
@@ -207,26 +207,26 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <inheritdoc/>
-        protected override float GetAnimDuration(Component renderer, string animName)
+        protected override float GetAnimDuration(Component rendererParam, string animName)
         {
             if (string.IsNullOrEmpty(animName)) return 0f;
-            var skeletonData = GetSkeletonData(AsSkeleton(renderer));
-            var animation = skeletonData?.FindAnimation(animName);
-            return animation?.Duration ?? 0f;
+            var skeletonData = GetSkeletonData(AsSkeleton(rendererParam));
+            var anim = skeletonData?.FindAnimation(animName);
+            return anim?.Duration ?? 0f;
         }
 
         /// <inheritdoc/>
-        protected override float GetAnimProgressOnRenderer(Component renderer, int trackIndex)
+        protected override float GetAnimProgressOnRenderer(Component rendererParam, int trackIndex)
         {
-            var entry = GetTrackEntry(renderer, trackIndex);
+            var entry = GetTrackEntry(rendererParam, trackIndex);
             if (entry?.Animation == null || entry.Animation.Duration <= 0f) return 0f;
             return Mathf.Clamp01(entry.TrackTime / entry.Animation.Duration);
         }
 
         /// <inheritdoc/>
-        protected override bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress)
+        protected override bool SetAnimProgressOnRenderer(Component rendererParam, int trackIndex, float progress)
         {
-            var entry = GetTrackEntry(renderer, trackIndex);
+            var entry = GetTrackEntry(rendererParam, trackIndex);
             if (entry?.Animation == null || entry.Animation.Duration <= 0f) return false;
             entry.TrackTime = entry.Animation.Duration * Mathf.Clamp01(progress);
             return true;
@@ -246,16 +246,16 @@ namespace Ale.AnimSimulatorSystem
         #region 后端契约实现-透明度
 
         /// <inheritdoc/>
-        protected override float GetRendererAlpha(Component renderer)
+        protected override float GetRendererAlpha(Component rendererParam)
         {
-            var skeleton = AsSkeleton(renderer)?.Skeleton;
+            var skeleton = AsSkeleton(rendererParam)?.Skeleton;
             return skeleton?.A ?? 0f;
         }
 
         /// <inheritdoc/>
-        protected override void SetRendererAlpha(Component renderer, float alpha)
+        protected override void SetRendererAlpha(Component rendererParam, float alpha)
         {
-            var skeleton = AsSkeleton(renderer)?.Skeleton;
+            var skeleton = AsSkeleton(rendererParam)?.Skeleton;
             if (skeleton != null) skeleton.A = alpha;
         }
 

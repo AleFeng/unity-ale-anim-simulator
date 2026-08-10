@@ -232,9 +232,9 @@ namespace Ale.AnimSimulatorSystem
         /// 进入采样通道前会先停掉该层的原生播放，避免两者同帧争写同一批参数。</item>
         /// </list>
         /// </remarks>
-        protected override bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex)
+        protected override bool PlayAnimOnRenderer(Component rendererParam, AnimData animData, int trackIndex)
         {
-            var renderController = AsRenderController(renderer);
+            var renderController = AsRenderController(rendererParam);
             if (!renderController) return false;
 
             string animName = animData.ResolveAnimName();
@@ -285,7 +285,7 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <inheritdoc/>
-        protected override void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData)
+        protected override void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData)
         {
             if (!_trackPlayState.TryGetValue(trackIndex, out var state))
             {
@@ -324,14 +324,14 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <inheritdoc/>
-        protected override void ClearRendererAnim(Component renderer)
+        protected override void ClearRendererAnim(Component rendererParam)
         {
             if (live2dMotionController) live2dMotionController.StopAllAnimation();
             _trackPlayState.Clear();
         }
 
         /// <inheritdoc/>
-        protected override float GetAnimDuration(Component renderer, string animName)
+        protected override float GetAnimDuration(Component rendererParam, string animName)
         {
             var clip = FindClip(animName);
             return clip ? clip.length : 0f;
@@ -345,7 +345,7 @@ namespace Ale.AnimSimulatorSystem
         /// <remarks>
         /// 只有采样通道能给出可信进度：Cubism 原生通道不暴露播放时间，此时返回 0。
         /// </remarks>
-        protected override float GetAnimProgressOnRenderer(Component renderer, int trackIndex)
+        protected override float GetAnimProgressOnRenderer(Component rendererParam, int trackIndex)
         {
             if (!_trackPlayState.TryGetValue(trackIndex, out var state)) return 0f;
             return state.isScrub ? Mathf.Clamp01(state.progress) : 0f;
@@ -356,9 +356,9 @@ namespace Ale.AnimSimulatorSystem
         /// 该轨道若还在原生通道上，会就地切换到采样通道——写进度这个动作本身就意味着
         /// 调用方要接管播放（拖拽 / 旋转 / 按压），继续让 Cubism 驱动只会两者互相覆盖。
         /// </remarks>
-        protected override bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress)
+        protected override bool SetAnimProgressOnRenderer(Component rendererParam, int trackIndex, float progress)
         {
-            var renderController = AsRenderController(renderer);
+            var renderController = AsRenderController(rendererParam);
             if (!renderController) return false;
             if (!_trackPlayState.TryGetValue(trackIndex, out var state) || !state.clip) return false;
 
@@ -391,9 +391,9 @@ namespace Ale.AnimSimulatorSystem
         #region 后端契约实现-透明度
 
         /// <inheritdoc/>
-        protected override float GetRendererAlpha(Component renderer)
+        protected override float GetRendererAlpha(Component rendererParam)
         {
-            var renderController = AsRenderController(renderer);
+            var renderController = AsRenderController(rendererParam);
             return renderController ? renderController.Opacity : 0f;
         }
 
@@ -404,9 +404,9 @@ namespace Ale.AnimSimulatorSystem
         /// <c>CubismRenderController.Opacity</c> 曲线），它会与本系统的淡入淡出同帧争写。
         /// 用于本系统的 Live2D 动作请不要动画模型整体不透明度，整体淡入淡出交给 <see cref="AnimatorBase"/>。
         /// </remarks>
-        protected override void SetRendererAlpha(Component renderer, float alpha)
+        protected override void SetRendererAlpha(Component rendererParam, float alpha)
         {
-            var renderController = AsRenderController(renderer);
+            var renderController = AsRenderController(rendererParam);
             if (renderController) renderController.Opacity = Mathf.Clamp01(alpha);
         }
 

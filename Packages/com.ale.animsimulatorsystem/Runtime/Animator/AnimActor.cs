@@ -146,7 +146,7 @@ namespace Ale.AnimSimulatorSystem
             if (animator)
             {
                 // clearAnimOnFadeOut=false：临时隐藏，仅禁用对象，保留动画数据
-                animator.FadeAnimator(false, null, clearAnimOnFadeOut: false);
+                animator.FadeAnimator(false, clearAnimOnFadeOut: false);
                 return;
             }
             // 无淡入淡出，直接非激活对象
@@ -162,7 +162,7 @@ namespace Ale.AnimSimulatorSystem
         public void LoadData(AnimActorSaveData animActorSaveData)
         {
             // 加载 皮肤组:已选择皮肤 映射表
-            foreach (var skinGroupToSelectedSkinNameList in animActorSaveData.SkinGroupToSelectedSkinMap)
+            foreach (var skinGroupToSelectedSkinNameList in animActorSaveData.skinGroupToSelectedSkinMap)
             {
                 // 查找 皮肤组
                 var skinGroupName = skinGroupToSelectedSkinNameList.Key;
@@ -208,7 +208,7 @@ namespace Ale.AnimSimulatorSystem
                 skinGroupToSelectedSkinListNameMap[animActorSkinGroupName.skinGroupName] = 
                     Array.ConvertAll(selectedSkinNameList.ToArray(), skin => skin.skinName);
             }
-            animActorSaveData.SkinGroupToSelectedSkinMap = skinGroupToSelectedSkinListNameMap;
+            animActorSaveData.skinGroupToSelectedSkinMap = skinGroupToSelectedSkinListNameMap;
 
             return animActorSaveData;
         }
@@ -228,7 +228,7 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 添加或移除 皮肤 回调。参数：是否添加、皮肤组、角色皮肤
         /// </summary>
-        public Action<AnimActorSkinGroup, AnimActorSkin, bool> OnSkinAddOrRemove;
+        public Action<AnimActorSkinGroup, AnimActorSkin, bool> onSkinAddOrRemove;
         
         // 皮肤组:已选择皮肤 映射表
         private Dictionary<AnimActorSkinGroup, List<AnimActorSkin>> _skinGroupToSelectedSkinListMap = 
@@ -332,7 +332,7 @@ namespace Ale.AnimSimulatorSystem
             if (animator)
                 animator.AddSkin(animActorSkin.skinName, isRefresh);
             // 调用 添加皮肤 回调
-            OnSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, true);
+            onSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, true);
             
             return true;
         }
@@ -374,7 +374,7 @@ namespace Ale.AnimSimulatorSystem
             if (animator)
                 animator.RemoveSkin(animActorSkin.skinName, isRefresh);
             // 调用 移除皮肤 回调
-            OnSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, false);
+            onSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, false);
             
             return true;
         }
@@ -427,7 +427,7 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 皮肤组名称:已选择皮肤名称 映射表
         /// </summary>
-        public Dictionary<string, string[]> SkinGroupToSelectedSkinMap =
+        public Dictionary<string, string[]> skinGroupToSelectedSkinMap =
             new Dictionary<string, string[]>();
     }
     #endregion

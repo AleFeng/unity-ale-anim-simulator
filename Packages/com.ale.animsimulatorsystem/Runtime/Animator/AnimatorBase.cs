@@ -78,26 +78,26 @@ namespace Ale.AnimSimulatorSystem
         protected virtual IEnumerable<FAnimStateData> EnumerateStateDatas() => Array.Empty<FAnimStateData>();
 
         /// <summary>在指定渲染器的指定轨道上播放一条动画。返回是否成功。</summary>
-        protected virtual bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex) => false;
+        protected virtual bool PlayAnimOnRenderer(Component rendererParam, AnimData animData, int trackIndex) => false;
 
         /// <summary>
         /// 停止指定渲染器上某条轨道的动画。
         /// <paramref name="resumeAnimData"/> 非空时表示该轨道的播放栈里还压着上一条动画，应恢复播放它（循环）；
         /// 为空则直接停止该轨道。
         /// </summary>
-        protected virtual void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData) { }
+        protected virtual void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData) { }
 
         /// <summary>清除指定渲染器上的全部动画并复位到初始姿势。</summary>
-        protected virtual void ClearRendererAnim(Component renderer) { }
+        protected virtual void ClearRendererAnim(Component rendererParam) { }
 
         /// <summary>取某条动画的时长（秒，不含速度倍率）。取不到返回 0。</summary>
-        protected virtual float GetAnimDuration(Component renderer, string animName) => 0f;
+        protected virtual float GetAnimDuration(Component rendererParam, string animName) => 0f;
 
         /// <summary>读取渲染器的整体透明度（0~1）。</summary>
-        protected virtual float GetRendererAlpha(Component renderer) => 0f;
+        protected virtual float GetRendererAlpha(Component rendererParam) => 0f;
 
         /// <summary>写入渲染器的整体透明度（0~1）。</summary>
-        protected virtual void SetRendererAlpha(Component renderer, float alpha) { }
+        protected virtual void SetRendererAlpha(Component rendererParam, float alpha) { }
 
         /// <summary>初始化后端的皮肤表（缓存皮肤名 → 后端皮肤对象）。首次用到皮肤时调用一次。</summary>
         protected virtual void InitSkinBackend() { }
@@ -109,10 +109,10 @@ namespace Ale.AnimSimulatorSystem
         protected virtual void ApplySkins(IReadOnlyList<string> baseSkinNames, IReadOnlyList<string> applySkinNames) { }
 
         /// <summary>读取指定轨道上动画的播放进度（0~1）。轨道为空或无效时返回 0。</summary>
-        protected virtual float GetAnimProgressOnRenderer(Component renderer, int trackIndex) => 0f;
+        protected virtual float GetAnimProgressOnRenderer(Component rendererParam, int trackIndex) => 0f;
 
         /// <summary>写入指定轨道上动画的播放进度（0~1）。轨道为空或无效时返回 false。</summary>
-        protected virtual bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress) => false;
+        protected virtual bool SetAnimProgressOnRenderer(Component rendererParam, int trackIndex, float progress) => false;
 
         #endregion
 

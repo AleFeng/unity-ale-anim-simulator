@@ -65,7 +65,7 @@ namespace Ale.AnimSimulatorSystem
             if (_uiAnimActorSkinBoxContent.AnimActor)
             {
                 // 监听 角色皮肤添加或移除 事件
-                _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove += OnSkinAddOrRemove;
+                _uiAnimActorSkinBoxContent.AnimActor.onSkinAddOrRemove += OnSkinAddOrRemove;
                 // 设置 选择提示 显示状态。
                 // 强制写入：格子是复用来的，_isSelected 保留着上一条数据的状态，
                 // 走增量判断会在「新旧状态恰好相同」时跳过，而此时提示对象的显示状态未必与之一致。
@@ -109,7 +109,7 @@ namespace Ale.AnimSimulatorSystem
             if (_uiAnimActorSkinBoxContent == null) return;
             if (!_uiAnimActorSkinBoxContent.AnimActor) return;
 
-            _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove -= OnSkinAddOrRemove;
+            _uiAnimActorSkinBoxContent.AnimActor.onSkinAddOrRemove -= OnSkinAddOrRemove;
         }
 
         private void OnEnable()  { AnimLocale.OnLocaleChanged += RefreshDisplayName; }
