@@ -60,9 +60,12 @@
 
 ![alt text](image-43.png)
 
-- 示例场景
-  - Assets\Plugins\Fs\Runtime\GameFramework\Gameplay\Systems\AnimSimulatorSystem\Demo\AnimSimulatorSystemDemo.unity
-  - 打开示例场景，直接 运行游戏 就能在 Game窗口 中看到 动画模拟器系统 的演示内容。
+- 示例场景（Demo）以 **UPM 的 Sample 形式随包分发**，需要先导入才会出现在工程里。
+  - 导入：菜单 `Window > Package Manager` → 左侧选中 **Anim Simulator System** → 右侧 **Samples** 页 → 点击 `Anim Simulator System Demo` 的 [Import]。
+  - 导入后的位置：`Assets\Samples\Anim Simulator System\<版本号>\Anim Simulator System Demo\`
+  - 打开其中的 `AnimSimulatorSystemDemo.unity`，直接 运行游戏 就能在 Game窗口 中看到 动画模拟器系统 的演示内容。
+
+> Sample 是**复制**到 `Assets` 下的，属于你自己的工程资产，可以随意修改，不会被包升级覆盖。反过来，包本体位于 `Packages\com.ale.animsimulatorsystem\`，不要把游戏资产放进去。
 
 <video controls="" poster="" src="Movie_004.mp4" ></videos>
 
@@ -103,17 +106,18 @@
 
 ![alt text](image-43.png)
 
-- 打开测试场景。
-  - 打开 Assets\Plugins\Fs\Runtime\GameFramework\Gameplay\Systems\AnimSimulatorSystem\Demo\AnimSimulatorSystemDemo.unity 场景。
-  - 在测试场景中，可以直接点击运行游戏，测试 动画模拟器系统 的功能。
+- 打开示例场景。
+  - 按上面 [示例场景](#示例场景) 一节的步骤，先从 Package Manager 的 Samples 页导入 Demo。
+  - 打开导入后的 `Assets\Samples\Anim Simulator System\<版本号>\Anim Simulator System Demo\AnimSimulatorSystemDemo.unity` 场景。
+  - 在示例场景中，可以直接点击运行游戏，测试 动画模拟器系统 的功能。
 
 ![alt text](image-61.png)
 
 - Spine或Live2D 动画资源的导入。
   - 首先需要将 美术制作好的Spine或Live2D的动画资源，导入到Unity中，并制作成 预制体。
-  - Spine或Live2D 动画资源的导入 与 预制体的制作方法，请参考 资源导入文档中的 [2D角色](../../../Fs/Runtime/GameFramework/Common/Systems/AssetSystem/Docs~/AssetImport/AssetImport.md#2d角色) 部分。
+  - Spine或Live2D 动画资源的导入 与 预制体的制作方法，见下面的 [资源导入](#资源导入) 一节。
     ![alt text](image-62.png)
-  - 动画角色的预制体，需要放置在 Assets\Plugins\Fs\Runtime\GameFramework\Gameplay\Systems\AnimSimulatorSystem\Demo\Assets\Actors\ 文件夹中，文件夹位置可以在 AnimSimulatorConfig(动画模拟器配置)进行修改，在之后的教程中会进行讲解。
+  - 动画角色的预制体，需要放置在 AnimSimulatorConfig(动画模拟器配置)的 `ActorAddressableFolder` 所指的文件夹中——Demo 里是 `Assets\Demo\Assets\Actors\`，正式项目建议改到 `Assets\ProductAssets\AnimSimulator\Actors\`，改法见下面的 [资源文件路径](#资源文件路径) 一节。
   - 动画资源的文件 一般会有很多，建议在 Actors 文件夹中 再新建一个文件夹，放置每个角色的 动画资源与预制体，并按照 角色的分类进行 命名与整理。
 
 ![alt text](image-64.png)
@@ -126,7 +130,7 @@
 ![alt text](image-63.png)
 
 - 放置 AnimActionPlayer(动画动作播放器)。
-  - 将 Assets\Plugins\Fs\Runtime\GameFramework\Gameplay\Systems\AnimSimulatorSystem\Demo\UI\AnimActionPlayer\AnimActionPlayer.prefab 预制体，拖拽放置到 角色预制体中。
+  - 将 Demo 中的 `Assets\UI\AnimActionPlayer\AnimActionPlayer.prefab` 预制体（导入 Sample 后位于 `Assets\Samples\Anim Simulator System\<版本号>\...` 下），拖拽放置到 角色预制体中。
   - 也可以自己手动创建空物体，并挂载 AnimActionPlayer组件 与 SphereCollider组件 来完成。只是通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
   - 将 Spine动画的SkeletonAnimation组件，拖拽到 AnimActionPlayer组件的 Spine Animator 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
@@ -158,7 +162,9 @@
 
 在 动画模拟器系统中，通常需要从外部导入 美术制作的资源文件，并在Unity中制作成 预制体。\
 例如，角色的Spine动画预制体、皮肤的UI图片、音频文件等。\
-具体的导入方法与流程，可以参考 [资源导入文档](../../../Fs/Runtime/GameFramework/Common/Systems/AssetSystem/Docs~/AssetImport/AssetImport.md)。
+具体的导入方法与流程，请参考 [Spine 官方的 spine-unity 文档](https://zh.esotericsoftware.com/spine-unity)（骨骼数据的导入、SkeletonAnimation 预制体的生成、材质与图集的设置）。
+
+> 本节原先链接的是 Fs 框架的《资源导入文档》。本插件已不再依赖 Fs，那份文档也不随本包分发，故改为指向 Spine 官方文档。
 
 # 系统配置
 
@@ -167,8 +173,8 @@
 ![alt text](image-69.png)
 
 - 创建 AnimSimulatorConfig(动画模拟管理器配置)文件。
-  - 在 Project面板中，鼠标右键 打开操作菜单，点击 Create > Fs > Anim Simulator System > Anim Simulator Config 来创建一个 AnimSimulatorConfig文件。
-  - 也可以直接从 Assets\Plugins\Fs\Runtime\GameFramework\Gameplay\Systems\AnimSimulatorSystem\Demo\Config\AnimSimulatorConfig，直接复制(Ctrl+C、Ctrl+V)一个 AnimSimulatorConfig文件，进行修改使用。
+  - 在 Project面板中，鼠标右键 打开操作菜单，点击 `Create > Ale > AnimSimulator System > AnimSimulator Config` 来创建一个 AnimSimulatorConfig文件。
+  - 也可以直接从 Demo 的 `Config\AnimSimulatorConfig`（导入 Sample 后位于 `Assets\Samples\Anim Simulator System\<版本号>\...` 下），直接复制(Ctrl+C、Ctrl+V)一个 AnimSimulatorConfig文件，进行修改使用。
 
 ## 动画模拟管理器
 

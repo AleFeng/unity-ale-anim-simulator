@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.ale.animsimulatorsystem": {
+      "version": "file:com.ale.animsimulatorsystem",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.ale.toolkit": {
       "version": "file:../../unity-ale-toolkit/Packages/com.ale.toolkit",
       "depth": 0,

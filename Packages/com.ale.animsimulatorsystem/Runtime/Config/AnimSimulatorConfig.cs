@@ -10,7 +10,7 @@ namespace Ale.AnimSimulatorSystem
     /// <summary>
     /// 动作模拟器 系统配置
     /// </summary>
-    [CreateAssetMenu(fileName = "AnimSimulatorConfig", menuName = "Fs/AnimSimulator System/AnimSimulator Config")]
+    [CreateAssetMenu(fileName = "AnimSimulatorConfig", menuName = "Ale/AnimSimulator System/AnimSimulator Config")]
     public class AnimSimulatorConfig : ScriptableObject
     {
         [Header("背景")]
