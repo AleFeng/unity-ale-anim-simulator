@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae8e95771b840b54cb3731e6fc38aff4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActor
-  spineAnimator: {fileID: 2864865959808424917}
+  animator: {fileID: 2864865959808424917}
   stateInitList:
   - idle
   baseSkins:
@@ -529,16 +529,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 886f5bb9b502ab545bfb14229d650da6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.SpineAnimator
-  spineSkeletonAnimation: {fileID: 1070422356110670968}
-  spineAnimSwitchSpineDuration: 0.2
+  animFadeDuration: 0.2
   isDisplayOnInit: 0
-  spineStateInitList:
+  stateInitList:
   - idle
+  baseSkins:
+  - skin-base
+  spineSkeletonAnimation: {fileID: 1070422356110670968}
   spineStateData:
   - stateName: idle
     spineSkeletonAnimation: {fileID: 0}
     spineAnimDatas:
-    - animRefAsset: {fileID: 11400000, guid: 6e29b0ce3ff9faf479d2c587c17a3954, type: 2}
+    - animName: idle
+      animRefAsset: {fileID: 0}
       animTrack: 1
       animTrackSub: 0
       isLoop: 1
@@ -546,7 +549,8 @@ MonoBehaviour:
       speed: 1
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 0}
-    - animRefAsset: {fileID: 11400000, guid: 81ff55dd79bbf2d4cb8620c6857f15e8, type: 2}
+    - animName: blink
+      animRefAsset: {fileID: 0}
       animTrack: 4
       animTrackSub: 0
       isLoop: 1
@@ -554,8 +558,6 @@ MonoBehaviour:
       speed: 1
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 3}
-  baseSkins:
-  - skin-base
 --- !u!1001 &209219445307138432
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -564,6 +566,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 539354452367387333}
     m_Modifications:
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: spineAnimator
       value: 
@@ -595,6 +601,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].isLoop
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].animName
+      value: idle
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].animName
+      value: walk
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animTrack
@@ -671,11 +685,11 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 6e29b0ce3ff9faf479d2c587c17a3954, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 464126ec8b829264dac1b87bbc0fcf66, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].animReferenceAsset
       value: 
@@ -903,6 +917,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 539354452367387333}
     m_Modifications:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2864865959808424917}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: spineAnimator
       value: 
       objectReference: {fileID: 2864865959808424917}
@@ -937,6 +955,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].isLoop
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].animName
+      value: dance
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].animName
+      value: dress-up
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animTrack
@@ -1013,11 +1039,11 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 587bbafcfd2f76b458dae5d2e4b99b42, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].animReferenceAsset
       value: 
@@ -1233,6 +1259,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 539354452367387333}
     m_Modifications:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2864865959808424917}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: spineAnimator
       value: 
       objectReference: {fileID: 2864865959808424917}
@@ -1255,6 +1285,10 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].animName
+      value: dance
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animTrack
@@ -1311,7 +1345,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].animReferenceAsset
       value: 
@@ -1539,6 +1573,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 539354452367387333}
     m_Modifications:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2864865959808424917}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: spineAnimator
       value: 
       objectReference: {fileID: 2864865959808424917}
@@ -1569,6 +1607,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].isLoop
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].animName
+      value: aware
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].animName
+      value: aware
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animTrack
@@ -1665,11 +1711,11 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 4f0df283cf04bb3468754ce976dbcac3, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 4f0df283cf04bb3468754ce976dbcac3, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].animReferenceAsset
       value: 
@@ -1817,6 +1863,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 539354452367387333}
     m_Modifications:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 2864865959808424917}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: spineAnimator
       value: 
       objectReference: {fileID: 2864865959808424917}
@@ -1845,6 +1895,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].animName
+      value: dress-up
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animTrack
       value: 900
       objectReference: {fileID: 0}
@@ -1859,7 +1913,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].animReferenceAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 587bbafcfd2f76b458dae5d2e4b99b42, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3

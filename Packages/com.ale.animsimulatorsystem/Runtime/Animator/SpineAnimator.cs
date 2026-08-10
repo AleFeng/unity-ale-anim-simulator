@@ -62,10 +62,6 @@ namespace Ale.AnimSimulatorSystem
 
         #region 后端契约实现-播放
 
-        // 轨道:起播时创建的 TrackEntry。仅供过渡期的 Obsolete 转发壳回传给旧调用方，
-        // 基类本身用 (轨道, 播放令牌) 表达同样的信息，不依赖它。
-        private readonly Dictionary<int, TrackEntry> _trackToPlayedEntry = new Dictionary<int, TrackEntry>();
-
         /// <inheritdoc/>
         protected override bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex)
         {
@@ -106,7 +102,6 @@ namespace Ale.AnimSimulatorSystem
                 trackEntryPlay.TimeScale = Mathf.Abs(animData.speed);
             }
 
-            _trackToPlayedEntry[trackIndex] = trackEntryPlay;
             return true;
         }
 
@@ -123,15 +118,13 @@ namespace Ale.AnimSimulatorSystem
                 var animation = skeletonData?.FindAnimation(resumeAnimData.ResolveAnimName());
                 if (animation != null)
                 {
-                    var entry = skeletonAnimation.AnimationState.SetAnimation(trackIndex, animation, true);
-                    if (entry != null) _trackToPlayedEntry[trackIndex] = entry;
+                    skeletonAnimation.AnimationState.SetAnimation(trackIndex, animation, true);
                     return;
                 }
             }
 
             // 否则，停止该轨道动画（0.2 秒淡出到空动画）
             skeletonAnimation.AnimationState.SetEmptyAnimation(trackIndex, 0.2f);
-            _trackToPlayedEntry.Remove(trackIndex);
         }
 
         /// <inheritdoc/>
@@ -146,8 +139,6 @@ namespace Ale.AnimSimulatorSystem
             skeletonAnimation.Skeleton.SetToSetupPose();
             // 更新Skeleton以应用更改
             skeletonAnimation.LateUpdate();
-
-            _trackToPlayedEntry.Clear();
         }
 
         /// <inheritdoc/>
@@ -300,69 +291,6 @@ namespace Ale.AnimSimulatorSystem
             AtlasUtilities.ClearCache();
             Resources.UnloadUnusedAssets();
         }
-
-        #endregion
-
-        #region 过渡期转发壳（下一步移除）
-
-        // 以下方法只是把旧的 Spine 味 API 转发到基类的中性 API，好让尚未改造的调用方
-        // （AnimActor / AnimActionPlayer）在本步之后仍能编译。它们会在改造完成后一并删除。
-
-        /// <inheritdoc cref="AnimatorBase.SwitchAnimStateArray"/>
-        [Obsolete("改用 SwitchAnimStateArray。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void SwitchStateArray(string[] actorAnims) => SwitchAnimStateArray(actorAnims);
-
-        /// <inheritdoc cref="AnimatorBase.FadeAnimator"/>
-        [Obsolete("改用 FadeAnimator。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void FadeSpineAnimator(bool isFadeIn, SkeletonAnimation spineAnimator = null, bool clearAnimOnFadeOut = true)
-            => FadeAnimator(isFadeIn, spineAnimator, clearAnimOnFadeOut);
-
-        /// <inheritdoc cref="AnimatorBase.PlayAnim(AnimData, Action{AnimData})"/>
-        [Obsolete("改用 PlayAnim(AnimData, Action<AnimData>)。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void PlaySpineAnim(AnimData animData, Action<TrackEntry> onOncePlayComplete = null)
-        {
-            if (animData == null) return;
-            if (onOncePlayComplete == null)
-            {
-                PlayAnim(animData);
-                return;
-            }
-
-            // 回传「起播时创建的那个 TrackEntry」。不能在回调里才去查表——
-            // 单次完成的回调是在 StopAnim 之后触发的，那时该轨道的记录已被移除，
-            // 查到的会是 null，而旧调用方普遍直接写 trackEntry.Animation，会当场空引用。
-            // 闭包捕获的是变量本身，故下面那行赋值对回调可见。
-            TrackEntry playedEntry = null;
-            PlayAnim(animData, d => onOncePlayComplete(playedEntry));
-            // PlayAnim 在无起播延时的情况下同步走到 PlayAnimOnRenderer，此时表中已有本次的 entry。
-            // 配了起播延时时这里取不到（回传 null），但旧调用方本就不该依赖它——
-            // 这只是过渡期的兼容壳，改造完成后随之删除。
-            _trackToPlayedEntry.TryGetValue(animData.AnimTrack, out playedEntry);
-        }
-
-        /// <inheritdoc cref="AnimatorBase.StopAnim"/>
-        [Obsolete("改用 StopAnim。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void StopSpineAnim(AnimData animData) => StopAnim(animData);
-
-        /// <summary>获取 动画轨道。</summary>
-        [Obsolete("改用 GetAnimProgress / SetAnimProgress / GetAnimPlayToken。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public TrackEntry GetTrackEntry(int trackIndex) => GetTrackEntry(ResolveTrackRenderer(trackIndex), trackIndex);
-
-        /// <inheritdoc cref="AnimatorBase.DestroyAnim"/>
-        [Obsolete("改用 DestroyAnim。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public bool DestroySpineAnim(out float delay) => DestroyAnim(out delay);
-
-        /// <inheritdoc cref="AnimatorBase.ClearAllAnim"/>
-        [Obsolete("改用 ClearAllAnim。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void ClearAllSpineAnim() => ClearAllAnim();
-
-        /// <inheritdoc cref="AnimatorBase.AddAnimState"/>
-        [Obsolete("改用 AddAnimState。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void AddSpineAnimState(string state) => AddAnimState(state);
-
-        /// <inheritdoc cref="AnimatorBase.RemoveAnimState"/>
-        [Obsolete("改用 RemoveAnimState。本转发壳仅为重构过渡，将在后续步骤移除。")]
-        public void RemoveSpineAnimState(string state) => RemoveAnimState(state);
 
         #endregion
 
