@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #if ATK_LOCALIZATION
 using UnityEngine.Localization;
-#endif
-
-#if ASS_SPINE
-using Spine.Unity;
 #endif
 
 namespace Ale.AnimSimulatorSystem
@@ -19,14 +16,12 @@ namespace Ale.AnimSimulatorSystem
     public class AnimActor : MonoBehaviour
     {
         [Header("动画设置")]
-#if ASS_SPINE
-        [Tooltip("Spine动画控制器")]
-        [SerializeField] private SpineAnimator spineAnimator;
-#else
-        [Tooltip("Live2D动画控制器")]
-        [SerializeField] private Animator live2DAnimator;
-#endif
-        [Tooltip("初始状态列表：根据 动画制作时的 状态名称 设置，填写一个或多个 状态名称。")] 
+        // 面向基类编程：挂 SpineAnimator 还是 Live2dAnimator 由角色预制体决定，本类对后端无感。
+        // FormerlySerializedAs 保住旧字段名 spineAnimator 上已配置的引用。
+        [FormerlySerializedAs("spineAnimator")]
+        [Tooltip("动画控制器：Spine Animator 或 Live2D Animator。留空时自动从自身或子物体查找。")]
+        [SerializeField] private AnimatorBase animator;
+        [Tooltip("初始状态列表：根据 动画制作时的 状态名称 设置，填写一个或多个 状态名称。")]
         [SerializeField] private string[] stateInitList = new string[] { "idle" };
         
         /// <summary>
@@ -53,28 +48,25 @@ namespace Ale.AnimSimulatorSystem
 #if UNITY_EDITOR
         private void Reset()
         {
-#if ASS_SPINE
-            // 从自身或子物体上获取 SpineAnimator 组件
-            if (!spineAnimator)
+            // 从自身或子物体上获取动画控制器。多态查找天然认得两种后端，无需按宏分支。
+            if (!animator)
             {
-                spineAnimator = GetComponent<SpineAnimator>();
-                if (!spineAnimator)
-                    spineAnimator = GetComponentInChildren<SpineAnimator>();
+                animator = GetComponent<AnimatorBase>();
+                if (!animator)
+                    animator = GetComponentInChildren<AnimatorBase>();
             }
-#endif
         }
 #endif
-        
+
         private void Start()
         {
             // 初始化 皮肤
             InitSkin();
-            
+
             // 设置 初始状态
-#if ASS_SPINE
-            if (spineAnimator)
-                spineAnimator.SwitchStateArray(stateInitList);
-#endif
+            if (animator)
+                animator.SwitchAnimStateArray(stateInitList);
+
             _isInitComplete = true;
             // 调用 初始化完成 回调
             OnInitComplete?.Invoke(this);
@@ -83,38 +75,33 @@ namespace Ale.AnimSimulatorSystem
         #region 淡入淡出
         /// <summary>
         /// 淡入（恢复显示）。
-        /// 有 Spine 动画则淡入并重新播放当前动画（修复临时隐藏后动画停止的问题）；
-        /// 否则直接激活对象。
+        /// 有动画控制器则淡入其渲染器；否则直接激活对象。
         /// </summary>
         public void FadeIn()
         {
-#if ASS_SPINE
-            if (spineAnimator)
+            if (animator)
             {
-                // 淡入 Spine 组件
-                spineAnimator.FadeSpineAnimator(true);
+                // 淡入 动画渲染器
+                animator.FadeAnimator(true);
                 return;
             }
-#endif
             // 无淡入淡出，直接激活对象
             gameObject.SetActive(true);
         }
 
         /// <summary>
         /// 淡出（临时隐藏，不销毁）。
-        /// 有 Spine 动画则淡出并禁用，同时保留动画数据以便 FadeIn() 恢复；
+        /// 有动画控制器则淡出并禁用，同时保留动画数据以便 FadeIn() 恢复；
         /// 否则直接非激活对象。
         /// </summary>
         public void FadeOut()
         {
-#if ASS_SPINE
-            if (spineAnimator)
+            if (animator)
             {
                 // clearAnimOnFadeOut=false：临时隐藏，仅禁用对象，保留动画数据
-                spineAnimator.FadeSpineAnimator(false, null, clearAnimOnFadeOut: false);
+                animator.FadeAnimator(false, null, clearAnimOnFadeOut: false);
                 return;
             }
-#endif
             // 无淡入淡出，直接非激活对象
             gameObject.SetActive(false);
         }
@@ -182,15 +169,10 @@ namespace Ale.AnimSimulatorSystem
 
         #region 皮肤管理
         [Header("皮肤设置")]
+        // 皮肤名对两个后端使用相同的命名规则，故不再按宏区分；
+        // 下拉选择由包内 Editor 程序集的皮肤名 Drawer 按角色实际后端提供。
         [Tooltip("基础皮肤列表：始终显示的 基础皮肤名称列表。")]
-#if ASS_SPINE
-        // Spine动画 Skin属性
-        [SpineSkin] 
         [SerializeField] private string[] baseSkins;
-#else
-        // Live2D动画 Skin属性
-        [SerializeField] private string[] baseSkins;
-#endif
         [Tooltip("皮肤组 列表：用于定义角色 可切换的皮肤组。")]
         [SerializeField] private AnimActorSkinGroup[] animActorSkinGroups;
         
@@ -242,21 +224,19 @@ namespace Ale.AnimSimulatorSystem
             }
             
             // 设置 基础皮肤
-#if ASS_SPINE
-            if (spineAnimator)
+            if (animator)
             {
                 // 设置基础皮肤
                 if (baseSkins != null && baseSkins.Length > 0)
                 {
-                    spineAnimator.SetBaseSkin(baseSkins, false);
+                    animator.SetBaseSkin(baseSkins, false);
                 }
-                
+
                 // 刷新 皮肤
-                spineAnimator.RefreshSkin();
-                // 所有皮肤添加完成后，重新打包皮肤。
-                // spineAnimator.RepackedSkin();
+                animator.RefreshSkin();
+                // 所有皮肤添加完成后，可重新打包皮肤（Spine 专有优化）：
+                // (animator as SpineAnimator)?.RepackedSkin();
             }
-#endif
         }
         
         /// <summary>
@@ -310,11 +290,8 @@ namespace Ale.AnimSimulatorSystem
             selectedSkinList.Add(animActorSkin);
             
             // 添加皮肤到 动画播放器
-#if ASS_SPINE
-            // Spine动画播放器
-            if (spineAnimator)
-                spineAnimator.AddSkin(animActorSkin.skinName, isRefresh);
-#endif
+            if (animator)
+                animator.AddSkin(animActorSkin.skinName, isRefresh);
             // 调用 添加皮肤 回调
             OnSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, true);
             
@@ -355,11 +332,8 @@ namespace Ale.AnimSimulatorSystem
             selectedSkinList.Remove(animActorSkin);
             
             // 从 动画播放器中 移除皮肤
-#if ASS_SPINE
-            // Spine动画播放器
-            if (spineAnimator)
-                spineAnimator.RemoveSkin(animActorSkin.skinName, isRefresh);
-#endif
+            if (animator)
+                animator.RemoveSkin(animActorSkin.skinName, isRefresh);
             // 调用 移除皮肤 回调
             OnSkinAddOrRemove?.Invoke(animActorSkinGroup, animActorSkin, false);
             
@@ -395,14 +369,9 @@ namespace Ale.AnimSimulatorSystem
     [Serializable]
     public class AnimActorSkin
     {
+        // 皮肤名对 Spine 与 Live2D 使用相同的命名规则；下拉选择由 Editor 程序集的 Drawer 按后端提供。
         [Tooltip("皮肤: 在动画软件中制作时的名称，用于指定皮肤。有文件夹路径时，一般使用 '/' 进行分隔。")]
-#if ASS_SPINE
-        // Spine动画 Skin属性 
-        [SpineSkin] public string skinName;
-#else
-        // Live2D动画 Skin属性
         public string skinName;
-#endif
 #if ATK_LOCALIZATION
         [Tooltip("UI中显示的皮肤名称：多语言Key。")]
         public LocalizedString uiDisplaySkinName;
