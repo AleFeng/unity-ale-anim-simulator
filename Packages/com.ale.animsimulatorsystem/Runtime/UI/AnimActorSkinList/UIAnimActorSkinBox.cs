@@ -1,9 +1,7 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-#if ATK_LOCALIZATION
-using UnityEngine.Localization.Components;
-#endif
 
 namespace Ale.AnimSimulatorSystem
 {
@@ -19,12 +17,8 @@ namespace Ale.AnimSimulatorSystem
     public class UIAnimActorSkinBox : MonoBehaviour, IUiAnimListCell<UIAnimActorSkinBoxContent>
     {
         [Header("UI组件")]
-        [Tooltip("文本：皮肤名称")]
-#if ATK_LOCALIZATION
-        [SerializeField] private LocalizeStringEvent localizeTxtSkinName;
-#else
-        [SerializeField] private Text txtSkinName;
-#endif
+        [Tooltip("文本：皮肤名称。内容取自皮肤配置的「UI中显示的皮肤名称」。")]
+        [SerializeField] private TMP_Text txtSkinName;
         [Tooltip("图片：皮肤图标")]
         [SerializeField] private Image imgSkin;
         [Tooltip("按钮：选择皮肤按钮")]
@@ -79,18 +73,8 @@ namespace Ale.AnimSimulatorSystem
                     _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin), true);
             }
 
-#if ATK_LOCALIZATION
-            // 设置 UI皮肤名称 多语言Key
-            if (localizeTxtSkinName)
-            {
-                localizeTxtSkinName.StringReference = _uiAnimActorSkinBoxContent.AnimActorSkin.uiDisplaySkinName;
-                localizeTxtSkinName.RefreshString();
-            }
-#else
             // 设置 UI皮肤名称
-            if (txtSkinName != null)
-                txtSkinName.text = _uiAnimActorSkinBoxContent.AnimActorSkin.uiDisplaySkinName;
-#endif
+            RefreshDisplayName();
             // 设置 UI皮肤图片
             if (imgSkin)
             {
@@ -107,15 +91,8 @@ namespace Ale.AnimSimulatorSystem
             UnsubscribeSkinEvent();
             _uiAnimActorSkinBoxContent = null;
 
-#if ATK_LOCALIZATION
-            // 设置 UI皮肤名称 多语言Key 为空
-            if (localizeTxtSkinName)
-                localizeTxtSkinName.StringReference = null;
-#else
             // 设置 UI皮肤名称 为空
-            if (txtSkinName != null)
-                txtSkinName.text = string.Empty;
-#endif
+            RefreshDisplayName();
             // 设置 UI皮肤图片 为空
             if (imgSkin)
                 imgSkin.sprite = null;
@@ -133,6 +110,19 @@ namespace Ale.AnimSimulatorSystem
             if (!_uiAnimActorSkinBoxContent.AnimActor) return;
 
             _uiAnimActorSkinBoxContent.AnimActor.OnSkinAddOrRemove -= OnSkinAddOrRemove;
+        }
+
+        private void OnEnable()  { AnimLocale.OnLocaleChanged += RefreshDisplayName; }
+        private void OnDisable() { AnimLocale.OnLocaleChanged -= RefreshDisplayName; }
+
+        /// <summary>按当前语言重取一次皮肤名。语言切换时由 <see cref="AnimLocale"/> 触发。</summary>
+        private void RefreshDisplayName()
+        {
+            if (!txtSkinName) return;
+            var value = _uiAnimActorSkinBoxContent != null
+                ? _uiAnimActorSkinBoxContent.AnimActorSkin.uiDisplaySkinName
+                : null;
+            txtSkinName.text = value != null ? value.ResolveText() : string.Empty;
         }
 
         private void OnDestroy()

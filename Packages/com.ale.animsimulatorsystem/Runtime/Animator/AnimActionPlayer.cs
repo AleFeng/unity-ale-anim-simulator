@@ -2,10 +2,6 @@
 using UnityEditor;
 #endif
 
-#if ATK_LOCALIZATION
-using UnityEngine.Localization;
-#endif
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1431,13 +1427,8 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("备注：仅用于编辑器查看。")] 
         public string comment;
 #endif
-#if ATK_LOCALIZATION
-        [Tooltip("UI中显示的动作名称：多语言Key。")]
-        public LocalizedString uiDisplayActionName;
-#else
-        [Tooltip("UI中显示的动作名称")]
-        public string uiDisplayActionName;
-#endif
+        [Tooltip("UI中显示的动作名称：填纯文本；启用本地化后还可另选多语言条目，取不到时回退到纯文本。")]
+        public TextValue uiDisplayActionName = new TextValue();
         [Tooltip("动作图标")] 
         public Sprite actionIcon;
         [Tooltip("动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。")]

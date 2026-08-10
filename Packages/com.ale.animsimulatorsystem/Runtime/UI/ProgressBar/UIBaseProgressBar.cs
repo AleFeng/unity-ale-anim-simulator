@@ -1,37 +1,41 @@
 using Ale.Toolkit.Runtime;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
-#if ATK_LOCALIZATION
-using UnityEngine.Localization.Components;
-#endif
 
 namespace Ale.AnimSimulatorSystem
 {
     public class UIBaseProgressBar : MonoBehaviour
     {
         [Header("UI组件")]
-#if ATK_LOCALIZATION
-        [Tooltip("本地化文字 等级名称")]
-        [SerializeField] private LocalizeStringEvent localizeTxtName;
-#else
-        [Tooltip("文本 名称")]
-        [SerializeField] private Text txtName;
-#endif
+        [Tooltip("文本：进度条名称。内容取自配置的「UI中显示的名称」。")]
+        [SerializeField] private TMP_Text txtName;
         [Tooltip("滑动条 经验进度")]
         [SerializeField] private Slider sliderProgress;
-        
+
         // 进度条 配置
         private ProgressBarConfig _progressBarConfig;
-        
+
         /// <summary>
         /// 初始化
         /// </summary>
         protected virtual void Awake()
         {
-            
+
         }
-        
+
+        protected virtual void OnEnable()  { AnimLocale.OnLocaleChanged += RefreshDisplayName; }
+        protected virtual void OnDisable() { AnimLocale.OnLocaleChanged -= RefreshDisplayName; }
+
+        /// <summary>按当前语言重取一次名称。语言切换时由 <see cref="AnimLocale"/> 触发。</summary>
+        private void RefreshDisplayName()
+        {
+            if (!txtName) return;
+            txtName.text = _progressBarConfig != null && _progressBarConfig.uiDisplayName != null
+                ? _progressBarConfig.uiDisplayName.ResolveText()
+                : string.Empty;
+        }
+
         /// <summary>
         /// 设置信息
         /// </summary>
@@ -45,19 +49,9 @@ namespace Ale.AnimSimulatorSystem
                 AnimSimLog.Warn(this, "传入的 ProgressBarConfig 为空，请检查调用。");
                 return;
             }
-            
-#if ATK_LOCALIZATION
-            // 设置 名称的本地化Key
-            if (localizeTxtName != null)
-            {
-                localizeTxtName.StringReference = _progressBarConfig.uiDisplayName;
-                localizeTxtName.RefreshString();
-            }
-#else
+
             // 设置 名称
-            if (txtName != null)
-                txtName.text = _progressBarConfig.uiDisplayName;
-#endif
+            RefreshDisplayName();
         }
 
         #region 进度条

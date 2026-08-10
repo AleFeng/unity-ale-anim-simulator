@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3528188082566972762}
   - component: {fileID: 4790245517308174352}
   - component: {fileID: 7641808957122385379}
-  - component: {fileID: 4934783787273375010}
   - component: {fileID: 7477917121819356273}
   m_Layer: 5
   m_Name: TxtActionName
@@ -68,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Action-Test
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
@@ -154,37 +153,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 2
   m_VerticalFit: 0
---- !u!114 &4934783787273375010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 501170977377450926}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecbb2647f9ce6a4eb114f87a56e12f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Ale.Toolkit.UI.Localization::Ale.Toolkit.Runtime.UI.LocalizedTextEvent
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-    m_TableEntryReference:
-      m_KeyId: 7666301374709760
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  _text: {fileID: 4790245517308174352}
-  _fontEvent: {fileID: 7477917121819356273}
-  passiveUpdate: 1
-  references:
-    version: 2
-    RefIds: []
 --- !u!114 &7477917121819356273
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,8 +178,7 @@ MonoBehaviour:
       m_Calls: []
   texts:
   - {fileID: 4790245517308174352}
-  textEvents:
-  - {fileID: 4934783787273375010}
+  textEvents: []
   fontMaterial:
     m_TableReference:
       m_TableCollectionName: 
@@ -422,9 +389,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e6b37e426446e1449a7018ea0701c79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActionListBox
-  localizeTxtActionName: {fileID: 0}
+  textActionName: {fileID: 4790245517308174352}
   imageActionIcon: {fileID: 7112682092594886140}
-  btnPlayAction: {fileID: 5434310804323961891}
 --- !u!1 &8435254778379712262
 GameObject:
   m_ObjectHideFlags: 0

@@ -53,19 +53,20 @@ MonoBehaviour:
   playAnimActionIntervalTime: 0.5
   stopAnimActionDelayTime: 0.5
   animActionPlayerType: 0
-  animActionSelectType: 0
   animActions:
   - actionName: "\u52A8\u4F5C-\u70B9\u51FB"
     comment: 
     uiDisplayActionName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 7666301374709760
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u52A8\u4F5C-\u6D4B\u8BD5"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 7666301374709760
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     actionIcon: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
     animTrack: 0
     animTrackSub: 0
@@ -76,7 +77,6 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: dance
-    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
@@ -94,14 +94,16 @@ MonoBehaviour:
   - actionName: "\u52A8\u4F5C-\u62D6\u62FD"
     comment: 
     uiDisplayActionName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 7666301374709760
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u52A8\u4F5C-\u6D4B\u8BD5"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 7666301374709760
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     actionIcon: {fileID: 21300000, guid: 90da2212637d7ba4f8a2aa2048366bcf, type: 3}
     animTrack: 0
     animTrackSub: 0
@@ -112,7 +114,6 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: dance
-    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
@@ -130,14 +131,16 @@ MonoBehaviour:
   - actionName: "\u52A8\u4F5C-\u65CB\u8F6C"
     comment: 
     uiDisplayActionName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 7666301374709760
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u52A8\u4F5C-\u6D4B\u8BD5"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 7666301374709760
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     actionIcon: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
     animTrack: 0
     animTrackSub: 0
@@ -148,7 +151,6 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: dance
-    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
@@ -166,14 +168,16 @@ MonoBehaviour:
   - actionName: "\u52A8\u4F5C-\u6309\u538B"
     comment: 
     uiDisplayActionName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 7666301374709760
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u52A8\u4F5C-\u6D4B\u8BD5"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 7666301374709760
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     actionIcon: {fileID: 21300000, guid: ae864560c1f61804d83e385f5581ef3c, type: 3}
     animTrack: 0
     animTrackSub: 0
@@ -184,7 +188,6 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: dance
-    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0

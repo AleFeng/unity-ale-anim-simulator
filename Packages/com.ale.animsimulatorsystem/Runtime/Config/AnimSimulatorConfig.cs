@@ -1,9 +1,6 @@
 using System;
+using Ale.Toolkit.Runtime;
 using UnityEngine;
-
-#if ATK_LOCALIZATION
-using UnityEngine.Localization;
-#endif
 
 namespace Ale.AnimSimulatorSystem
 {
@@ -156,13 +153,8 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("UI画布中的 分组名称：会将 进度条 添加到指定 分组下。若为空，则不显示UI的进度条，但会保留 进度条功能。")]
         public string uiGroupName;
         
-#if ATK_LOCALIZATION
-        [Tooltip("UI中显示的名称：多语言Key。")]
-        public LocalizedString uiDisplayName;
-#else
-        [Tooltip("UI中显示的名称")]
-        public string uiDisplayName;
-#endif
+        [Tooltip("UI中显示的名称：填纯文本；启用本地化后还可另选多语言条目，取不到时回退到纯文本。")]
+        public TextValue uiDisplayName = new TextValue();
 
         // ── 由子类落实的两件事 ──────────────────────────────────────────────────────
         // 「用哪个预制体」与「怎么把配置写进实例」是等级条与动作条仅有的差异。把它们收在这里，

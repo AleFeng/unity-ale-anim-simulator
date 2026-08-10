@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Ale.Toolkit.Runtime;
 using UnityEngine;
 using UnityEngine.Serialization;
-
-#if ATK_LOCALIZATION
-using UnityEngine.Localization;
-#endif
 
 namespace Ale.AnimSimulatorSystem
 {
@@ -414,13 +411,8 @@ namespace Ale.AnimSimulatorSystem
         // 皮肤名对 Spine 与 Live2D 使用相同的命名规则；下拉选择由 Editor 程序集的 Drawer 按后端提供。
         [Tooltip("皮肤: 在动画软件中制作时的名称，用于指定皮肤。有文件夹路径时，一般使用 '/' 进行分隔。")]
         [AnimSkinName] public string skinName;
-#if ATK_LOCALIZATION
-        [Tooltip("UI中显示的皮肤名称：多语言Key。")]
-        public LocalizedString uiDisplaySkinName;
-#else
-        [Tooltip("UI中显示的皮肤名称")]
-        public string uiDisplaySkinName;
-#endif
+        [Tooltip("UI中显示的皮肤名称：填纯文本；启用本地化后还可另选多语言条目，取不到时回退到纯文本。")]
+        public TextValue uiDisplaySkinName = new TextValue();
         [Tooltip("皮肤图片")]
         public Sprite skinImage;
     }

@@ -28,14 +28,16 @@ MonoBehaviour:
     comment: 
     uiGroupName: LevelProgressBar
     uiDisplayName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 19795951616
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u5934\u90E8\u654F\u611F\u5EA6"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 19795951616
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     uiLevelProgressBar: {fileID: 0}
     levelMax: 99
     expCurveConfigs: []
@@ -43,14 +45,16 @@ MonoBehaviour:
     comment: 
     uiGroupName: LevelProgressBar
     uiDisplayName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 602795819008
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u80F8\u90E8\u654F\u611F\u5EA6"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 602795819008
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     uiLevelProgressBar: {fileID: 0}
     levelMax: 99
     expCurveConfigs: []
@@ -58,14 +62,16 @@ MonoBehaviour:
     comment: 
     uiGroupName: LevelProgressBar
     uiDisplayName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 644273291264
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u624B\u81C2\u654F\u611F\u5EA6"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 644273291264
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     uiLevelProgressBar: {fileID: 0}
     levelMax: 99
     expCurveConfigs: []
@@ -75,14 +81,16 @@ MonoBehaviour:
     comment: 
     uiGroupName: ActionProgressBar
     uiDisplayName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 2083095724032
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u5FEB\u611F"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 2083095724032
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     uiActionProgressBar: {fileID: 0}
     progressValueMax: 100
     progressValueLimit: 300
@@ -97,14 +105,16 @@ MonoBehaviour:
     comment: 
     uiGroupName: ActionProgressBarVertical
     uiDisplayName:
-      m_TableReference:
-        m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-      m_TableEntryReference:
-        m_KeyId: 1071749448744960
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+      fallback: "\u5174\u594B\u5EA6"
+      localized:
+        m_TableReference:
+          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+        m_TableEntryReference:
+          m_KeyId: 1071749448744960
+          m_Key: 
+        m_FallbackState: 0
+        m_WaitForCompletion: 0
+        m_LocalVariables: []
     uiActionProgressBar: {fileID: 6735727399098961996, guid: 17f51a795bd5ed7499bcc8eef7784061, type: 3}
     progressValueMax: 100
     progressValueLimit: 300

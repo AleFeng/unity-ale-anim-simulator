@@ -1,7 +1,4 @@
-#if ATK_LOCALIZATION
-using UnityEngine.Localization;
-#endif
-
+using Ale.Toolkit.Runtime;
 using UnityEngine;
 
 namespace Ale.AnimSimulatorSystem
@@ -13,13 +10,8 @@ namespace Ale.AnimSimulatorSystem
     /// </summary>
     public class UIAnimActionListBoxContent
     {
-#if ATK_LOCALIZATION
-        [Tooltip("UI中显示的动作名称：多语言Key。")]
-        public LocalizedString UIDisplayActionName;
-#else
-        [Tooltip("UI中显示的动作名称")]
-        public string UIDisplayActionName;
-#endif
+        /// <summary>UI中显示的动作名称。直接引用动作上那一份，不复制。</summary>
+        public readonly TextValue UIDisplayActionName;
 
         /// <summary>
         /// 动画动作 图标
