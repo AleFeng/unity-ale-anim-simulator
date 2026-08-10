@@ -161,7 +161,6 @@ GameObject:
   - component: {fileID: 965544096143615365}
   - component: {fileID: 3599996630741440571}
   - component: {fileID: 1207782037193214285}
-  - component: {fileID: 8639299628344001052}
   - component: {fileID: 5900215355165218904}
   m_Layer: 5
   m_Name: TxtName
@@ -217,7 +216,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Pleasure
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
@@ -289,37 +288,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &8639299628344001052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4088424836683787855}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecbb2647f9ce6a4eb114f87a56e12f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Ale.Toolkit.UI.Localization::Ale.Toolkit.Runtime.UI.LocalizedTextEvent
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-    m_TableEntryReference:
-      m_KeyId: 2083095724032
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  _text: {fileID: 1207782037193214285}
-  _fontEvent: {fileID: 5900215355165218904}
-  passiveUpdate: 1
-  references:
-    version: 2
-    RefIds: []
 --- !u!114 &5900215355165218904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -345,8 +313,7 @@ MonoBehaviour:
       m_Calls: []
   texts:
   - {fileID: 1207782037193214285}
-  textEvents:
-  - {fileID: 8639299628344001052}
+  textEvents: []
   fontMaterial:
     m_TableReference:
       m_TableCollectionName: 
@@ -442,7 +409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aca6a2f7cb9c07b42af28fd09565f571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.ActionProgressBar
-  localizeTxtName: {fileID: 0}
+  txtName: {fileID: 1207782037193214285}
   sliderProgress: {fileID: 668392965289103078}
   sliderTweenBaseDuration: 0.5
   button: {fileID: 3311757978997218794}

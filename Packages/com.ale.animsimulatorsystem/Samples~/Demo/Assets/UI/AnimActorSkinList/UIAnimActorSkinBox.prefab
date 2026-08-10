@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2234b047978839343886d4033938321b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.UIAnimActorSkinItem
-  localizeTxtSkinName: {fileID: 0}
+  txtSkinName: {fileID: 371126069444164001}
   imgSkin: {fileID: 3895287283747058946}
   btnSkin: {fileID: 8319719214053502334}
   goSelectedTip: {fileID: 8021456300732295202}
@@ -67,7 +67,6 @@ GameObject:
   - component: {fileID: 3110877481651437588}
   - component: {fileID: 9153003824426090191}
   - component: {fileID: 371126069444164001}
-  - component: {fileID: 1363999746638324090}
   - component: {fileID: 7957618843772209526}
   m_Layer: 5
   m_Name: TxtSkinName
@@ -123,7 +122,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Backpack
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
   m_sharedMaterial: {fileID: 629922519631163190, guid: 9d2ec58c21fc1f448bdaa2561bea343f, type: 2}
@@ -195,37 +194,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &1363999746638324090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 784343562142305063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecbb2647f9ce6a4eb114f87a56e12f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Ale.Toolkit.UI.Localization::Ale.Toolkit.Runtime.UI.LocalizedTextEvent
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-    m_TableEntryReference:
-      m_KeyId: 4754396729458688
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls: []
-  _text: {fileID: 371126069444164001}
-  _fontEvent: {fileID: 7957618843772209526}
-  passiveUpdate: 1
-  references:
-    version: 2
-    RefIds: []
 --- !u!114 &7957618843772209526
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,8 +219,7 @@ MonoBehaviour:
       m_Calls: []
   texts:
   - {fileID: 371126069444164001}
-  textEvents:
-  - {fileID: 1363999746638324090}
+  textEvents: []
   fontMaterial:
     m_TableReference:
       m_TableCollectionName: 

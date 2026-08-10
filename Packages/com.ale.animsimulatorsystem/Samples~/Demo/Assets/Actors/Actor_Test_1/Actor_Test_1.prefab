@@ -51,11 +51,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActor
   animator: {fileID: 2864865959808424917}
-  stateInitList:
-  - idle
-  baseSkins:
-  - skin-base
-  - eyelids/girly
+  stateInitListLegacy: []
+  baseSkinsLegacy: []
   animActorSkinGroups:
   - skinGroupName: "\u8863\u670D"
     skinGroupIcon: {fileID: 21300000, guid: 80b399b9cc45c3a46adc0bfbfcb97fc0, type: 3}
@@ -65,47 +62,55 @@ MonoBehaviour:
     animActorSkins:
     - skinName: clothes/dress-green
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4751229920886784
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EFF\u8272\u8FDE\u8863\u88D9"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4751229920886784
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: de37bb5aa5176b543b2a22e5b31cb8a0, type: 3}
     - skinName: clothes/dress-blue
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4750981441929216
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u8FDE\u8863\u88D9"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4750981441929216
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 3f5a0bc3fb4b7dd429e6eaf22c5e7719, type: 3}
     - skinName: clothes/hoodie-orange
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4752115111968768
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u6A58\u8272\u5E3D\u886B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4752115111968768
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: a4e604af0b55afc4d9191a3ccd02cdc9, type: 3}
     - skinName: clothes/hoodie-blue-and-scarf
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4751968919502848
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u5E3D\u886B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4751968919502848
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 470d0d804c5b98c4b955e2bdcefabb67, type: 3}
   - skinGroupName: "\u4E0B\u8EAB"
     skinGroupIcon: {fileID: 21300000, guid: ee94330dc2d5f7641a644035d1dff026, type: 3}
@@ -115,47 +120,55 @@ MonoBehaviour:
     animActorSkins:
     - skinName: legs/boots-pink
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4752473271975936
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7C89\u8272\u9774\u5B50"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4752473271975936
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 36392785ea152064e92be5c9796b4788, type: 3}
     - skinName: legs/boots-red
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4752604864069632
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EA2\u8272\u9774\u5B50"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4752604864069632
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: c4da79fcdd6763c4d880f601789b519d, type: 3}
     - skinName: legs/pants-green
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4752717170753536
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EFF\u8272\u957F\u88E4"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4752717170753536
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: eb3b9f345fa625d4798a87787c322910, type: 3}
     - skinName: legs/pants-jeans
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4752937103278080
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u725B\u4ED4\u957F\u88E4"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4752937103278080
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: e95774eeace507848aa8bc9e01e04e66, type: 3}
   - skinGroupName: "\u914D\u9970"
     skinGroupIcon: {fileID: 21300000, guid: ae048b792cb6f9641a5276d025708e8b, type: 3}
@@ -165,80 +178,94 @@ MonoBehaviour:
     animActorSkins:
     - skinName: accessories/hat-red-yellow
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754917632655360
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EA2\u8272\u9488\u7EC7\u5E3D"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754917632655360
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 78f8d649f1e88514f842295521aaf18f, type: 3}
     - skinName: accessories/hat-pointy-blue-yellow
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754802893275136
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u9488\u7EC7\u5E3D"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754802893275136
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: ed0af350a0b527a4c93e2f5aac817680, type: 3}
     - skinName: accessories/scarf
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4755783118897152
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u56F4\u5DFE"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4755783118897152
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 9b4c436d526705d47a8127cd92b23764, type: 3}
     - skinName: accessories/cape-red
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754726653411328
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EA2\u8272\u62AB\u80A9"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754726653411328
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: e09d1d6164f191f4b847a83d2867d634, type: 3}
     - skinName: accessories/cape-blue
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754635225972736
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u62AB\u80A9"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754635225972736
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 9ce0c7d475e1589468ae851782a98273, type: 3}
     - skinName: accessories/backpack
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754396729458688
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u80CC\u5305"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754396729458688
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 45d35da14fcebeb478b8f2b1275839cd, type: 3}
     - skinName: accessories/bag
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4754535577698304
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u630E\u5305"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4754535577698304
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 1f3a30518213009459d1ce0ef7504bef, type: 3}
   - skinGroupName: "\u5934\u53D1"
     skinGroupIcon: {fileID: 21300000, guid: 7083f96b0b66b44488fc021cdc156df5, type: 3}
@@ -248,58 +275,68 @@ MonoBehaviour:
     animActorSkins:
     - skinName: hair/hair-short-red
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4756105207889920
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EA2\u8272\u77ED\u53D1"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4756105207889920
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 8c364877deaa8ef4194001c0decc8531, type: 3}
     - skinName: hair/hair-blue
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4755875381002240
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u4E2D\u957F\u53D1"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4755875381002240
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: fbe2509f26f14af4d9311b774ba77f11, type: 3}
     - skinName: hair/hair-brown
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4755959061561344
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u68D5\u8272\u4E2D\u957F\u53D1"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4755959061561344
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 3db1890f72ef2fc4dafee42e3556e491, type: 3}
     - skinName: hair/hair-pink
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4756063424233472
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7C89\u8272\u4E2D\u957F\u53D1"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4756063424233472
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: b701c0730b511664e9d29de0c64f0014, type: 3}
     - skinName: hair/hair-long-blue-scarf
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4756005123407872
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u957F\u53D1"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4756005123407872
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 40e645e68750c4e4e819457e194477e1, type: 3}
   - skinGroupName: "\u773C\u775B"
     skinGroupIcon: {fileID: 21300000, guid: 5781c66f0283f23479a228dbf435569d, type: 3}
@@ -309,47 +346,55 @@ MonoBehaviour:
     animActorSkins:
     - skinName: eyes/eyes-blue
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4756976054452224
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u84DD\u8272\u773C\u775B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4756976054452224
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: de76c0370b160bd418b1ad9aa0c41928, type: 3}
     - skinName: eyes/eyes-green
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4757031549288448
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7EFF\u8272\u773C\u775B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4757031549288448
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 491cf30e92e0d0a46b76d5bb0f6a20ed, type: 3}
     - skinName: eyes/eyes-violet
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4757054202724352
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u7D2B\u8272\u773C\u775B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4757054202724352
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: c55f11fd636336541ab13bea70343ba7, type: 3}
     - skinName: eyes/eyes-yellow
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4757106304368640
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u9EC4\u8272\u773C\u775B"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4757106304368640
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: 47510c77bef3e1c4b941dcc15e81aaa2, type: 3}
   - skinGroupName: "\u9F3B\u5B50"
     skinGroupIcon: {fileID: 21300000, guid: 2aeb0f77904358f41b8ce7232c99abae, type: 3}
@@ -359,25 +404,29 @@ MonoBehaviour:
     animActorSkins:
     - skinName: nose/nose-short
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4757231231713280
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u77ED\u9F3B\u5B50"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4757231231713280
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: e7bfacf0c30c0a54eab6a29be51b826c, type: 3}
     - skinName: nose/nose-long
       uiDisplaySkinName:
-        m_TableReference:
-          m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
-        m_TableEntryReference:
-          m_KeyId: 4757299510788096
-          m_Key: 
-        m_FallbackState: 0
-        m_WaitForCompletion: 0
-        m_LocalVariables: []
+        fallback: "\u957F\u9F3B\u5B50"
+        localized:
+          m_TableReference:
+            m_TableCollectionName: GUID:9cd2a90cd41caa9439e5481f796b46bb
+          m_TableEntryReference:
+            m_KeyId: 4757299510788096
+            m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
       skinImage: {fileID: 21300000, guid: c3d1d0802de08ed46a34e37d838e930b, type: 3}
   references:
     version: 2
@@ -535,13 +584,13 @@ MonoBehaviour:
   - idle
   baseSkins:
   - skin-base
+  - eyelids/girly
   spineSkeletonAnimation: {fileID: 1070422356110670968}
   spineStateData:
   - stateName: idle
     spineSkeletonAnimation: {fileID: 0}
     spineAnimDatas:
     - animName: idle
-      animRefAsset: {fileID: 0}
       animTrack: 1
       animTrackSub: 0
       isLoop: 1
@@ -550,7 +599,6 @@ MonoBehaviour:
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 0}
     - animName: blink
-      animRefAsset: {fileID: 0}
       animTrack: 4
       animTrackSub: 0
       isLoop: 1
@@ -571,24 +619,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u8EAB\u4F53"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -633,7 +669,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u8D70\u8DEF-\u5FAA\u73AF"
@@ -645,7 +681,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u52A8\u4F5C-\u8033\u6735"
@@ -663,41 +699,9 @@ PrefabInstance:
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animTrackIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionOperationType
       value: 0
@@ -723,6 +727,10 @@ PrefabInstance:
       value: 360
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -737,14 +745,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionParameter
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8|1"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetName
@@ -799,6 +799,10 @@ PrefabInstance:
       value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetParameter
       value: 1
       objectReference: {fileID: 0}
@@ -850,6 +854,58 @@ PrefabInstance:
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].key
+      value: AnimSim.LevelProgress
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[0].id
+      value: progress
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[1].id
+      value: op
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[2].id
+      value: level
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[1].type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[2].type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[1].ints.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[2].ints.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[0].strings.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: 'animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[1].ints.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: 'animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[2].ints.Array.data[0]'
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: 'animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.data[0].strings.Array.data[0]'
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
       value: AnimActionPlayer (3)
@@ -894,10 +950,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -921,10 +973,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u5174\u594B\u5EA6"
       objectReference: {fileID: 0}
@@ -933,16 +981,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActionPlayerType
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -987,7 +1027,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u6253\u91CF-\u81EA\u52A8"
@@ -999,7 +1039,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 1241952a28d2892499a075aee43f40a3, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u52A8\u4F5C-\u8033\u6735"
@@ -1017,41 +1057,9 @@ PrefabInstance:
       value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animTrackIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionOperationType
       value: 0
@@ -1092,10 +1100,6 @@ PrefabInstance:
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
       value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
@@ -1236,10 +1240,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1263,24 +1263,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u81C0\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1301,7 +1289,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionName
       value: "\u8DF3\u821E-\u65CB\u8F6C"
@@ -1313,7 +1301,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u52A8\u4F5C-\u65CB\u8F6C"
@@ -1335,29 +1323,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].isAntiClockwise
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionOperationType
       value: 2
@@ -1401,14 +1369,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 64b6ec6b4c06fcf4daec1bf36b8a5241, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[3].conditions.Array.data[0].conditionParameter
-      value: "\u654F\u611F\u5EA6-\u5934\u90E8|1"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
@@ -1550,10 +1510,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1577,28 +1533,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u817F\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1643,7 +1583,7 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 07fa883b748ecc34696b75e7281f1449, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionName
       value: "\u4E0B\u8E72-\u62D6\u62FD"
@@ -1655,14 +1595,10 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 90da2212637d7ba4f8a2aa2048366bcf, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].actionName
       value: "\u4E0B\u8E72-\u6309\u538B"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].actionType
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].showGizmos
@@ -1671,14 +1607,10 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionIcon
       value: 
-      objectReference: {fileID: 21300000, guid: 90da2212637d7ba4f8a2aa2048366bcf, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].actionName
       value: "\u4E0B\u8E72-\u6309\u538B"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].actionType
-      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].showGizmos
@@ -1709,18 +1641,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[1].animReferenceAsset
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[2].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 4f0df283cf04bb3468754ce976dbcac3, type: 2}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionOperationType
       value: 1
       objectReference: {fileID: 0}
@@ -1744,10 +1664,6 @@ PrefabInstance:
       propertyPath: animActions.Array.data[2].progressBarConfigs.Array.size
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.data[0].animReferenceAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: f4d3e0814f5bc0f4c8f9d21ffdc52175, type: 2}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
       value: "\u654F\u611F\u5EA6-\u817F\u90E8"
@@ -1840,10 +1756,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1867,28 +1779,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2864865959808424917}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: spineAnimator
-      value: 
-      objectReference: {fileID: 2864865959808424917}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndex
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: actionPlayerName
       value: "\u52A8\u4F5C\u64AD\u653E\u5668-\u5934\u90E8"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animTrackDefault
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: skeletonAnimation
-      value: 
-      objectReference: {fileID: 1070422356110670968}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animTrackIndexDefault
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.size
@@ -1905,14 +1801,6 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].actionName
       value: "\u6253\u91CF-\u70B9\u51FB"
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActionGroup.animActions.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: animActions.Array.data[0].animReferenceAsset
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
@@ -1985,10 +1873,6 @@ PrefabInstance:
     - target: {fileID: 4851507608177750342, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6870921461620685774, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
