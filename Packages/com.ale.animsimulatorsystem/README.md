@@ -36,7 +36,7 @@ Cubism 与 Spine 的模型差异较大，有三点需要在配置时注意：
 
 ### 必需：Ale Toolkit
 
-本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.3**）之上，用到的底层能力：
+本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.5**）之上，用到的底层能力：
 
 | toolkit 能力 | 插件中的用途 |
 |---|---|
@@ -45,7 +45,7 @@ Cubism 与 Spine 的模型差异较大，有三点需要在配置时注意：
 | `ToolkitInputBinder` | 光标移动 / 左键 / 右键的输入绑定 |
 | `ToolkitTween` | 淡入淡出、起播延时、单次播放完成、循环随机间隔的全部计时 |
 | `UIUtility.WorldPosToUILocalPos` | 动作列表跟随角色的世界坐标定位 |
-| `UiwFocusOrderList<,>` / `UiwVirtualOrderList<,>` | 动画动作列表与皮肤列表的虚拟滚动 |
+| `UiwFocusOrderList<,>` / `UiwVirtualOrderList<,>` | 动画动作列表与皮肤列表的虚拟滚动、焦点选中与行距倍率 |
 | `TextValue` | 动作名 / 皮肤名 / 进度条名的展示文本（纯文本 + 可选的多语言条目） |
 | `Ale.Condition`（条件系统） | 动画动作的解锁条件：两级与或非组合、内联编辑界面、可扩展判定器 |
 | `LocalizedFontEvent` | Demo 预制体的字体随语言切换 |
@@ -53,7 +53,9 @@ Cubism 与 Spine 的模型差异较大，有三点需要在配置时注意：
 
 toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写进 `package.json` 的 `dependencies`，需自行安装。
 
-> **最低版本是 1.7.3**：该版本给 `ToolkitTween` 新增了通用浮点补间 `To()`，本插件用它补间 Spine 的 `Skeleton.A` 与 Live2D 的 `CubismRenderController.Opacity`——这两个目标都不是 `UnityEngine.Object`，落不到 toolkit 原有的任何固定通道上。
+> **最低版本是 1.7.5**：
+> - **1.7.3** 给 `ToolkitTween` 新增了通用浮点补间 `To()`，本插件用它补间 Spine 的 `Skeleton.A` 与 Live2D 的 `CubismRenderController.Opacity`——这两个目标都不是 `UnityEngine.Object`，落不到 toolkit 原有的任何固定通道上。
+> - **1.7.5** 把顺序虚拟列表的**行距与格子高度解耦**（新增 `rowPitchScale` 行距倍率），并把格子轴心由顶端改为正中。后者是动作列表的一处显示修复：焦点缩放曲线放大焦点条目时，顶端轴心会让它只向下长开、视觉中心比焦点线低 `(缩放 − 1) × 行距 / 2`。低于该版本插件仍能编译运行，但动作列表的条目间距不可调、焦点条目对不准中线。
 
 > **2.1.0 起不再依赖 DOTween**。此前它是硬依赖且缺失时会让淡入淡出、单次播放完成、循环随机间隔、起播延时四项静默失效（角色因此永远不显示）；现已全部改用 `ToolkitTween`，插件的第三方运行时依赖归零。
 
