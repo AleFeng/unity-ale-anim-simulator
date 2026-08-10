@@ -692,6 +692,110 @@ PrefabInstance:
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u81C0\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].conditions.Array.data[0].conditionTargetParameter
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
       value: AnimActionPlayer (3)
@@ -886,6 +990,102 @@ PrefabInstance:
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u624B\u81C2"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
       value: AnimActionPlayer (4)
@@ -1059,6 +1259,102 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u80F8\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1258,6 +1554,54 @@ PrefabInstance:
       propertyPath: animActions.Array.data[2].progressBarConfigs.Array.size
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u817F\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
       value: AnimActionPlayer
@@ -1351,6 +1695,30 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressName
+      value: "\u654F\u611F\u5EA6-\u5934\u90E8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5FEB\u611F"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressName
+      value: "\u52A8\u4F5C\u8FDB\u5EA6-\u5174\u594B\u5EA6"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[0].progressModifyValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[1].progressModifyValue
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
