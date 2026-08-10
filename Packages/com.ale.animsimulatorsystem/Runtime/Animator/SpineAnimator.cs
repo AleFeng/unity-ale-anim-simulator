@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Ale.Toolkit.Runtime;
 
 #if ASS_SPINE
 using Spine;
 using Spine.Unity;
 using Spine.Unity.AttachmentTools;
-#endif
-
-#if DOTWEEN
-using DG.Tweening;
 #endif
 
 namespace Ale.AnimSimulatorSystem
@@ -350,12 +347,10 @@ namespace Ale.AnimSimulatorSystem
         }
         
         #region 循环动画 随机间隔
-        // 正在运行的 循环随机间隔动画 Tween 列表
-#if DOTWEEN
-        private readonly Dictionary<SkeletonAnimation, Dictionary<int, Tween>> _mDicSpineAnimTrackToLoopCoroutine =
-            new Dictionary<SkeletonAnimation, Dictionary<int, Tween>>();
-#endif
-        
+        // 正在运行的 循环随机间隔动画 补间句柄表
+        private readonly Dictionary<SkeletonAnimation, Dictionary<int, ToolkitTweenHandle>> _mDicSpineAnimTrackToLoopCoroutine =
+            new Dictionary<SkeletonAnimation, Dictionary<int, ToolkitTweenHandle>>();
+
         /// <summary>
         /// 停止所有 Spine动画 的 循环随机间隔动画
         /// </summary>
@@ -363,21 +358,17 @@ namespace Ale.AnimSimulatorSystem
         private void StopSpineAnimLoopCoroutineAll(SkeletonAnimation spineAnimator)
         {
             if (!spineAnimator) return;
-#if DOTWEEN
-            // 记录表本身声明在 #if DOTWEEN 内，故整段访问都必须同样受宏保护——
-            // 否则「开 ASS_SPINE 但没有 DOTween」的组合根本无法编译。
             if (_mDicSpineAnimTrackToLoopCoroutine.Count == 0) return;
 
             // 停止所有
             if (_mDicSpineAnimTrackToLoopCoroutine.TryGetValue(spineAnimator, out var dicTrackToItem))
             {
                 foreach (var kv in dicTrackToItem)
-                    kv.Value?.Kill();
+                    kv.Value.Kill();
                 dicTrackToItem.Clear();
             }
-#endif
         }
-        
+
         /// <summary>
         /// 启动指定轨道的 循环随机间隔动画
         /// </summary>
@@ -385,16 +376,14 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="animData"></param>
         private void StartSpineAnimLoopCoroutine
         (
-            SkeletonAnimation spineAnimator, 
+            SkeletonAnimation spineAnimator,
             SpineAnimData animData)
         {
             // 停止已有
             StopSpineAnimLoopCoroutine(spineAnimator, animData.AnimTrack);
-            
-#if DOTWEEN
-            // 使用 DOTween 以在每次播放后等待一个随机延迟再播放下一次
+
+            // 每次播放后等待一个随机延迟再播放下一次
             PlaySpineAnimLoopIntervalTime(spineAnimator, animData);
-#endif
         }
 
         /// <summary>
@@ -405,24 +394,21 @@ namespace Ale.AnimSimulatorSystem
         private void StopSpineAnimLoopCoroutine(SkeletonAnimation spineAnimator, int trackIndex)
         {
             if (!spineAnimator) return;
-#if DOTWEEN
-            // 同 StopSpineAnimLoopCoroutineAll：记录表声明在 #if DOTWEEN 内，访问也必须一并受保护。
             if (_mDicSpineAnimTrackToLoopCoroutine.TryGetValue(spineAnimator, out var dicTrackToItem))
             {
                 if (dicTrackToItem.TryGetValue(trackIndex, out var item))
                 {
-                    // 停止 DOTween
-                    item?.Kill();
+                    // 停止补间
+                    item.Kill();
                     // 移除记录
                     dicTrackToItem.Remove(trackIndex);
                 }
             }
-#endif
         }
-        
-#if DOTWEEN
+
         /// <summary>
-        /// 播放 Spine 动画，循环播放且在每次播放后等待一个随机间隔时间（DOTween 实现）
+        /// 播放 Spine 动画，循环播放且在每次播放后等待一个随机间隔时间。
+        /// 由 <see cref="ToolkitTween.DelayedCall"/> 递归调度实现。
         /// </summary>
         /// <param name="spineAnimator"></param>
         /// <param name="animData"></param>
@@ -433,48 +419,48 @@ namespace Ale.AnimSimulatorSystem
         )
         {
             if (!spineAnimator || !animData.animRefAsset || animData.animRefAsset.Animation == null) return;
-            
-            // 设置为 非循环播放，由 DOTween 控制 循环和间隔
+
+            // 设置为 非循环播放，由 递归调度 控制 循环和间隔
             animData.isLoop = false;
-            
+
             // 预计算动画时长（考虑速度倍率）
             float animDuration = animData.animRefAsset.Animation.Duration / Mathf.Max(0.001f, Mathf.Abs(animData.speed));
             int trackIndex = animData.AnimTrack;
-            
+
             // 获取或创建轨道字典
             if (!_mDicSpineAnimTrackToLoopCoroutine.TryGetValue(spineAnimator, out var dicTrackToTween))
             {
-                dicTrackToTween = new Dictionary<int, Tween>();
+                dicTrackToTween = new Dictionary<int, ToolkitTweenHandle>();
                 _mDicSpineAnimTrackToLoopCoroutine.Add(spineAnimator, dicTrackToTween);
             }
-            
+
             // 递归调度：播放一次动画，等待 动画时长+随机间隔 后，调度下一次
             void ScheduleNextLoop()
             {
                 if (!spineAnimator || !spineAnimator.gameObject.activeInHierarchy) return;
-                
+
                 // 播放一次
                 PlaySpineAnimWhenTrackEmpty(animData);
-                
+
                 // 计算随机间隔，等待 动画时长 + 间隔时间 后，调度下一次循环
                 float intervalDelay = UnityEngine.Random.Range(animData.loopIntervalTimeRange.x, animData.loopIntervalTimeRange.y);
                 intervalDelay = Mathf.Max(0.001f, intervalDelay); // 最小等待时间保护
-                var tween = DOVirtual.DelayedCall(animDuration + intervalDelay, ScheduleNextLoop);
-                dicTrackToTween[trackIndex] = tween;
+                // owner 传 this：本组件被销毁后调度自动中止，不会再对已失效的骨架下发播放。
+                dicTrackToTween[trackIndex] =
+                    ToolkitTween.DelayedCall(animDuration + intervalDelay, ScheduleNextLoop, owner: this);
             }
-            
+
             // 处理初始延迟
             if (animData.startDelayTime > 0f)
             {
-                var tween = DOVirtual.DelayedCall(animData.startDelayTime, ScheduleNextLoop);
-                dicTrackToTween[trackIndex] = tween;
+                dicTrackToTween[trackIndex] =
+                    ToolkitTween.DelayedCall(animData.startDelayTime, ScheduleNextLoop, owner: this);
             }
             else
             {
                 ScheduleNextLoop();
             }
         }
-#endif
         #endregion
         #endregion
 
@@ -505,19 +491,20 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
             
-#if DOTWEEN
             if (animData.startDelayTime > 0f)
             {
                 if (_spineAnimStartDelayTweenMap.ContainsKey(animData)) return;
-                var delayTween = DOVirtual.DelayedCall(animData.startDelayTime, () =>
+                // owner 传 this：本组件被销毁后延时自动作废，不会再对已失效的骨架下发播放。
+                var delayHandle = ToolkitTween.DelayedCall(animData.startDelayTime, () =>
                 {
                     _spineAnimStartDelayTweenMap.Remove(animData);
                     PlaySpineAnimImmediate(animData, onOncePlayComplete);
-                });
-                _spineAnimStartDelayTweenMap.Add(animData, delayTween);
+                }, owner: this);
+                // 仅登记真正在途的延时。句柄无效（运行器不可用等）时不登记，
+                // 否则这条记录会永久卡住该动画数据——上面的 ContainsKey 会让后续播放一律提前返回。
+                if (delayHandle.IsActive) _spineAnimStartDelayTweenMap.Add(animData, delayHandle);
                 return;
             }
-#endif
 
             PlaySpineAnimImmediate(animData, onOncePlayComplete);
         }
@@ -605,17 +592,15 @@ namespace Ale.AnimSimulatorSystem
             float speed = Mathf.Abs(animData.speed);
             if (speed == 0f) return; // 速度为0, 动画暂停，无法完成
             float delayTime = animData.animRefAsset.Animation.Duration / speed;
-            
-#if DOTWEEN
-            // 等待指定时间后，触发回调
-            DOVirtual.DelayedCall(delayTime, () =>
+
+            // 等待指定时间后，触发回调。owner 传 this，组件销毁后不再回调。
+            ToolkitTween.DelayedCall(delayTime, () =>
             {
                 // 停止播放。从 正在播放的动画列表中移除。
                 StopSpineAnim(animData);
                 // 触发回调
                 onOncePlayComplete?.Invoke(trackEntry);
-            });
-#endif
+            }, owner: this);
         }
         
         /// <summary>
@@ -686,132 +671,117 @@ namespace Ale.AnimSimulatorSystem
         }
         
         #region 延时播放动画
-#if DOTWEEN
-        // 映射表 动画数据：延时播放Tween。记录正在进行的 延时播放动画，以便在需要时 取消延时播放。
-        private readonly Dictionary<SpineAnimData, Tween> _spineAnimStartDelayTweenMap =
-            new Dictionary<SpineAnimData, Tween>();
-#endif
-        
+        // 映射表 动画数据：延时播放补间句柄。记录正在进行的 延时播放动画，以便在需要时 取消延时播放。
+        private readonly Dictionary<SpineAnimData, ToolkitTweenHandle> _spineAnimStartDelayTweenMap =
+            new Dictionary<SpineAnimData, ToolkitTweenHandle>();
+
         /// <summary>
         /// 清除所有 延时播放的 Spine动画。
         /// 用于 切换状态时，清空之前状态的 正在等待延时播放的 Spine动画数据。
         /// </summary>
         private void ClearAllSpineAnimStartDelay()
         {
-#if DOTWEEN
             foreach (var kv in _spineAnimStartDelayTweenMap)
-            {
-                if (kv.Value != null && kv.Value.IsActive())
-                    kv.Value.Kill();
-            }
+                kv.Value.Kill();
             _spineAnimStartDelayTweenMap.Clear();
-#endif
         }
-        
+
         /// <summary>
         /// 取消 延时播放的 Spine动画。用于 切换状态时，取消之前状态的 正在等待延时播放的 动画数据。
         /// </summary>
         /// <param name="animData"></param>
-        /// <returns></returns>
+        /// <returns>是否确实取消了一条在途的延时播放。</returns>
         private bool CancelSpineAnimStartDelay(SpineAnimData animData)
         {
             if (animData == null) return false;
-#if DOTWEEN
-            if (_spineAnimStartDelayTweenMap.TryGetValue(animData, out var tween))
+
+            if (_spineAnimStartDelayTweenMap.TryGetValue(animData, out var handle))
             {
-                if (tween != null && tween.IsActive())
-                    tween.Kill();
+                handle.Kill();
                 _spineAnimStartDelayTweenMap.Remove(animData);
                 return true;
             }
             return false;
-#else
-            // 无 DOTween 时 不存在延时播放机制，因此不可能有 可取消的延时动画。
-            // 必须返回 false：返回 true 会使调用方 StopSpineAnim 提前返回，导致动画永远无法停止。
-            return false;
-#endif
         }
         #endregion
         #endregion
         
         #region Spine组件淡入/淡出
-#if DOTWEEN
-        // 正在进行淡入/淡出动画的 Spine动画组件:对应的 DOTween 序列
-        private readonly Dictionary<SkeletonAnimation, DG.Tweening.Sequence> _mDicSpineAnimSequenceFade = 
-            new Dictionary<SkeletonAnimation, DG.Tweening.Sequence>();
-#endif
-        
+        // 正在进行淡入/淡出的 Spine动画组件:对应的 补间句柄
+        private readonly Dictionary<SkeletonAnimation, ToolkitTweenHandle> _mDicSpineAnimFadeHandle =
+            new Dictionary<SkeletonAnimation, ToolkitTweenHandle>();
+
         /// <summary>
-        /// 使用 DOTween 淡入/淡出 Spine动画组件
+        /// 淡入/淡出 Spine动画组件（补间 <c>Skeleton.A</c>）。
         /// </summary>
         /// <param name="isFadeIn">是否为淡入</param>
         /// <param name="spineAnimator">目标 SkeletonAnimation，为空时使用默认组件</param>
         /// <param name="clearAnimOnFadeOut">淡出完成后是否清除动画数据。
         /// true（默认）= 正常销毁流程，清除动画轨道和数据；
-        /// false = 临时隐藏，仅禁用对象，保留动画数据以便之后用 RestoreCurrentAnims() 恢复。</param>
+        /// false = 临时隐藏，仅禁用对象，保留动画数据以便之后恢复。</param>
         public void FadeSpineAnimator(bool isFadeIn, SkeletonAnimation spineAnimator = null, bool clearAnimOnFadeOut = true)
         {
-#if DOTWEEN
             if (!spineAnimator) spineAnimator = spineSkeletonAnimation;
             if (!spineAnimator) return;
 
-            // 立刻完成 当前的淡入/淡出动画
-            if (_mDicSpineAnimSequenceFade.TryGetValue(spineAnimator, out var sequenceFadeCur))
-                sequenceFadeCur.Complete();
-                
-            // 创建一个序列以同时淡入/淡出所有材质
-            var sequenceFadeNew = DOTween.Sequence();
-            _mDicSpineAnimSequenceFade[spineAnimator] = sequenceFadeNew; // 记录新序列
-                
+            // 立刻完成 当前的淡入/淡出：其完成回调会同步执行并把自己从表中移除，
+            // 因此下面登记新句柄时表里必定不残留旧记录。必须在 SetActive(true) 之前——
+            // 旧的淡出回调里带着 SetActive(false)，顺序反了会把刚激活的对象又关掉。
+            if (_mDicSpineAnimFadeHandle.TryGetValue(spineAnimator, out var handleFadeCur))
+                handleFadeCur.Complete();
+
             // 如果是淡入，确保对象是激活状态
             if (isFadeIn)
             {
                 spineAnimator.gameObject.SetActive(true);
             }
-            // 添加淡入/淡出动画
+
             var skeleton = spineAnimator.Skeleton;
             if (skeleton == null)
             {
                 Debug.LogWarning($"SpineAnimator >> FadeSpineAnimator: SkeletonAnimation 的 Skeleton 为空，无法淡入/淡出，GameObject={spineAnimator.gameObject.name}");
-                // 清理已记录的空序列，避免残留泄漏
-                sequenceFadeNew.Kill();
-                _mDicSpineAnimSequenceFade.Remove(spineAnimator);
+                _mDicSpineAnimFadeHandle.Remove(spineAnimator);
                 return;
             }
+
             float fadeDur = Mathf.Max(0.001f, spineAnimSwitchSpineDuration);
             float targetAlpha = isFadeIn ? 1f : 0f; // 目标透明度
-            float startAlpha = skeleton.A; // 起始透明度
-            sequenceFadeNew.Join(DOTween.To(() => startAlpha, (x) =>
-            {
-                skeleton.A = x;
-            }, targetAlpha, fadeDur).SetEase(Ease.Linear));
+            float startAlpha = skeleton.A;          // 起始透明度
 
-            sequenceFadeNew.OnComplete(() =>
-            {
-                // 对象已被销毁，直接移除记录并返回
-                if (!spineAnimator)
+            // fadeDur 恒 > 0，故 To() 必定异步推进、完成回调不会在本方法返回前触发——
+            // 下面那行「登记新句柄」才不会被回调里的 Remove 抢先。
+            // owner 传 this：本组件被销毁后补间自动作废，不再向已失效的骨架写 alpha。
+            var handleFadeNew = ToolkitTween.To(startAlpha, targetAlpha, fadeDur,
+                x => skeleton.A = x,
+                EToolkitEase.Linear,
+                onComplete: () =>
                 {
-                    _mDicSpineAnimSequenceFade.Remove(spineAnimator);
-                    return;
-                }
-                // 立刻设置为目标透明度
-                skeleton.A = targetAlpha;
-                // 如果是淡出，禁用对象
-                if (isFadeIn == false)
-                {
-                    if (clearAnimOnFadeOut)
+                    // 目标已被销毁，直接移除记录并返回
+                    if (!spineAnimator)
                     {
-                        // 正常销毁流程：清除所有动画数据
-                        ClearSpineAnim(spineAnimator);
+                        _mDicSpineAnimFadeHandle.Remove(spineAnimator);
+                        return;
                     }
-                    // 禁用对象（临时隐藏 和 正常销毁 都需要）
-                    if (spineAnimator) spineAnimator.gameObject.SetActive(false);
-                }
-                        
-                // 移除记录
-                _mDicSpineAnimSequenceFade.Remove(spineAnimator);
-            });
-#endif
+                    // 立刻设置为目标透明度
+                    skeleton.A = targetAlpha;
+                    // 如果是淡出，禁用对象
+                    if (isFadeIn == false)
+                    {
+                        if (clearAnimOnFadeOut)
+                        {
+                            // 正常销毁流程：清除所有动画数据
+                            ClearSpineAnim(spineAnimator);
+                        }
+                        // 禁用对象（临时隐藏 和 正常销毁 都需要）
+                        if (spineAnimator) spineAnimator.gameObject.SetActive(false);
+                    }
+
+                    // 移除记录
+                    _mDicSpineAnimFadeHandle.Remove(spineAnimator);
+                },
+                owner: this);
+
+            _mDicSpineAnimFadeHandle[spineAnimator] = handleFadeNew;
         }
         #endregion
         

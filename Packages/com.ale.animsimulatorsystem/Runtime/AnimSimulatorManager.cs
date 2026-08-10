@@ -8,9 +8,6 @@ using UnityEngine.InputSystem;
 // 输入绑定器所在程序集同样受 ATK_INPUT_SYSTEM 约束，宏关闭时该命名空间不存在，故 using 也须一并门控。
 using Ale.Toolkit.Runtime.InputSupport;
 #endif
-#if DOTWEEN
-using DG.Tweening;
-#endif
 #if UNITY_EDITOR && ATK_ADDRESSABLE
 // 仅供「测试用」字段直接挂载资产引用，非运行期依赖。
 using UnityEngine.AddressableAssets;
@@ -238,6 +235,9 @@ namespace Ale.AnimSimulatorSystem
 
         // 当前是否正在淡入UI。用于控制在拖拽过程中 不切换动画动作播放器时，保持UI状态不变。
         private bool _isUiFadeIn;
+
+        // UI 淡入淡出时长（秒）
+        private const float UiFadeDuration = 0.5f;
         
         /// <summary>
         /// 初始化 UI设置
@@ -267,12 +267,10 @@ namespace Ale.AnimSimulatorSystem
                 // 激活 UI
                 if (uiCanvas)
                     uiCanvas.gameObject.SetActive(true);
-#if DOTWEEN
-                // DoTween 淡入动画
-                uiCanvasGroup.DOFade(1f, 0.5f);
-#else
-                uiCanvasGroup.alpha = 1f;
-#endif
+                // 打断在途的淡出：否则那条淡出的完成回调会在稍后触发，把刚激活的 UI 又关掉。
+                ToolkitTween.Kill(uiCanvasGroup);
+                // 淡入动画
+                ToolkitTween.FadeCanvasGroup(uiCanvasGroup, 1f, UiFadeDuration);
             }
             else if (uiCanvas)
             {
@@ -292,19 +290,16 @@ namespace Ale.AnimSimulatorSystem
             // 淡出 UI
             if (uiCanvasGroup)
             {
-#if DOTWEEN
-                // DoTween 淡出动画
-                uiCanvasGroup.DOFade(0f, 0.5f).OnComplete(() =>
+                // 打断在途的淡入，避免两条补间同帧互相争写 alpha。
+                ToolkitTween.Kill(uiCanvasGroup);
+                // 淡出动画
+                ToolkitTween.FadeCanvasGroup(uiCanvasGroup, 0f, UiFadeDuration, onComplete: () =>
                 {
                     // 非激活 UI
-                    uiCanvas.gameObject.SetActive(false);
+                    if (uiCanvas) uiCanvas.gameObject.SetActive(false);
                     // 完成回调
                     onComplete?.Invoke();
                 });
-#else
-                uiCanvasGroup.alpha = 0f;
-                uiCanvas.gameObject.SetActive(false);
-#endif
             }
             else if (uiCanvas)
             {
