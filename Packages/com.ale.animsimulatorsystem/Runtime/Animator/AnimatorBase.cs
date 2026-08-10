@@ -40,6 +40,17 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("初始状态：根据 动画制作时的 状态名称 设置，填写一个或多个 状态名称。")]
         [SerializeField] protected string[] stateInitList = { "idle" };
 
+        /// <summary>
+        /// 初始状态列表：<c>Start</c> 时切换到这一组状态。
+        /// <para>本类是这项配置的<b>唯一持有者</b>——2.1.2 之前 <see cref="AnimActor"/> 上还有一份同名字段，
+        /// 两个 <c>Start</c> 各应用一次、顺序未定义。</para>
+        /// </summary>
+        public string[] StateInitList
+        {
+            get => stateInitList;
+            set => stateInitList = value ?? Array.Empty<string>();
+        }
+
         [Header("皮肤设置")]
         [Tooltip("基础皮肤 列表：始终显示的 基础皮肤名称。")]
         [AnimSkinName] public string[] baseSkins;

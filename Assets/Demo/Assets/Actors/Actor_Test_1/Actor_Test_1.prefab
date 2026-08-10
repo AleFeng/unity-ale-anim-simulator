@@ -51,11 +51,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActor
   animator: {fileID: 2864865959808424917}
-  stateInitList:
-  - idle
-  baseSkins:
-  - skin-base
-  - eyelids/girly
+  stateInitListLegacy: []
+  baseSkinsLegacy: []
   animActorSkinGroups:
   - skinGroupName: "\u8863\u670D"
     skinGroupIcon: {fileID: 21300000, guid: 80b399b9cc45c3a46adc0bfbfcb97fc0, type: 3}
@@ -535,6 +532,7 @@ MonoBehaviour:
   - idle
   baseSkins:
   - skin-base
+  - eyelids/girly
   spineSkeletonAnimation: {fileID: 1070422356110670968}
   spineStateData:
   - stateName: idle

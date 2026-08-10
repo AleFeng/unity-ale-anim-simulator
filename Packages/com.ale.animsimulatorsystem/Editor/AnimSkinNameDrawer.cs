@@ -78,7 +78,7 @@ namespace Ale.AnimSimulatorSystem.Editor
             // ① 字段就在动画控制器自己身上（AnimatorBase.baseSkins）
             if (target is AnimatorBase self) return self;
 
-            // ② 字段在动画角色上（AnimActor.baseSkins / AnimActorSkin.skinName）：
+            // ② 字段在动画角色上（AnimActorSkin.skinName）：
             //    直接读它序列化的控制器引用，比在层级里瞎找准确
             if (target is AnimActor)
             {

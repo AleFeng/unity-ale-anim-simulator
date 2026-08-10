@@ -21,9 +21,52 @@ namespace Ale.AnimSimulatorSystem
         [FormerlySerializedAs("spineAnimator")]
         [Tooltip("动画控制器：Spine Animator 或 Live2D Animator。留空时自动从自身或子物体查找。")]
         [SerializeField] private AnimatorBase animator;
-        [Tooltip("初始状态列表：根据 动画制作时的 状态名称 设置，填写一个或多个 状态名称。")]
-        [SerializeField] private string[] stateInitList = new string[] { "idle" };
-        
+
+        // ── 旧配置的迁移入口 ──────────────────────────────────────────────────────────
+        // 2.1.2 之前，「初始状态」与「基础皮肤」在本组件与 AnimatorBase 上各存一份，两个 Start
+        // 各应用一次、执行顺序未定义——两处填得不一样时，角色最终显示哪一套是不确定的
+        // （Demo 里就是这种情况：本组件 [skin-base, eyelids/girly]，动画组件 [skin-base]）。
+        // 现统一由 AnimatorBase 持有。下面两个字段只为接住旧数据而保留、Inspector 中不可见，
+        // MigrateLegacyAnimatorConfig() 会把非空的值搬到 animator 上再清空自身。计划在 2.2.0 删除。
+        [FormerlySerializedAs("stateInitList")]
+        [HideInInspector] [SerializeField] private string[] stateInitListLegacy;
+        [FormerlySerializedAs("baseSkins")]
+        [HideInInspector] [SerializeField] private string[] baseSkinsLegacy;
+
+        /// <summary>
+        /// 把旧版配在本组件上的「初始状态 / 基础皮肤」搬到动画播放器上。幂等：搬完即清空来源，重复调用无副作用。
+        /// </summary>
+        /// <returns>本次是否确实搬运了数据。</returns>
+        public bool MigrateLegacyAnimatorConfig()
+        {
+            if (!animator) return false;
+
+            var moved = new List<string>();
+
+            if (stateInitListLegacy != null && stateInitListLegacy.Length > 0)
+            {
+                animator.StateInitList = stateInitListLegacy;
+                moved.Add("初始状态 [" + string.Join(", ", stateInitListLegacy) + "]");
+                stateInitListLegacy = null;
+            }
+
+            if (baseSkinsLegacy != null && baseSkinsLegacy.Length > 0)
+            {
+                animator.baseSkins = baseSkinsLegacy;
+                moved.Add("基础皮肤 [" + string.Join(", ", baseSkinsLegacy) + "]");
+                baseSkinsLegacy = null;
+            }
+
+            if (moved.Count == 0) return false;
+
+            Debug.LogWarning(
+                $"[AnimActor] MigrateLegacyAnimatorConfig: {gameObject.name} 上的旧配置已迁移到 " +
+                $"{animator.GetType().Name}——{string.Join("；", moved)}。" +
+                "这两项现在只配在动画组件上；请保存该预制体 / 场景以固化本次迁移。", this);
+            return true;
+        }
+
+
         /// <summary>
         /// 初始化完成 回调
         /// </summary>
@@ -56,16 +99,28 @@ namespace Ale.AnimSimulatorSystem
                     animator = GetComponentInChildren<AnimatorBase>();
             }
         }
+
+        private void OnValidate()
+        {
+            // 编辑器里打开 / 导入到这个组件时顺手完成迁移，用户不必手动做任何事。
+            MigrateLegacyAnimatorConfig();
+        }
 #endif
+
+        private void Awake()
+        {
+            // 兜底：若某份资产在编辑器里从未被打开过（OnValidate 没跑到），运行时也能正确迁移。
+            // 放在 Awake 而非 Start——必须赶在 AnimatorBase.Start 读取这两项之前。
+            MigrateLegacyAnimatorConfig();
+        }
 
         private void Start()
         {
             // 初始化 皮肤
             InitSkin();
 
-            // 设置 初始状态
-            if (animator)
-                animator.SwitchAnimStateArray(stateInitList);
+            // 初始状态由 AnimatorBase 自己在 Start 里应用，本组件不再插手
+            // ——两处各应用一次会形成顺序未定义的竞争。
 
             _isInitComplete = true;
             // 调用 初始化完成 回调
@@ -169,10 +224,7 @@ namespace Ale.AnimSimulatorSystem
 
         #region 皮肤管理
         [Header("皮肤设置")]
-        // 皮肤名对两个后端使用相同的命名规则，故不再按宏区分；
-        // 下拉选择由包内 Editor 程序集的皮肤名 Drawer 按角色实际后端提供。
-        [Tooltip("基础皮肤列表：始终显示的 基础皮肤名称列表。")]
-        [AnimSkinName] [SerializeField] private string[] baseSkins;
+        // 基础皮肤列表已移到 AnimatorBase（动画组件的 Inspector 上），本组件只管皮肤组。
         [Tooltip("皮肤组 列表：用于定义角色 可切换的皮肤组。")]
         [SerializeField] private AnimActorSkinGroup[] animActorSkinGroups;
         
@@ -223,15 +275,10 @@ namespace Ale.AnimSimulatorSystem
                 }
             }
             
-            // 设置 基础皮肤
+            // 基础皮肤由 AnimatorBase 自己在 Start 的 InitSkin 里应用，本组件不再推送
+            // ——两处各设一次会互相覆盖，且顺序未定义。这里只需把上面添加的皮肤组默认皮肤刷出来。
             if (animator)
             {
-                // 设置基础皮肤
-                if (baseSkins != null && baseSkins.Length > 0)
-                {
-                    animator.SetBaseSkin(baseSkins, false);
-                }
-
                 // 刷新 皮肤
                 animator.RefreshSkin();
                 // 所有皮肤添加完成后，可重新打包皮肤（Spine 专有优化）：
