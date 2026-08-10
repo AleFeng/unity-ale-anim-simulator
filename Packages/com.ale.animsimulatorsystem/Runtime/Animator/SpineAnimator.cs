@@ -363,19 +363,19 @@ namespace Ale.AnimSimulatorSystem
         private void StopSpineAnimLoopCoroutineAll(SkeletonAnimation spineAnimator)
         {
             if (!spineAnimator) return;
+#if DOTWEEN
+            // 记录表本身声明在 #if DOTWEEN 内，故整段访问都必须同样受宏保护——
+            // 否则「开 ASS_SPINE 但没有 DOTween」的组合根本无法编译。
             if (_mDicSpineAnimTrackToLoopCoroutine.Count == 0) return;
-            
+
             // 停止所有
             if (_mDicSpineAnimTrackToLoopCoroutine.TryGetValue(spineAnimator, out var dicTrackToItem))
             {
                 foreach (var kv in dicTrackToItem)
-                {
-#if DOTWEEN
                     kv.Value?.Kill();
-#endif
-                }
                 dicTrackToItem.Clear();
             }
+#endif
         }
         
         /// <summary>
@@ -405,18 +405,19 @@ namespace Ale.AnimSimulatorSystem
         private void StopSpineAnimLoopCoroutine(SkeletonAnimation spineAnimator, int trackIndex)
         {
             if (!spineAnimator) return;
+#if DOTWEEN
+            // 同 StopSpineAnimLoopCoroutineAll：记录表声明在 #if DOTWEEN 内，访问也必须一并受保护。
             if (_mDicSpineAnimTrackToLoopCoroutine.TryGetValue(spineAnimator, out var dicTrackToItem))
             {
                 if (dicTrackToItem.TryGetValue(trackIndex, out var item))
                 {
-#if DOTWEEN
                     // 停止 DOTween
                     item?.Kill();
-#endif
                     // 移除记录
                     dicTrackToItem.Remove(trackIndex);
                 }
             }
+#endif
         }
         
 #if DOTWEEN

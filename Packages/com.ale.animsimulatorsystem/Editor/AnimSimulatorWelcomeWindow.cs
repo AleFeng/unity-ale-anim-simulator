@@ -1,0 +1,413 @@
+using System;
+using Ale.Toolkit.Editor;
+using UnityEditor;
+using UnityEngine;
+using static Ale.Toolkit.Editor.ToolkitEditorL10n;
+
+namespace Ale.AnimSimulatorSystem.Editor
+{
+    /// <summary>
+    /// 动画模拟器系统 欢迎窗口。承载本插件的<b>快捷入口</b>与<b>动画后端宏开关</b>
+    /// （<c>ASS_SPINE</c> / <c>ASS_LIVE2D</c>）。
+    /// 每次 Unity 会话启动时自动弹出一次（可通过页脚「启动时自动显示」关闭）。
+    /// 通过菜单 <c>Tools &gt; Ale Toolkit &gt; Anim Simulator System &gt; Welcome</c> 手动打开。
+    ///
+    /// <para>界面语言与 <c>ATK_*</c> 可选依赖宏是<b>项目级全局设定</b>，已统一下沉到 toolkit，
+    /// 由本窗口顶部的按钮跳转过去配置。</para>
+    /// </summary>
+    public class AnimSimulatorWelcomeWindow : EditorWindow
+    {
+        private const string Version = "2.0.0";
+
+        // 打开时的初始高宽；窗口可手动调整（见 OpenWindow），缩放下限为 MinWindowSize。
+        private static readonly Vector2 WindowSize    = new Vector2(540f, 660f);
+        private static readonly Vector2 MinWindowSize = new Vector2(500f, 480f);
+
+        // 内部 UI 状态
+        private bool _spineEnabled,  _spineInstalled;
+        private bool _live2dEnabled, _live2dInstalled;
+        private bool _autoShow;
+        private bool _initialized;
+        private bool _pendingRecompile;
+        private Vector2 _scroll;
+
+        // Logo 纹理缓存（从磁盘加载，FilterMode.Point 保持像素锐利）
+        private Texture2D _logoTexture;
+        private bool _logoLoadAttempted;
+
+        #region 打开窗口
+
+        [MenuItem("Tools/Ale Toolkit/Anim Simulator System/Welcome", priority = 1010)]
+        public static void Open()
+        {
+            OpenWindow();
+        }
+
+        private static void OpenWindow()
+        {
+            var window = GetWindow<AnimSimulatorWelcomeWindow>(true, Tr("Anim Simulator 动画模拟器系统"), true);
+            // 只设下限、不锁 max（min==max 会禁止缩放），使高宽可手动调整。
+            window.minSize = MinWindowSize;
+            window.CenterOnMainWin();
+            window.Show();
+            window.Focus();
+        }
+
+        private void CenterOnMainWin()
+        {
+            var main = EditorGUIUtility.GetMainWindowPosition();
+            float x = main.x + (main.width  - WindowSize.x) * 0.5f;
+            float y = main.y + (main.height - WindowSize.y) * 0.5f;
+            position = new Rect(x, y, WindowSize.x, WindowSize.y);
+        }
+
+        #endregion
+
+        #region 生命周期
+
+        private void OnEnable()
+        {
+            _initialized = false;
+            _logoTexture = null;
+            _logoLoadAttempted = false;
+        }
+
+        private void OnDisable()
+        {
+            if (_logoTexture)
+            {
+                DestroyImmediate(_logoTexture);
+                _logoTexture = null;
+            }
+        }
+
+        private void LoadState()
+        {
+            if (_initialized) return;
+            _initialized = true;
+
+            _spineEnabled    = AnimSimulatorDefines.IsSpineEnabled();
+            _spineInstalled  = AnimSimulatorDefines.IsSpinePackageInstalled();
+            _live2dEnabled   = AnimSimulatorDefines.IsLive2dEnabled();
+            _live2dInstalled = AnimSimulatorDefines.IsLive2dPackageInstalled();
+            _autoShow        = EditorPrefs.GetBool(AnimSimulatorEditorPrefs.WelcomeAutoShow, true);
+        }
+
+        #endregion
+
+        #region UI界面
+
+        private void OnGUI()
+        {
+            LoadState();
+            titleContent.text = Tr("Anim Simulator 动画模拟器系统");
+
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+
+            DrawHeader();
+            EditorGUILayout.Space(8);
+
+            DrawGlobalSettingsLink();
+            DrawSeparator();
+
+            DrawQuickActions();
+            DrawSeparator();
+
+            DrawMacroSection();
+
+            EditorGUILayout.EndScrollView();
+
+            DrawSeparator();
+            DrawFooter();
+        }
+
+        private void DrawHeader()
+        {
+            var headerStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 18,
+                alignment = TextAnchor.MiddleCenter
+            };
+            var subStyle = new GUIStyle(EditorStyles.label)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = new Color(0.6f, 0.6f, 0.6f) }
+            };
+
+            EditorGUILayout.BeginVertical(GUILayout.Height(56));
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.Space(20);
+            var logo = GetLogoTexture();
+            if (logo)
+            {
+                const int displaySize = 128;
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                Rect logoRect = GUILayoutUtility.GetRect(
+                    displaySize, displaySize,
+                    GUILayout.Width(displaySize), GUILayout.Height(displaySize));
+                GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit, true);
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.Space(6);
+            }
+
+            EditorGUILayout.LabelField($"Anim Simulator System  v{Version}", headerStyle);
+            EditorGUILayout.LabelField(Tr("基于 Spine / Live2D 的 2D 动画模拟器"), subStyle);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndVertical();
+        }
+
+        /// <summary>
+        /// 跳转到 Ale Toolkit 欢迎 / 全局设置窗口。界面语言、枚举翻译、<c>ATK_*</c> 可选依赖宏
+        /// （TMP / Localization / Addressables / Input System）均为<b>项目级全局设定</b>，在那里配置。
+        /// </summary>
+        private static void DrawGlobalSettingsLink()
+        {
+            if (GUILayout.Button(Tr("打开 Ale Toolkit 设置（语言 / 插件宏）"), GUILayout.Height(24)))
+                ToolkitWelcomeWindow.Open();
+        }
+
+        private static void DrawQuickActions()
+        {
+            EditorGUILayout.LabelField(Tr("快捷操作"), EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+
+            if (GUILayout.Button(Tr("创建配置资产"), GUILayout.Height(28)))
+                CreateConfigAsset();
+
+            if (GUILayout.Button(Tr("查看使用文档"), GUILayout.Height(28)))
+                OpenDoc("Packages/com.ale.animsimulatorsystem/Docs~/AnimSimulatorSystem/AnimSimulatorSystem.md");
+
+            if (GUILayout.Button(Tr("查看 README"), GUILayout.Height(28)))
+                OpenDoc("Packages/com.ale.animsimulatorsystem/README.md");
+
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField(
+                Tr("示例场景经 Package Manager > Anim Simulator System > Samples > Import 导入后，" +
+                   "位于 Assets/Samples/ 下。"),
+                EditorStyles.wordWrappedMiniLabel);
+        }
+
+        private void DrawMacroSection()
+        {
+            EditorGUILayout.LabelField(Tr("插件支持（编译宏）"), EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(
+                Tr("按项目实际使用的动画运行时启用。两者可同时启用——一个工程里 Spine 与 Live2D 角色并存，" +
+                   "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2dAnimator 决定。"),
+                EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.Space(2);
+
+            DrawMacroToggle("Spine", AnimSimulatorDefines.Spine, AnimSimulatorDefines.PackageSpine,
+                ref _spineEnabled, _spineInstalled,
+                Tr("启用后 SpineAnimator 参与编译，可播放 Spine 动画、按皮肤名组合换装。" +
+                   "需通过 Package Manager 安装 Spine Unity 运行时（git URL 分发，不在 UPM 注册表中）。"),
+                Tr("  ⚠ {0} 未安装（需通过 Package Manager 安装）"),
+                Tr("尚未检测到 Spine Unity 运行时。\n启用宏后，SpineAnimator 将无法编译。\n\n确定要继续启用吗？"));
+
+            EditorGUILayout.Space(2);
+
+            DrawMacroToggle("Live2D", AnimSimulatorDefines.Live2d, AnimSimulatorDefines.PackageLive2d,
+                ref _live2dEnabled, _live2dInstalled,
+                Tr("启用后 Live2dAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。"),
+                Tr("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）"),
+                Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2dAnimator 将无法编译。\n\n确定要继续启用吗？"),
+                DrawLive2dInstallHint);
+        }
+
+        /// <summary>
+        /// Live2D 宏方块下的安装说明。它<b>不是 UPM 包</b>——官方以 <c>.unitypackage</c> 分发
+        /// （含专有的 Cubism Core 原生库），既无法写进 <c>package.json</c> 的 <c>dependencies</c>，
+        /// 也无法由 Package Manager 安装，只能手动下载导入。
+        /// </summary>
+        private static void DrawLive2dInstallHint()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                Tr("Live2D Cubism SDK 不是 UPM 包：官方以 .unitypackage 分发（含专有 Cubism Core 原生库），" +
+                   "需从官网下载后拖入工程，导入到 Assets/Live2D/Cubism/。" +
+                   "Cubism 5 SDK 自带 Live2D.Cubism 程序集定义，导入后本插件即可自动引用。"),
+                EditorStyles.wordWrappedMiniLabel);
+            if (GUILayout.Button(Tr("打开 Live2D 官方下载页"), GUILayout.Height(22)))
+                Application.OpenURL(AnimSimulatorDefines.UrlLive2dDownload);
+            EditorGUILayout.EndVertical();
+        }
+
+        /// <summary>
+        /// 动画后端宏开关的绘制。Toggle 操作 PlayerSettings 宏（经 <see cref="DefineUtils.ApplyDefine"/>），
+        /// 运行时未安装时勾选会弹确认对话框。
+        ///
+        /// <para>与 toolkit 版的差异：<paramref name="missingLabel"/> 可定制——Live2D 不是 UPM 包，
+        /// 不能沿用「需通过 Package Manager 安装」的措辞。</para>
+        /// </summary>
+        /// <param name="titleName">显示名（如 "Spine"）。</param>
+        /// <param name="define">宏名称。</param>
+        /// <param name="runtimeName">依赖的动画运行时名称，填入状态行的 {0}。</param>
+        /// <param name="enabled">当前启用状态，随勾选就地更新。</param>
+        /// <param name="runtimeInstalled">运行时是否已安装。</param>
+        /// <param name="description">功能说明。</param>
+        /// <param name="missingLabel">未安装时的状态行模板（含 {0}）。</param>
+        /// <param name="warnDialog">未安装却勾选时的确认对话框正文。</param>
+        /// <param name="drawAdditionalFields">宏方块下的额外内容（如安装说明）。</param>
+        private void DrawMacroToggle(string titleName, string define, string runtimeName,
+            ref bool enabled, bool runtimeInstalled, string description,
+            string missingLabel, string warnDialog, Action drawAdditionalFields = null)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUI.BeginChangeCheck();
+            bool newEnabled = EditorGUILayout.ToggleLeft(
+                $"{titleName}  ({define})", enabled, EditorStyles.boldLabel);
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (newEnabled && !runtimeInstalled)
+                {
+                    if (!EditorUtility.DisplayDialog(Tr("警告"), warnDialog, Tr("确定"), Tr("取消")))
+                        newEnabled = false;
+                }
+                if (newEnabled != enabled)
+                {
+                    enabled = newEnabled;
+                    DefineUtils.ApplyDefine(enabled, define);
+                    _pendingRecompile = true;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (runtimeInstalled)
+            {
+                var s = new GUIStyle(EditorStyles.miniLabel)
+                    { normal = { textColor = new Color(0.3f, 0.8f, 0.3f) } };
+                EditorGUILayout.LabelField(Fmt("  ✓ {0} 已安装", runtimeName), s);
+            }
+            else
+            {
+                var s = new GUIStyle(EditorStyles.miniLabel)
+                    { normal = { textColor = new Color(0.9f, 0.7f, 0.2f) } };
+                EditorGUILayout.LabelField(string.Format(missingLabel, runtimeName), s);
+            }
+
+            EditorGUILayout.LabelField(description, EditorStyles.wordWrappedMiniLabel);
+
+            if (_pendingRecompile)
+            {
+                var s = new GUIStyle(EditorStyles.miniLabel)
+                    { normal = { textColor = new Color(0.9f, 0.7f, 0.2f) } };
+                EditorGUILayout.LabelField(Tr("  ⏳ 宏定义已更改，等待 Unity 重新编译…"), s);
+                if (!EditorApplication.isCompiling) _pendingRecompile = false;
+            }
+
+            // 宏方块下的额外内容（无论宏是否启用都绘制：未启用时正是最需要看安装说明的时候）
+            if (drawAdditionalFields != null)
+            {
+                EditorGUILayout.Space(4);
+                drawAdditionalFields.Invoke();
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawFooter()
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            EditorGUI.BeginChangeCheck();
+            bool newAutoShow = EditorGUILayout.ToggleLeft(Tr("启动时自动显示"), _autoShow, GUILayout.Width(140));
+            if (EditorGUI.EndChangeCheck())
+            {
+                _autoShow = newAutoShow;
+                EditorPrefs.SetBool(AnimSimulatorEditorPrefs.WelcomeAutoShow, _autoShow);
+            }
+
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(4);
+        }
+
+        private static void DrawSeparator()
+        {
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField(string.Empty, GUI.skin.horizontalSlider);
+            EditorGUILayout.Space(2);
+        }
+
+        /// <summary>
+        /// FilterMode.Point 确保放大时像素边缘保持锐利清晰。结果缓存，避免每帧重复 I/O。
+        /// Logo 文件不存在时静默跳过绘制（<c>Docs~</c> 不被 AssetDatabase 索引，走文件系统读取）。
+        /// </summary>
+        private Texture2D GetLogoTexture()
+        {
+            if (_logoTexture) return _logoTexture;
+            if (_logoLoadAttempted) return null;
+
+            _logoLoadAttempted = true;
+
+            string logoPath = System.IO.Path.GetFullPath(
+                "Packages/com.ale.animsimulatorsystem/Docs~/Images/AnimSimulatorSystem_Logo.png");
+
+            if (!System.IO.File.Exists(logoPath)) return null;
+
+            byte[] bytes = System.IO.File.ReadAllBytes(logoPath);
+            var tex = new Texture2D(64, 64, TextureFormat.RGBA32, false, false)
+            {
+                filterMode = FilterMode.Point,   // 像素锐利，无插值模糊
+                wrapMode   = TextureWrapMode.Clamp
+            };
+            if (tex.LoadImage(bytes))
+            {
+                _logoTexture = tex;
+            }
+            else
+            {
+                DestroyImmediate(tex);
+            }
+
+            return _logoTexture;
+        }
+
+        #endregion
+
+        #region 快捷操作
+
+        /// <summary>创建一份 <see cref="AnimSimulatorConfig"/> 资产并选中它。</summary>
+        private static void CreateConfigAsset()
+        {
+            string path = EditorUtility.SaveFilePanelInProject(
+                Tr("创建 动画模拟器配置"),
+                "AnimSimulatorConfig", "asset",
+                Tr("选择 AnimSimulatorConfig 资产的保存位置"));
+            if (string.IsNullOrEmpty(path)) return;
+
+            var config = ScriptableObject.CreateInstance<AnimSimulatorConfig>();
+            AssetDatabase.CreateAsset(config, path);
+            AssetDatabase.SaveAssets();
+
+            Selection.activeObject = config;
+            EditorGUIUtility.PingObject(config);
+        }
+
+        /// <summary>
+        /// 用系统默认程序打开包内的 Markdown 文档。<c>.md</c> 与 <c>Docs~</c> 均不被 AssetDatabase 索引，
+        /// 故取绝对路径后交给系统打开。
+        /// </summary>
+        private static void OpenDoc(string packageRelativePath)
+        {
+            string absolutePath = System.IO.Path.GetFullPath(packageRelativePath);
+
+            if (System.IO.File.Exists(absolutePath))
+            {
+                Application.OpenURL("file:///" + absolutePath.Replace('\\', '/'));
+            }
+            else
+            {
+                EditorUtility.DisplayDialog(Tr("文档未找到"),
+                    Fmt("未能找到文档文件：\n{0}", packageRelativePath), Tr("确定"));
+            }
+        }
+
+        #endregion
+    }
+}
