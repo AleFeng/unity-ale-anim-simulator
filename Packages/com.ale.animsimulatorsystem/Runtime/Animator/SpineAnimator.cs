@@ -62,25 +62,6 @@ namespace Ale.AnimSimulatorSystem
 
         #region 轨道号压缩
 
-        // 主轨道值 → 紧凑序数。静态只读：类型初始化时按 EAnimTrack 的声明序数一次建好，此后只读不写。
-        private static readonly Dictionary<int, int> MainTrackToOrdinal = BuildMainTrackOrdinals();
-        // 枚举内主轨道的个数，同时也是「枚举之外的主轨道」的序数起点。
-        private static readonly int OrdinalCountInEnum = MainTrackToOrdinal.Count;
-        // 留给「枚举之外的主轨道号」的序数槽位数（见 ToSpineTrack）。
-        private const int OrdinalSlotsOutOfEnum = 8;
-
-        private static Dictionary<int, int> BuildMainTrackOrdinals()
-        {
-            var map = new Dictionary<int, int>();
-            // Enum.GetValues 按枚举常量的数值升序返回，故遍历下标即保序的秩
-            foreach (EAnimTrack value in (EAnimTrack[])Enum.GetValues(typeof(EAnimTrack)))
-            {
-                int main = (int)value;
-                if (!map.ContainsKey(main)) map.Add(main, map.Count);
-            }
-            return map;
-        }
-
         /// <summary>
         /// 把系统轨道号（主轨道值 * 10 + 子轨道）换算为紧凑的 Spine 轨道号（主轨道序数 * 10 + 子轨道）。
         ///
@@ -89,17 +70,9 @@ namespace Ale.AnimSimulatorSystem
         /// Resize 到 <c>trackIndex + 1</c>（spine-csharp 的 <c>ExpandToIndex</c>），并在 Update / Apply 等
         /// <b>六处</b>按 <c>tracks.Count</c> 全量遍历——播一条 Other 轨道的动画就要每帧空转近六万次。</para>
         ///
-        /// <para><b>为什么必须保序</b>：Spine 的轨道号同时是<b>混合优先级</b>，Apply 按轨道升序应用、高轨道覆盖
-        /// 低轨道，这正是 <c>EAnimTrack.Action</c>「可能覆盖其它轨道」所依赖的语义。所以不能按「首次使用顺序」
-        /// 发号，否则先播 Action 后播 Body 会让 Body 反过来盖住 Action。改用枚举的<b>声明序数</b>：
-        /// <c>Enum.GetValues</c> 按常量数值升序返回，秩天然保序；且 <c>Body</c>..<c>Parts</c>（值 1..18）的序数
-        /// 恰等于其值，因此除 <c>Action</c>(900→19) 与 <c>Other</c>(999→20) 外，<b>既有配置的换算都是恒等式</b>。</para>
-        ///
-        /// <para><b>枚举之外的主轨道号</b>（<see cref="AnimData"/> 的构造函数允许直接传任意轨道号）折叠到枚举序数
-        /// 之后的 <see cref="OrdinalSlotsOutOfEnum"/> 个固定槽位里。刻意<b>不</b>按首次使用顺序发号——那样同一份
-        /// 配置会因播放顺序不同而算出不同的轨道号，还需要一张持续增长的可变静态表（所有实例共享，关闭
-        /// Domain Reload 时更会跨播放会话累积）。保序性对枚举外的轨道本就没有约定，取模折叠不破坏任何已承诺的语义。
-        /// 轨道号上界因此恒定为 289。</para>
+        /// <para>序数由 <see cref="AnimTrackOrdinal"/> 给出，保序（Spine 的轨道号同时是混合优先级，
+        /// 见那里的说明），且上界恒定（枚举内 21 个 + 枚举外 8 个槽位 = 序数至多 28），
+        /// 故 Spine 轨道号上界恒定为 <c>28 * 10 + 9 = 289</c>。</para>
         ///
         /// <para>换算<b>只发生在本类与 Spine 之间</b>：基类、<c>AnimActionPlayer</c> 与序列化数据一律仍用系统轨道号。</para>
         /// </summary>
@@ -107,14 +80,8 @@ namespace Ale.AnimSimulatorSystem
         {
             if (trackIndex < 0) return trackIndex;
 
-            int mainTrack = trackIndex / 10;
             int subTrack = trackIndex % 10;
-
-            int ordinal;
-            if (!MainTrackToOrdinal.TryGetValue(mainTrack, out ordinal))
-                ordinal = OrdinalCountInEnum + mainTrack % OrdinalSlotsOutOfEnum;
-
-            return ordinal * 10 + subTrack;
+            return AnimTrackOrdinal.OrdinalOfTrack(trackIndex) * 10 + subTrack;
         }
 
         #endregion
@@ -144,6 +111,9 @@ namespace Ale.AnimSimulatorSystem
             // 设置动画
             var trackEntryPlay = skeletonAnimation.AnimationState.SetAnimation(trackIndex, anim, animData.isLoop);
             if (trackEntryPlay == null) return false;
+
+            // 设置 轨道混合权重
+            ApplyBlendWeight(trackEntryPlay, animData.BlendWeight);
 
             // 设置 混合时间
             float defaultMixDuration = skeletonAnimation.SkeletonDataAsset.defaultMix; // 默认混合时间
@@ -183,13 +153,34 @@ namespace Ale.AnimSimulatorSystem
                 var anim = skeletonData?.FindAnimation(resumeAnimData.ResolveAnimName());
                 if (anim != null)
                 {
-                    skeletonAnimation.AnimationState.SetAnimation(trackIndex, anim, true);
+                    var trackEntryResume = skeletonAnimation.AnimationState.SetAnimation(trackIndex, anim, true);
+                    // 恢复出来的是一条新的 TrackEntry，权重不会自己继承，须按被恢复那条的配置重设
+                    ApplyBlendWeight(trackEntryResume, resumeAnimData.BlendWeight);
                     return;
                 }
             }
 
             // 否则，停止该轨道动画（0.2 秒淡出到空动画）
             skeletonAnimation.AnimationState.SetEmptyAnimation(trackIndex, 0.2f);
+        }
+
+        /// <summary>
+        /// 把轨道混合权重落到 Spine 的 <c>TrackEntry.Alpha</c> 上。
+        ///
+        /// <para><c>Alpha</c> 默认 1、<c>MixBlend</c> 默认 <c>Replace</c>，语义正是本系统要的：
+        /// 等于 1 时用本条动画完全覆写骨架当前姿势，小于 1 时与当前姿势（通常即更低轨道应用后的结果）按比例混合。
+        /// 覆盖<b>方向</b>由轨道号给出——Spine 按轨道号升序 Apply，而 <see cref="AnimTrackOrdinal"/> 的序数保序。</para>
+        ///
+        /// <para><b>一处 Spine 语义需要知道</b>：<c>MixBlend.First</c>（「以本条为基准姿势、从初始姿势起混」）
+        /// 只作用于 Spine 的 <b>0 号轨道</b>，而本系统的序数从 1（<c>Body</c>）起、0 号轨道实际空着。
+        /// 因此权重取 1 时结果完全确定（覆写就是覆写）；取小于 1 时，<b>没有任何轨道打关键帧的骨骼</b>
+        /// 会与上一帧的姿势相混而非从初始姿势起混，多帧下会渐近而非定值。真需要严格基准姿势的场合，
+        /// 把基础循环动画配到 <c>EAnimTrack.None</c>（即 0 号轨道）即可。</para>
+        /// </summary>
+        private static void ApplyBlendWeight(TrackEntry trackEntry, float blendWeight)
+        {
+            if (trackEntry == null) return;
+            trackEntry.Alpha = Mathf.Clamp01(blendWeight);
         }
 
         /// <inheritdoc/>

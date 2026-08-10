@@ -42,10 +42,12 @@ namespace Ale.AnimSimulatorSystem
         [SerializeField] private FLive2dAnimClip[] live2dAnimClips;
 
         [Header("Live2D 轨道映射")]
-        [Tooltip("轨道 → Cubism 层。未显式映射的轨道按首次出现顺序自动分配，并钳制在 LayerCount 内。")]
+        [Tooltip("轨道 → Cubism 层。层号即覆盖优先级（层号大的后应用、盖住层号小的）。\n" +
+                 "未显式映射的轨道按 轨道序数 自动分层并钳制在 LayerCount 内——保序、且与播放顺序无关。")]
         [SerializeField] private FLive2dTrackLayer[] live2dTrackLayers;
-        [Tooltip("默认层索引：查不到映射且自动分配也用尽时的兜底层。")]
-        [SerializeField] private int live2dLayerIndexDefault;
+        // 这里原本还有一个「默认层索引」字段，用途是「自动分配把层用尽时的兜底层」。
+        // 自动分层改为按轨道序数钳取之后，任何轨道都必得到一个有效层号，不再存在「用尽」这回事，
+        // 该字段也就没有了任何作用，故删除——留着只会让人在 Inspector 上配了却不起作用。
 
         [Header("Live2D 皮肤")]
         [Tooltip("皮肤定义列表：皮肤名 → 要显示的部件 ID 集合。")]
@@ -70,9 +72,6 @@ namespace Ale.AnimSimulatorSystem
                                       $"CubismMotionController.LayerCount = {layerCount}（有效范围 0..{layerCount - 1}）。" +
                                       $"GameObject={gameObject.name}");
             }
-            if (live2dLayerIndexDefault < 0 || live2dLayerIndexDefault >= layerCount)
-                AnimSimLog.Warn(this, $"默认层索引 {live2dLayerIndexDefault} 越界（LayerCount = {layerCount}）。" +
-                                      $"GameObject={gameObject.name}");
         }
 #endif
 
@@ -166,9 +165,17 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <summary>
-        /// 把本系统的轨道号映射到 Cubism 的层索引。
-        /// 显式映射优先；缺失时分配<b>第一个尚未被占用的层</b>；无空闲层时退到
-        /// <see cref="live2dLayerIndexDefault"/>（越界则钳进有效范围）并告警一次。
+        /// 把本系统的轨道号映射到 Cubism 的层索引。显式映射优先；缺失时按<b>轨道序数</b>确定性分层。
+        ///
+        /// <para><b>为什么按序数而不是「第一个空闲层」</b>：Cubism 的层号就是覆盖优先级（层混合器按层号
+        /// 依次应用，层号大的后应用），这正是 <see cref="EAnimTrack"/>「枚举值大的轨道覆盖枚举值小的」
+        /// 在本后端的落点。而「第一个空闲层」是按<b>首次播放的先后</b>发号的——先播 <c>Action</c> 再播
+        /// <c>Body</c> 就会让 <c>Body</c> 拿到更大的层号、反过来盖住 <c>Action</c>，同一份配置还会因玩家
+        /// 操作顺序不同而每次算出不同的层号。改用 <see cref="AnimTrackOrdinal"/> 的序数并钳进层数范围：
+        /// 单调不降，故「高轨道的层号永远不低于低轨道」恒成立；且与播放顺序无关，可复现。</para>
+        ///
+        /// <para>层数不够时高序数的轨道会被钳到同一层、互相覆盖——这是 Cubism 层数有限的固有约束，
+        /// 首次发生时告警一次。要精确控制请在「轨道映射」里显式指定，或调大 <c>LayerCount</c>。</para>
         /// </summary>
         private int MapTrackToLayer(int trackIndex)
         {
@@ -177,26 +184,20 @@ namespace Ale.AnimSimulatorSystem
 
             int maxLayer = live2dMotionController ? Mathf.Max(0, live2dMotionController.LayerCount - 1) : 0;
 
-            // 找第一个空闲层
-            layer = -1;
-            for (int i = 0; i <= maxLayer; i++)
-                if (!_layersInUse.Contains(i)) { layer = i; break; }
+            // 按轨道序数分层：序数保序，钳取后仍单调不降
+            int ordinal = AnimTrackOrdinal.OrdinalOfTrack(trackIndex);
+            layer = Mathf.Clamp(ordinal, 0, maxLayer);
 
-            if (layer < 0)
+            // 被钳住（序数超出层数）意味着若干高轨道会挤在最后一层互相覆盖，告警一次
+            if (ordinal > maxLayer && !_layerOverflowWarned)
             {
-                // 无空闲层：退到配置的默认层（Inspector 上那个「默认层索引」的用途就在这里），
-                // 越界时钳进有效范围，并告警一次——同层的动作会互相覆盖，必须让人知道。
-                layer = Mathf.Clamp(live2dLayerIndexDefault, 0, maxLayer);
-                if (!_layerOverflowWarned)
-                {
-                    _layerOverflowWarned = true;
-                    AnimSimLog.Warn(this,
-                        $"轨道 {trackIndex} 没有显式的层映射，且已无空闲层可分配" +
-                        $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），" +
-                        $"退到默认层 {layer}（配置值 {live2dLayerIndexDefault}）。" +
-                        "同层的动作会互相覆盖——请在「轨道映射」里显式指定，或调大 CubismMotionController 的 Layer Count。" +
-                        $" GameObject={gameObject.name}");
-                }
+                _layerOverflowWarned = true;
+                AnimSimLog.Warn(this,
+                    $"轨道 {trackIndex}（序数 {ordinal}）没有显式的层映射，序数超出层数范围" +
+                    $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），" +
+                    $"被钳到最高层 {layer}。同层的动作会互相覆盖——" +
+                    "请在「轨道映射」里显式指定，或调大 CubismMotionController 的 Layer Count。" +
+                    $" GameObject={gameObject.name}");
             }
 
             _layersInUse.Add(layer);
@@ -277,12 +278,51 @@ namespace Ale.AnimSimulatorSystem
                 return false;
             }
 
+            // 设置 轨道混合权重（须在播放前设好，层权重是层混合器的输入）
+            ApplyBlendWeight(layerIndex, animData.BlendWeight);
+
             // PriorityForce：本系统自己管轨道与覆盖关系，不希望被 Cubism 的优先级二次拦截
             live2dMotionController.PlayAnimation(clip, layerIndex,
                 CubismMotionPriority.PriorityForce, animData.isLoop, speed);
             _trackPlayState[trackIndex] = stateNew;
             return true;
         }
+
+        /// <summary>
+        /// 把轨道混合权重落到 Cubism 的<b>层权重</b>上。
+        ///
+        /// <para><b>只对 0 号以上的层有效</b>：Cubism 的 <c>SetLayerWeight</c> 对 <c>layerIndex &lt;= 0</c>
+        /// 直接静默返回——0 层是 <c>AnimationLayerMixerPlayable</c> 的基准层，权重恒为 1，这是 Unity 层混合器
+        /// 的规则而非 Cubism 的选择。本系统的轨道序数从 1（<c>Body</c>）起，只有把动画配到
+        /// <c>EAnimTrack.None</c> 才会落到 0 层，故正常配置下不受影响；真落到 0 层时权重设置无声失效，
+        /// 这里显式告警一次而不是假装设置成功。</para>
+        ///
+        /// <para><b>采样通道不适用</b>：反向播放与进度擦洗由本类逐帧 <c>SampleAnimation</c> 直接把剪辑写到模型上，
+        /// 根本不经过层混合器，层权重对它没有任何作用。</para>
+        /// </summary>
+        private void ApplyBlendWeight(int layerIndex, float blendWeight)
+        {
+            if (!live2dMotionController) return;
+
+            if (layerIndex <= 0)
+            {
+                if (!_layerZeroWeightWarned && blendWeight < 1f)
+                {
+                    _layerZeroWeightWarned = true;
+                    AnimSimLog.Warn(this,
+                        $"轨道混合权重 {blendWeight:0.##} 落在 Cubism 的 0 号层上，无法生效——" +
+                        "0 层是层混合器的基准层，权重恒为 1。请把该动画配到 EAnimTrack.None 以外的轨道，" +
+                        "或在「轨道映射」里把它显式映射到 1 号及以上的层。" +
+                        $" GameObject={gameObject.name}");
+                }
+                return;
+            }
+
+            live2dMotionController.SetLayerWeight(layerIndex, Mathf.Clamp01(blendWeight));
+        }
+
+        // 0 号层无法设权重的告警只发一次，避免逐次播放刷屏
+        private bool _layerZeroWeightWarned;
 
         /// <inheritdoc/>
         protected override void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData)
@@ -303,6 +343,8 @@ namespace Ale.AnimSimulatorSystem
                 var clip = FindClip(resumeAnimData.ResolveAnimName());
                 if (clip && live2dMotionController)
                 {
+                    // 层权重是层上的持久设置，被恢复那条的权重未必与刚停掉那条相同，须重设
+                    ApplyBlendWeight(state.layerIndex, resumeAnimData.BlendWeight);
                     live2dMotionController.PlayAnimation(clip, state.layerIndex,
                         CubismMotionPriority.PriorityForce, true, Mathf.Max(0.001f, Mathf.Abs(resumeAnimData.speed)));
                     _trackPlayState[trackIndex] = new FTrackPlayState

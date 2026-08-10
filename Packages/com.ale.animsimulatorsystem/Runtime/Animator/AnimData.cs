@@ -77,13 +77,30 @@ namespace Ale.AnimSimulatorSystem
         private int _animTrack = -1;
 
         /// <summary>
+        /// 轨道混合权重（0~1）：本条动画压在<b>更低轨道</b>之上的强度。
+        /// 1 = 完全覆盖低轨道（默认）；小于 1 时与低轨道的姿势按此比例混合。
+        /// <para>覆盖<b>方向</b>仍由轨道号决定（枚举值大的轨道盖枚举值小的），本值只决定盖得有多实。</para>
+        /// </summary>
+        public float BlendWeight
+        {
+            get { return Mathf.Clamp01(_blendWeight); }
+        }
+        // 轨道混合权重。构造函数时，由外部传参进行设置。
+        //
+        // 【序列化契约】同上面的 _animTrack，刻意不加 [SerializeField]：权重是「玩家操作触发的动作要盖多实」
+        // 这一层的配置，入口在 AnimActionPlayer 上（animTrackBlendWeight），逐条状态动画不需要这个旋钮。
+        // 不序列化也就意味着既有预制体的 AnimData 数组布局一字不改。字段初始值 1 保证从预制体反序列化
+        // 出来的实例恒为「完全覆盖」，即与本字段引入之前的行为完全一致。
+        private float _blendWeight = 1f;
+
+        /// <summary>
         /// 解析实际要播放的动画名。未填写 <see cref="animName"/> 时返回 <c>null</c>。
         /// </summary>
         public string ResolveAnimName() => string.IsNullOrEmpty(animName) ? null : animName;
 
         /// <summary>
         /// 复制一份「按单次播放」的副本：除 <see cref="isLoop"/> 恒为 <c>false</c> 外，其余字段（含私有的
-        /// 轨道号哨兵）与本实例完全一致。
+        /// 轨道号哨兵与混合权重）与本实例完全一致。
         ///
         /// <para>供「循环 + 随机间隔」的递归调度使用——那种播法要求每一次都按单次播放，播完才等间隔。
         /// 调度器不能直接改本实例的 <see cref="isLoop"/>：本实例通常是动画组件上序列化数组的元素，
@@ -128,6 +145,7 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="speed">播放速度倍率。默认为 1.0。</param>
         /// <param name="startDelayTime">开始播放的延迟时间（秒）：动画将在指定的延迟后开始播放。</param>
         /// <param name="loopIntervalTimeRange">循环间隔时间（秒）：仅当动画为 循环播放 时有效。动画播放完成后，在设定的范围内 随机一次 间隔时间。</param>
+        /// <param name="blendWeight">轨道混合权重（0~1）：压在更低轨道之上的强度。默认 1.0 即完全覆盖。</param>
         public AnimData
         (
             string animName,
@@ -136,7 +154,8 @@ namespace Ale.AnimSimulatorSystem
             bool isReverse = false,
             float speed = 1f,
             float startDelayTime = 0f,
-            Vector2 loopIntervalTimeRange = default
+            Vector2 loopIntervalTimeRange = default,
+            float blendWeight = 1f
         )
         {
             this.animName = animName;
@@ -146,6 +165,7 @@ namespace Ale.AnimSimulatorSystem
             this.speed = speed;
             this.startDelayTime = startDelayTime;
             this.loopIntervalTimeRange = loopIntervalTimeRange;
+            this._blendWeight = blendWeight;
         }
     }
 }

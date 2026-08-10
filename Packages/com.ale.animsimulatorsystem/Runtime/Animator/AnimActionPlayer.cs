@@ -418,10 +418,21 @@ namespace Ale.AnimSimulatorSystem
         [SerializeField] private EAnimTrack animTrackDefault = EAnimTrack.Other;
         [Tooltip("动画子轨道 默认：用于同一类型动画的区分。不同子轨道的动画 可以同时播放。"), Range(0, 9)]
         [SerializeField] private int animTrackSubDefault;
+        [Tooltip("轨道混合权重：本播放器的动作 压在更低轨道之上 的强度。\n" +
+                 "1 = 完全覆盖低轨道（默认）；小于 1 时与低轨道的姿势按此比例混合，0 则完全看不出本动作。\n" +
+                 "覆盖的「方向」仍由轨道号决定——枚举值大的轨道盖枚举值小的，本值只决定盖得有多实。")]
+        [Range(0f, 1f)]
+        [SerializeField] private float animTrackBlendWeight = 1f;
+
         /// <summary>
         /// 动画轨道 默认：主轨道 * 10 + 子轨道，主轨道间隔10，子轨道0-9，保证不同 子轨道的动画 可以同时播放。
         /// </summary>
         public int AnimTrackDefault => (int)animTrackDefault * 10 + animTrackSubDefault;
+
+        /// <summary>
+        /// 轨道混合权重（0~1）：本播放器的动作压在更低轨道之上的强度。1 = 完全覆盖。
+        /// </summary>
+        public float AnimTrackBlendWeight => Mathf.Clamp01(animTrackBlendWeight);
 
         [Tooltip("最小间隔时间：连续播放 动画动作的 最小间隔时间。单位：秒。")]
         [SerializeField] private float playAnimActionIntervalTime = 0.5f;
@@ -1035,7 +1046,8 @@ namespace Ale.AnimSimulatorSystem
                 _animActionCurrent.isLoop,
                 _animActionCurrent.isReverse,
                 _animActionCurrent.clickModeAnimPlaySpeed,
-                _animActionCurrent.startDelayTime
+                _animActionCurrent.startDelayTime,
+                blendWeight: AnimTrackBlendWeight
             );
             // 记录动作完成的回调
             if (onActionComplete != null)
