@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d626f4b2fd5cb4349b2ca49c147441e9, type: 3}
   m_Name: AnimSimulatorConfig
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimSimulatorConfig
-  backgroundAddressableFolder: Assets/Plugins/Fs/Runtime/GameFramework/Gameplay/Systems/AnimSimulatorSystem/Demo/Assets/Backgrounds/
-  actorAddressableFolder: Assets/Plugins/Fs/Runtime/GameFramework/Gameplay/Systems/AnimSimulatorSystem/Demo/Assets/Actors/
+  backgroundAddressableFolder: Assets/Demo/Assets/Backgrounds/
+  actorAddressableFolder: Assets/Demo/Assets/Actors/
   uiAnimActionListPrefab: {fileID: 8422216555664299035, guid: ed73cd2655660574192ea056969208e8, type: 3}
   uiAnimActorSkinGroupListPrefab: {fileID: 1432011802789687979, guid: c644d2702e393c84da56034ad6333cf1, type: 3}
   uiProgressBarViewPrefab: {fileID: 3478702868834902606, guid: 8d0d613335ff6b5408ff152bec4a14e2, type: 3}

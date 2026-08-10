@@ -11,6 +11,10 @@ using Ale.Toolkit.Runtime.InputSupport;
 #if DOTWEEN
 using DG.Tweening;
 #endif
+#if UNITY_EDITOR && ATK_ADDRESSABLE
+// 仅供「测试用」字段直接挂载资产引用，非运行期依赖。
+using UnityEngine.AddressableAssets;
+#endif
 
 namespace Ale.AnimSimulatorSystem
 {
@@ -44,7 +48,7 @@ namespace Ale.AnimSimulatorSystem
 
 #if UNITY_EDITOR
             // 测试用 直接加载指定角色
-            if (string.IsNullOrEmpty(testActorName) == false)
+            if (HasTestActor)
             {
                 // 开始 动画模拟器
                 StartAnimSimulator();
@@ -999,15 +1003,41 @@ namespace Ale.AnimSimulatorSystem
         #region 背景 管理
 #if UNITY_EDITOR
         [Header("背景-测试用")]
-        [Tooltip("背景名称-测试用")]
+        [Tooltip("背景名称-测试用。按 AnimSimulatorConfig 的背景文件夹拼出地址。")]
         [SerializeField] private string testBackgroundName;
-        
+#if ATK_ADDRESSABLE
+        [Tooltip("背景资产引用-测试用。直接挂载背景预制体即可，无需依赖配置里的文件夹与命名约定。\n" +
+                 "与上方的名称二选一，本引用优先。")]
+        [SerializeField] private AssetReference testBackgroundReference;
+#endif
+
+        /// <summary>是否配置了测试用背景（名称或资产引用任一）。</summary>
+        private bool HasTestBackground
+        {
+            get
+            {
+#if ATK_ADDRESSABLE
+                if (testBackgroundReference != null && testBackgroundReference.RuntimeKeyIsValid()) return true;
+#endif
+                return !string.IsNullOrEmpty(testBackgroundName);
+            }
+        }
+
         /// <summary>
         /// 重新加载 测试用背景
         /// </summary>
         [ContextMenu("背景-测试用-重新加载")]
         private void ReloadTestBackground()
         {
+#if ATK_ADDRESSABLE
+            // 资产引用优先：RuntimeKey 即该资产的 GUID，Addressables 可直接作为地址使用，
+            // 因此不必再走「配置文件夹 + 名称」拼地址那条路。
+            if (testBackgroundReference != null && testBackgroundReference.RuntimeKeyIsValid())
+            {
+                LoadBackgroundByAddress(testBackgroundReference.RuntimeKey.ToString());
+                return;
+            }
+#endif
             LoadBackground(testBackgroundName);
         }
 #endif
@@ -1034,12 +1064,25 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
             
+            // 组合 背景资产 地址 并加载
+            LoadBackgroundByAddress(
+                $"{animSimulatorConfig.backgroundAddressableFolder}{backgroundName}.prefab");
+        }
+
+        /// <summary>
+        /// 按 Addressable 地址 加载 背景。
+        /// <para>地址可以是「文件夹 + 名称」拼出的路径，也可以是资产 GUID——Addressables 两者都认。</para>
+        /// </summary>
+        /// <param name="address">背景资产地址</param>
+        private void LoadBackgroundByAddress(string address)
+        {
+            if (string.IsNullOrEmpty(address)) return;
+
             // 卸载 旧的背景
             UnloadBackground();
-            
-            // 组合 背景资产 地址
-            _backgroundCurrentName = 
-                $"{animSimulatorConfig.backgroundAddressableFolder}{backgroundName}.prefab";
+
+            // 记录 当前地址（卸载时按同一地址释放）
+            _backgroundCurrentName = address;
             // 使用 资产门面 加载并实例化 背景资产。直接挂到本管理器下，实例化时即完成父子关系，
             // 免得先建到场景根部再重挂一次（其组件的 Awake 也就能在已挂好父节点的状态下执行）。
             ToolkitAssets.InstantiateByAddress<GameObject>(
@@ -1094,15 +1137,40 @@ namespace Ale.AnimSimulatorSystem
         #region 角色 管理
 #if UNITY_EDITOR
         [Header("角色-测试用")]
-        [Tooltip("角色名称-测试用")]
+        [Tooltip("角色名称-测试用。按 AnimSimulatorConfig 的角色文件夹拼出地址。")]
         [SerializeField] private string testActorName;
-        
+#if ATK_ADDRESSABLE
+        [Tooltip("角色资产引用-测试用。直接挂载角色预制体即可，无需依赖配置里的文件夹与命名约定。\n" +
+                 "与上方的名称二选一，本引用优先。")]
+        [SerializeField] private AssetReference testActorReference;
+#endif
+
+        /// <summary>是否配置了测试用角色（名称或资产引用任一）。</summary>
+        private bool HasTestActor
+        {
+            get
+            {
+#if ATK_ADDRESSABLE
+                if (testActorReference != null && testActorReference.RuntimeKeyIsValid()) return true;
+#endif
+                return !string.IsNullOrEmpty(testActorName);
+            }
+        }
+
         /// <summary>
         /// 重新加载 测试用角色
         /// </summary>
         [ContextMenu("角色-测试用-重新加载")]
         private void ReloadTestActor()
         {
+#if ATK_ADDRESSABLE
+            // 资产引用优先：RuntimeKey 即该资产的 GUID，Addressables 可直接作为地址使用。
+            if (testActorReference != null && testActorReference.RuntimeKeyIsValid())
+            {
+                LoadActorByAddress(testActorReference.RuntimeKey.ToString());
+                return;
+            }
+#endif
             LoadActor(testActorName);
         }
 #endif
@@ -1138,12 +1206,25 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
             
+            // 组合 角色资产 地址 并加载
+            LoadActorByAddress(
+                $"{animSimulatorConfig.actorAddressableFolder}{actorName}.prefab");
+        }
+
+        /// <summary>
+        /// 按 Addressable 地址 加载 角色。
+        /// <para>地址可以是「文件夹 + 名称」拼出的路径，也可以是资产 GUID——Addressables 两者都认。</para>
+        /// </summary>
+        /// <param name="address">角色资产地址</param>
+        private void LoadActorByAddress(string address)
+        {
+            if (string.IsNullOrEmpty(address)) return;
+
             // 卸载 旧的角色
             UnloadActor();
-            
-            // 组合 角色资产 地址
-            _actorCurrentName = 
-                $"{animSimulatorConfig.actorAddressableFolder}{actorName}.prefab";
+
+            // 记录 当前地址（卸载时按同一地址释放）
+            _actorCurrentName = address;
             // 加载 新的角色 并实例化。同背景，直接挂到本管理器下。
             ToolkitAssets.InstantiateByAddress<GameObject>(
                 _actorCurrentName, OnLoadActorComplete, transform);

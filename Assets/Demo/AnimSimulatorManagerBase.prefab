@@ -57,7 +57,19 @@ MonoBehaviour:
   uiAnimActorSkinGroupListRoot: {fileID: 5888361689972995859}
   uiProgressBarViewRoot: {fileID: 2757575386485926401}
   testBackgroundName: 
-  testActorName: Actor_Test_1/Actor_Test_1
+  testBackgroundReference:
+    m_AssetGUID: 64dcd327121616343baf50546c98a389
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
+  testActorName: 
+  testActorReference:
+    m_AssetGUID: 23efdaf6ebbdf134abd76dec0e1e6194
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 0
 --- !u!1 &4180089140783626177
 GameObject:
   m_ObjectHideFlags: 0
