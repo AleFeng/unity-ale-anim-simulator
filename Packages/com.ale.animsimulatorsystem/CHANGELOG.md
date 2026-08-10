@@ -4,6 +4,50 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.2] - 2026-08-10
+
+**一轮全包体检。** 扫描下来，这个包的问题集中在「同一件事写了两遍」——Spine / Live2D 两个后端、角色 / 背景两条资产链、等级条 / 动作条两种进度条、本地化的开 / 关两个分支，四组孪生结构各自复制了一份逻辑，并派生出若干只在其中一份里修过的缺陷。本版把这些结构收敛掉，并修掉沿途查出的运行期缺陷。
+
+**本版不含新功能，也没有可见的行为变化**（下述缺陷修复本身除外）。
+
+### 修复
+
+- **「循环 + 随机间隔」在第二次进入同一状态后退化为只播一次。** 调度器把 `animData.isLoop` 就地改成了 `false`，而 `animData` 是动画组件上序列化数组的元素——改完永久生效，下次 `AddAnimState` 时 `PlayAnimDatas` 里的 `hasLoopInterval` 便判不出来了。现改用 `AnimData.CloneAsOnce()` 取一份一次性副本，原件一字不动。
+- **按压过程中切换到另一个动作必然抛空引用。** `StopAnimActionImmediate` 会清空 `_animActionCurrent` / `_animDataCurrent`，但原先只停了「延迟停止」一条协程；按压、松开、进度阻尼、循环完成这四类每帧都在解引用它们，而 `PlayAnimAction` 正是先调该方法再起新动作。现在最先停掉全部在途协程与补间。顺带：按压被打断后 `_isPressModeAnimPlaying` 未复位，会让下次进入按压模式误判为「已在按压中」而恢复上一次的旧进度。
+- **`AnimActor` 与 `AnimatorBase` 各存一份「初始状态 / 基础皮肤」，两个 `Start` 各应用一次、执行顺序未定义。** 两处填得不一样时角色最终显示哪一套是不确定的。现统一由 `AnimatorBase` 持有，详见下方「破坏性变更」。
+- **Gizmo 两处 `SceneView.lastActiveSceneView` 无判空解引用**（一处是「先抛异常再判空」，另一处完全没判）。Game 视图最大化时该属性为 `null`，画 Gizmo 即抛。
+- **`AnimSimulatorManager` 遍历「正在播放」列表时被回调改写集合。** 分发进去的输入回调可能同步走完动作，其完成回调会把该播放器从表里移除，`foreach` 撞 `InvalidOperationException`。拖拽移动与左键抬起两处均改为遍历快照。
+- **皮肤格 `SelectSkin` 传入的是旧选中值**，使显示更新分支成为空操作——一直靠 `AnimActor.OnSkinAddOrRemove` 走另一条路兜住，角色引用为空时标记则永不更新。
+- **进度条实例化缺两处防护**：配置数组直接取 `.Length`（新建的 `AnimSimulatorConfig` 里这些数组默认为 `null`），以及 `InstantiateProgressBar<T>` 的 `as T` 可能为 `null` 而调用方立刻解引用。后者随泛型参数一并去掉，隐患从根上消失；预制体类型配错时现在有明确告警而非静默空引用。
+- **`ClearAllAnim` 未结清在途的淡入淡出**（其余集合都清了），也未清掉循环间隔调度表外层残留的空字典。
+- **Live2D 的「默认层索引」形同虚设**：`OnValidate` 里校验它，`MapTrackToLayer` 却回退到 `maxLayer`，Inspector 上那个字段承诺的行为从未实现。
+- **动作列表三处对当前播放器的裸解引用**：`FadeAnimActionList` / `OpenCloseAnimActionList` 是 `public` 的，外部在没有播放器时调用即空引用。
+- **右键状态在「按住不放又收到一次按下事件」时会被误清成未按下。**
+- 清理两处失效逻辑：`UILevelProgressBar.SetInfo` 里不可达的重复判空（日志文案还与入口那条一字不差）、`UIProgressBarView.Init` 里 `TryAdd` 成功分支中多余的重复赋值。
+
+### 变更
+
+均为内部结构调整，序列化布局与运行行为不变：
+
+- **后端契约的 13 个成员由 `abstract` 改为带默认空实现的 `virtual`**，两个后端各 16 行逐字节相同的 `#else` 空桩归零。宏关闭时子类只剩空类体，直接继承默认实现；改契约的编辑点由 4 处降到 1 处。
+- **`SpineAnimator` 的轨道压缩表改为静态只读**（原先是可变静态状态，所有实例共享，关闭 Domain Reload 时更会跨播放会话累积）。枚举之外的主轨道号改用确定性折叠，轨道号上界恒为 289。既有配置的换算结果不变。
+- **角色与背景的六对孪生加载方法与六个孪生字段抽成 `AnimAssetSlot`**；两段进度条实例化循环靠 `ProgressBarConfig` 新增的 `ResolvePrefab` / `ApplyTo` 两个虚方法收成一个。管理器由 1285 行降至约 1150 行。
+- **补间机制归一到 `ToolkitTween`**：进度条滑块与动作进度阻尼两处手写协程改用它，四处无效的 `try/catch StopCoroutine` 收成一个 `KillCor`。缓动曲线与 `timeScale` 取用方式保持原样（OutCubic 手写在回调内、`unscaled` 传 `false`），观感不变。
+- **新增 `AnimSimLog` 作为包内统一日志出口**，格式固定为 `[类名] 方法名: 内容`。方法名由 `CallerMemberName` 自动取（消除「方法改名后日志里仍是旧名」这类错误，包内原有 3 处）、类名取自运行期类型、`context` 一律传 `this`（点日志即可选中出问题的对象，原先只有约三分之一传了）。运行时 49 处调用全部迁移，顺带修正 5 处张冠李戴的前缀。
+- **两个滚动列表适配器的绑定 / 清空收进 `IUiAnimListCell` 接口与统一助手**（二者继承的是 toolkit 的两个不同基类，C# 单继承下塞不进共同的中间基类）；动作列表的淡入淡出两分支合一并抽出互斥触发器；皮肤组页签的选中态由复制的 `if/else` 压成无分支。
+- **三处「查找 AnimatorBase」归一到 `AnimatorBase.FindFor`**，按「自身逐级上溯、每级搜索整棵子树」执行——这是原来三种互不相同的搜索顺序的并集，其中「兄弟分支」一段是必需的（动作播放器与动画组件通常互为兄弟）。
+- 欢迎窗口的 `GUIStyle` 移出 `OnGUI`（原先每次重绘都新建）；运行时 asmdef 的 7 个 GUID 引用改为名称引用，与编辑器 asmdef 一致——缺包时 Inspector 能显示缺的是谁，SDK 重导致 GUID 变化时也能自动接上。
+
+### 破坏性变更
+
+本版号是 patch，以下改动都不影响运行行为，但严格说属于 API / 序列化布局变更，特此列出。
+
+- **`AnimActor` 的 `stateInitList` 与 `baseSkins` 移交给动画组件**（`SpineAnimator` / `Live2dAnimator` 的 Inspector）。两个字段降级为隐藏的迁移入口（`[FormerlySerializedAs]` 接住旧数据），`OnValidate` 与 `Awake` 会自动把非空的值搬过去并给出说明去向的日志，**打开一次预制体 / 场景并保存即可固化**。计划在 2.2.0 删除这两个 legacy 字段。
+- **删除 3 个方法体为空的公开方法**：`AnimActionPlayer.OnDragMoveSS` / `OnRightClickDown` / `OnRightClickUp`。它们由管理器每次指针移动 / 右键照常调用，而 `AnimActionPlayer` 是 `sealed` 的，空实现不可能作为扩展点。管理器侧的调用同步移除；右键的按下状态改由新增的 `AnimSimulatorManager.IsRightClickDown` 只读属性对外提供。
+- **删除 2 个从不被读取的序列化字段**：`AnimActionPlayer` 的「动画动作 选择类型」（实际生效的是 `ActionPlayConfig.animActionSelectType`，留着只会让人在 Inspector 上配了却不起作用）与 `UIAnimActionListBox.btnPlayAction`。
+- 删除 `UIAnimActionListBoxContent` / `UIAnimActorSkinBoxContent` 的无参构造（零调用），并去掉 `SetAnimProgressMode` 那个从不使用的入参。
+- 新增 `AnimatorBase.StateInitList` 属性与 `AnimatorBase.FindFor` 静态方法（均为新增，不影响既有代码）。
+
 ## [2.1.1] - 2026-08-10
 
 **收尾 2.1.0 的动画名迁移，并消除 Spine 侧一处埋着的每帧空转。**
