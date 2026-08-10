@@ -1,10 +1,6 @@
 using System;
 using UnityEngine;
 
-#if ASS_SPINE
-using Spine.Unity;
-#endif
-
 namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
@@ -38,15 +34,8 @@ namespace Ale.AnimSimulatorSystem
     [Serializable]
     public class AnimData
     {
-        [Tooltip("动画名称：在动画软件中制作时的名称。Spine 与 Live2D 使用相同的命名规则。\n" +
-                 "留空时回退读取下方的 动画引用资源（仅 Spine，兼容旧配置用）。")]
+        [Tooltip("动画名称：在动画软件中制作时的名称。Spine 与 Live2D 使用相同的命名规则。")]
         public string animName;
-
-#if ASS_SPINE
-        [Tooltip("动画引用资源：Spine动画资产引用。\n" +
-                 "【兼容字段】仅在 动画名称 留空时作为回退使用，新配置请直接填写 动画名称。")]
-        public AnimationReferenceAsset animRefAsset;
-#endif
 
         [Tooltip("动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。")]
         [SerializeField] private EAnimTrack animTrack;
@@ -83,18 +72,9 @@ namespace Ale.AnimSimulatorSystem
         private int _animTrack = -1;
 
         /// <summary>
-        /// 解析实际要播放的动画名：<see cref="animName"/> 优先；留空时回退到旧版的 Spine 动画引用资源
-        /// （取其引用的动画名，取不到则退而取资产文件名）。两者都没有时返回 <c>null</c>。
+        /// 解析实际要播放的动画名。未填写 <see cref="animName"/> 时返回 <c>null</c>。
         /// </summary>
-        public string ResolveAnimName()
-        {
-            if (!string.IsNullOrEmpty(animName)) return animName;
-#if ASS_SPINE
-            if (animRefAsset)
-                return animRefAsset.Animation != null ? animRefAsset.Animation.Name : animRefAsset.name;
-#endif
-            return null;
-        }
+        public string ResolveAnimName() => string.IsNullOrEmpty(animName) ? null : animName;
 
         /// <summary>
         /// 构造函数：初始化动画数据
@@ -102,9 +82,6 @@ namespace Ale.AnimSimulatorSystem
         public AnimData()
         {
             animName = null;
-#if ASS_SPINE
-            animRefAsset = null;
-#endif
             animTrack = EAnimTrack.None;
             animTrackSub = 0;
             isLoop = false;
@@ -117,6 +94,10 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 构造函数：按 动画名称 初始化动画数据（两个后端通用）。
         /// </summary>
+        /// <remarks>
+        /// 这里的 <paramref name="animTrack"/> 是<b>完整的轨道号</b>（主轨道 * 10 + 子轨道），
+        /// 而非 <see cref="EAnimTrack"/> 的枚举值。
+        /// </remarks>
         /// <param name="animName">动画名称：在动画软件中制作时的名称。</param>
         /// <param name="animTrack">动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。</param>
         /// <param name="isLoop">是否循环播放</param>
@@ -143,39 +124,5 @@ namespace Ale.AnimSimulatorSystem
             this.startDelayTime = startDelayTime;
             this.loopIntervalTimeRange = loopIntervalTimeRange;
         }
-
-#if ASS_SPINE
-        /// <summary>
-        /// 构造函数：按 Spine 动画引用资源 初始化动画数据。
-        /// 【兼容重载】新代码请用接收 动画名称 的重载——它对两个后端都适用。
-        /// </summary>
-        /// <param name="animRefAsset">动画引用资源：Spine动画资产引用。</param>
-        /// <param name="animTrack">动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。</param>
-        /// <param name="isLoop">是否循环播放</param>
-        /// <param name="isReverse">是否反转播放。反转时，动画将从 结束位置开始，并反方向播放。</param>
-        /// <param name="speed">播放速度倍率。默认为 1.0。</param>
-        /// <param name="startDelayTime">开始播放的延迟时间（秒）：动画将在指定的延迟后开始播放。</param>
-        /// <param name="loopIntervalTimeRange">循环间隔时间（秒）：仅当动画为 循环播放 时有效。动画播放完成后，在设定的范围内 随机一次 间隔时间。</param>
-        public AnimData
-        (
-            AnimationReferenceAsset animRefAsset,
-            int animTrack = 0,
-            bool isLoop = false,
-            bool isReverse = false,
-            float speed = 1f,
-            float startDelayTime = 0f,
-            Vector2 loopIntervalTimeRange = default
-        )
-        {
-            // 设置动画数据
-            this.animRefAsset = animRefAsset;
-            this._animTrack = animTrack;
-            this.isLoop = isLoop;
-            this.isReverse = isReverse;
-            this.speed = speed;
-            this.startDelayTime = startDelayTime;
-            this.loopIntervalTimeRange = loopIntervalTimeRange;
-        }
-#endif
     }
 }

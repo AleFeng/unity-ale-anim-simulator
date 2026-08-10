@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActionPlayer
   actionPlayerName: 
   comment: 
-  spineAnimator: {fileID: 0}
+  animator: {fileID: 0}
   animTrackDefault: 999
   animTrackSubDefault: 0
   playAnimActionIntervalTime: 0.5
@@ -75,10 +75,14 @@ MonoBehaviour:
     actionDirectionX: 0
     actionDirectionY: 0
     actionDirectionZ: 0
-    animReferenceAsset: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+    animName: dance
+    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
+    startDelayTime: 0
+    randomTypeWeight: 100
+    randomTypePlayLimit: 0
     clickModeAnimPlaySpeed: 1
     rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
@@ -107,10 +111,14 @@ MonoBehaviour:
     actionDirectionX: 0
     actionDirectionY: 0
     actionDirectionZ: 0
-    animReferenceAsset: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+    animName: dance
+    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
+    startDelayTime: 0
+    randomTypeWeight: 100
+    randomTypePlayLimit: 0
     clickModeAnimPlaySpeed: 1
     rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
@@ -139,10 +147,14 @@ MonoBehaviour:
     actionDirectionX: 0
     actionDirectionY: 0
     actionDirectionZ: 0
-    animReferenceAsset: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+    animName: dance
+    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
+    startDelayTime: 0
+    randomTypeWeight: 100
+    randomTypePlayLimit: 0
     clickModeAnimPlaySpeed: 1
     rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
@@ -171,10 +183,14 @@ MonoBehaviour:
     actionDirectionX: 0
     actionDirectionY: 0
     actionDirectionZ: 0
-    animReferenceAsset: {fileID: 11400000, guid: bf35bc31b1a22fe43b2bfb00c3b99142, type: 2}
+    animName: dance
+    animReferenceAsset: {fileID: 0}
     dampingTime: 0.06
     isLoop: 0
     isReverse: 0
+    startDelayTime: 0
+    randomTypeWeight: 100
+    randomTypePlayLimit: 0
     clickModeAnimPlaySpeed: 1
     rotateModeAngleRangeMax: 360
     isAntiClockwise: 0

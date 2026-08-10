@@ -6,10 +6,6 @@ using UnityEditor;
 using UnityEngine.Localization;
 #endif
 
-#if ASS_SPINE
-using Spine.Unity;
-#endif
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1499,28 +1495,13 @@ namespace Ale.AnimSimulatorSystem
         public float actionDirectionZ;
         
         [Header("动画设置")]
-        [Tooltip("动画名称：在动画软件中制作时的名称。Spine 与 Live2D 使用相同的命名规则。\n" +
-                 "留空时回退读取下方的 动画资源（仅 Spine，兼容旧配置用）。")]
+        [Tooltip("动画名称：在动画软件中制作时的名称。Spine 与 Live2D 使用相同的命名规则。")]
         public string animName;
-#if ASS_SPINE
-        [Tooltip("动画资源: 播放的Spine动画资源。\n" +
-                 "【兼容字段】仅在 动画名称 留空时作为回退使用，新配置请直接填写 动画名称。")]
-        public AnimationReferenceAsset animReferenceAsset;
-#endif
 
         /// <summary>
-        /// 解析实际要播放的动画名：<see cref="animName"/> 优先；留空时回退到旧版的 Spine 动画引用资源
-        /// （取其引用的动画名，取不到则退而取资产文件名）。两者都没有时返回 <c>null</c>。
+        /// 解析实际要播放的动画名。未填写 <see cref="animName"/> 时返回 <c>null</c>。
         /// </summary>
-        public string ResolveAnimName()
-        {
-            if (!string.IsNullOrEmpty(animName)) return animName;
-#if ASS_SPINE
-            if (animReferenceAsset)
-                return animReferenceAsset.Animation != null ? animReferenceAsset.Animation.Name : animReferenceAsset.name;
-#endif
-            return null;
-        }
+        public string ResolveAnimName() => string.IsNullOrEmpty(animName) ? null : animName;
 
         [Tooltip("动画阻尼时间：用于平滑过渡动画变化的时间（秒）")]
         public float dampingTime = 0.06f;

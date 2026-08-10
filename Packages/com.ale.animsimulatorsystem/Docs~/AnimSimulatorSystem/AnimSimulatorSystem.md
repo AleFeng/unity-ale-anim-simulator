@@ -236,8 +236,7 @@ Spine 的 Unity 运行时以 **git URL** 分发（不在 UPM 注册表中），�
 - **Spine Skeleton Animation**（可选）：该状态专用的渲染器。留空则用上面配置的默认渲染器；**填了则该状态的动画会播到这个渲染器上**，用于一个角色由多个 Spine 模型拼成的场合（该渲染器会随状态的启用 / 停用自动淡入淡出）。
 - **Spine Anim Datas**：这个状态要播放的动画列表，每条包含：
   - **Anim Name**：动画名，即在 Spine 中制作动画时起的名字。**Spine 侧按名直接在骨架数据中查找，不需要额外的查找表**（这是与 Live2D 的一处差异）。
-  - **Anim Ref Asset**：动画引用文件（**兼容字段，仅 Spine**）。旧版本用它指定动画，现已被 Anim Name 取代，仅在 Anim Name 留空时作为回退读取。计划在 2.2.0 移除，新配置请直接填 Anim Name。
-  - **Anim Track / Anim Track Sub**：动画轨道与子轨道。**Spine 的 `AnimationState` 轨道数不受限制**，本系统的轨道号（`主轨道 × 10 + 子轨道`）可直接当作 Spine 的轨道索引使用，无需任何映射（Live2D 侧则必须映射到有限的层）。
+  - **Anim Track / Anim Track Sub**：动画轨道与子轨道。**Spine 的 `AnimationState` 轨道数不受限制**，本系统的轨道号（`主轨道 × 10 + 子轨道`）无需像 Live2D 那样映射到有限的层；SpineAnimator 内部只做一次<b>保序压缩</b>（把 `Action` / `Other` 这两个大枚举值收敛到紧凑序号），配置与行为都不受影响。
   - **Is Loop / Is Reverse / Speed**：是否循环、是否反向、播放速度倍率。
   - **Start Delay Time**：起播延迟（秒）。
   - **Loop Interval Time Range**：循环间隔（秒）。仅循环动画有效，填非零范围后，每播完一次会在该范围内随机等待一段时间再播下一次——用于眨眼、耳朵抖动这类「偶尔来一下」的动画。
@@ -590,7 +589,6 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - Action Direction Z：动作的交互方向 Z轴。对交互方向的Z轴进行旋转，调整交互的方向。
   - Anim Name：动画名称。这个动作要播放的动画，用**动画制作时起的名字**来指定，例如“dress-up”。Spine 与 Live2D **使用相同的命名规则**——同一份动作配置对两个后端都成立。
     - Spine 侧按名在骨架数据中查找；Live2D 侧按名在 Live2dAnimator 的「动作查找表」中查找（Cubism 没有按名找动作的 API，需先在那张表里把动画名与动作剪辑对应起来）。
-    - Anim Reference Asset：动画引用文件（**兼容字段，仅 Spine**）。旧版本用它指定动画，现已被 Anim Name 取代，仅在 Anim Name 留空时作为回退读取。计划在 2.2.0 移除，新配置请直接填 Anim Name。
   - Damping Time：阻尼时间。用于平滑过渡动画的进度变化，单位是秒。一般设置成0.05秒左右，能够让动画进度的变化更自然一些。增大这个值，可以让动画的反应更迟钝，更有重量感。
   - Is Loop：是否循环。这个动画动作 是否需要循环播放。例如，从Idle动画切换到Walk动画，两个动画均为循环动画，那么这个动画动作就需要设置成 循环。
   - Is Reverse：是否反向。这个动画动作 是否需要反向播放。
