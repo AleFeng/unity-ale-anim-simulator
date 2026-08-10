@@ -85,7 +85,7 @@ namespace Ale.AnimSimulatorSystem
         /// 依据当前 AnimActionPlayer 重建列表数据并推给列表组件。
         /// 当前播放器为空时即为清空。
         /// </summary>
-        private void RebuildListContents()
+        private void RebuildListContents(bool preserveScroll = false)
         {
             // 清空 现有数据
             _animActionContentList.Clear();
@@ -93,8 +93,8 @@ namespace Ale.AnimSimulatorSystem
             // 检查 角色动作播放器
             if (_animActionPlayerCurrent)
             {
-                // 获取 所有满足条件的动画动作。传入回调，条件在之后才满足的动作会增量补进来。
-                var allAnimActions = _animActionPlayerCurrent.GetAnimActionsMeetConditions(OnUnmetAnimActionIsMet);
+                // 获取 所有满足条件的动画动作
+                var allAnimActions = _animActionPlayerCurrent.GetAnimActionsMeetConditions();
                 if (allAnimActions != null)
                 {
                     // 填充 动画动作 数据列表
@@ -107,29 +107,34 @@ namespace Ale.AnimSimulatorSystem
                 }
             }
 
-            // 推给 列表组件。SetItems 会回到起点并重算焦点。
-            if (animActionList)
-                animActionList.SetItems(_animActionContentList);
+            if (!animActionList) return;
+
+            // preserveScroll=true 时用 UpdateItems：保留当前滚动位置，
+            // 不因为解锁了一个新动作就把玩家正在浏览的位置弹回起点。
+            // 否则用 SetItems——换了播放器就该回到起点并重算焦点。
+            if (preserveScroll) animActionList.UpdateItems(_animActionContentList);
+            else                animActionList.SetItems(_animActionContentList);
         }
 
+        private void OnEnable()  { AnimSimulatorManager.OnConditionInputsChanged += OnConditionInputsChanged; }
+        private void OnDisable() { AnimSimulatorManager.OnConditionInputsChanged -= OnConditionInputsChanged; }
+
         /// <summary>
-        /// 当 不满足的动画动作，条件被满足时 调用
+        /// 条件所依赖的输入（进度条读数 / 等级）发生变化：重新求值一遍，条数变了就刷新列表。
+        ///
+        /// <para>取代了旧的「条件不满足时登记回调、满足后把该条增量插进来」——那套以活着的 UI 组件的
+        /// <c>GetHashCode()</c> 为字典键，且每次检查都会把回调置空再只留最新一个订阅者。
+        /// 改为统一广播 + 重新求值后，多个列表 UI 同时在用也各自正确。</para>
         /// </summary>
-        /// <param name="animAction"></param>
-        private void OnUnmetAnimActionIsMet(AnimAction animAction)
+        private void OnConditionInputsChanged()
         {
-            if (animAction == null) return;
+            if (!_animActionPlayerCurrent) return;
 
-            // 将 新满足条件的 动画动作，添加到 列表数据中。
-            // 倒序显示时新条目应出现在列表头部，与重建时的整体倒序保持一致。
-            var content = new UIAnimActionListBoxContent(animAction);
-            if (reverseContentOrder) _animActionContentList.Insert(0, content);
-            else                     _animActionContentList.Add(content);
+            // 只有条数变化才动列表，避免每次进度条跳动都重建一遍
+            int countNow = _animActionPlayerCurrent.GetAnimActionsMeetConditions().Count;
+            if (countNow == _animActionContentList.Count) return;
 
-            // 刷新 列表显示。用 UpdateItems 而非 SetItems：保留当前滚动位置，
-            // 不因为解锁了一个新动作就把玩家正在浏览的位置弹回起点。
-            if (animActionList)
-                animActionList.UpdateItems(_animActionContentList);
+            RebuildListContents(preserveScroll: true);
         }
         #endregion
         

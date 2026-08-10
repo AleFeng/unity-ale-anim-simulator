@@ -5,6 +5,8 @@
         "Ale.Toolkit.Runtime",
         "Ale.Toolkit.Runtime.UI",
         "Ale.Toolkit.Input.Runtime",
+        "Ale.Condition.Core",
+        "Ale.Condition.Runtime",
         "Unity.Localization",
         "Unity.InputSystem",
         "Unity.TextMeshPro",

@@ -5,6 +5,7 @@ using UnityEditor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Ale.Condition;
 using Ale.Toolkit.Runtime;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -1215,18 +1216,22 @@ namespace Ale.AnimSimulatorSystem
         private AnimAction _animActionSelected;
         
         /// <summary>
-        /// 获取 满足条件的 动画动作 列表
+        /// 获取 满足条件的 动画动作 列表。
+        ///
+        /// <para>本方法是<b>纯查询</b>：只按当前状态求值，不登记任何回调。条件所依赖的输入发生变化时，
+        /// 由 <see cref="AnimSimulatorManager.OnConditionInputsChanged"/> 统一广播，调用方收到后再查一次即可。
+        /// 旧实现在这里顺带登记「条件满足后回调我」，两个列表 UI 同时使用时只有最后一个登记的收得到通知。</para>
         /// </summary>
-        /// <param name="onAllUnmetConditionsMet">不满足时添加监听，满足后触发的回调。</param>
-        /// <returns></returns>
-        public List<AnimAction> GetAnimActionsMeetConditions(Action<AnimAction> onAllUnmetConditionsMet = null)
+        public List<AnimAction> GetAnimActionsMeetConditions()
         {
             List<AnimAction> animActionList = new List<AnimAction>();
+            if (animActions == null) return animActionList;
+
             // 遍历所有 动画动作
             foreach (var animAction in animActions)
             {
                 // 检查 是否满足所有条件
-                if (animAction.CheckAllConditionsIsMet(onAllUnmetConditionsMet))
+                if (animAction != null && animAction.CheckConditionsIsMet())
                     animActionList.Add(animAction);
             }
 
@@ -1530,204 +1535,32 @@ namespace Ale.AnimSimulatorSystem
         
         #region 条件 设置
         [Header("条件 设置")]
-        [Tooltip("条件组：满足所有条件，动作才会在 动画动作列表 中出现。")]
-        [SerializeField] private AnimActionCondition[] conditions;
-        
-        /// <summary>
-        /// 未满足条件的 对象-条件 映射表。
-        /// 在条件要求值变化时，使用该映射表 查找对应的条件 进行重新检查。
-        /// </summary>
-        private Dictionary<int, AnimActionCondition> _mapHashcodeToUnmetCondition = 
-            new Dictionary<int, AnimActionCondition>();
-        
-        /// <summary>
-        /// 满足所有条件时的回调
-        /// </summary>
-        public event Action<AnimAction> OnAllUnmetConditionsMet;
-        
-        /// <summary>
-        /// 检查 所有条件 是否满足
-        /// </summary>
-        /// <param name="onAllUnmetConditionsMet">不满足时添加监听，满足后触发的回调。</param>
-        /// <returns></returns>
-        public bool CheckAllConditionsIsMet(Action<AnimAction> onAllUnmetConditionsMet = null)
-        {
-            // 清除 未满足条件的映射表
-            _mapHashcodeToUnmetCondition.Clear();
-            OnAllUnmetConditionsMet = null;
-            
-            // 遍历检查 所有条件
-            bool isAllMeet = true;
-            foreach (var condition in conditions)
-            {
-                if (CheckConditionIsMet(condition, true) == false)
-                    isAllMeet = false;
-            }
-            
-            // 若有未满足的条件，注册回调
-            if (isAllMeet == false)
-                OnAllUnmetConditionsMet = onAllUnmetConditionsMet;
-            
-            return isAllMeet;
-        }
+        [Tooltip("条件：全部满足时，本动作才会出现在 动画动作列表 中。留空即为无条件。")]
+        [SerializeField] private ConditionExpression conditions = new ConditionExpression();
 
         /// <summary>
-        /// 检查 条件 是否满足
+        /// 检查 条件 是否满足。
+        ///
+        /// <para>判定交给 toolkit 的条件系统（<see cref="ConditionEngine"/>），数据源由
+        /// <see cref="AnimSimulatorManager"/> 以 <see cref="IAnimSimConditionSource"/> 提供。
+        /// 空表达式视为「无条件」，直接通过。</para>
+        ///
+        /// <para><b>与 2.2.0 之前的差异</b>：旧实现只有「大于等于」一种比较、只能 AND、没有分组与取反；
+        /// 且在参数解析失败 / 取不到管理器 / 查不到进度条时一律<b>判为满足</b>，配错名字的条件会静默失效。
+        /// 现在这些情况一律判否。</para>
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="registerCallback">条件不满足时，是否监听 条件值变化。</param>
-        /// <returns></returns>
-        private bool CheckConditionIsMet(AnimActionCondition condition, bool registerCallback = false)
+        public bool CheckConditionsIsMet()
         {
-            // 检查条件类型
-            switch (condition.conditionType)
-            {
-                // 等级进度条
-                case EAnimActionConditionType.LevelProgress:
-                    return CheckConditionLevelProgressBar(condition, registerCallback);
-                // 道具持有
-                case EAnimActionConditionType.Item:
-                    //TODO:接入道具系统，检查是否持有指定道具
-                    break;
-            }
-            
-            // 默认返回满足条件
-            return true;
-        }
-        
-        /// <summary>
-        /// 检查 未满足的条件
-        /// </summary>
-        /// <param name="hashCode"></param>
-        /// <returns></returns>
-        private bool CheckUnmetConditionByHashcode(int hashCode)
-        {
-            // 查找 未满足条件的映射表
-            if (_mapHashcodeToUnmetCondition.TryGetValue(hashCode, out var condition))
-            {
-                // 重新检查 条件
-                if (CheckConditionIsMet(condition))
-                {
-                    // 条件已满足，移除映射表
-                    _mapHashcodeToUnmetCondition.Remove(hashCode);
-                    // 检查 是否所有条件均已满足
-                    if (_mapHashcodeToUnmetCondition.Count == 0)
-                    {
-                        // 触发 所有条件满足的回调
-                        OnAllUnmetConditionsMet?.Invoke(this);
-                        OnAllUnmetConditionsMet = null; // 清除回调，避免重复调用
-                    }
-                    
-                    // 条件满足，返回 true
-                    return true;
-                }
-            }
-            
-            // 条件仍未满足，返回 false
-            return false;
-        }
-        
-        /// <summary>
-        /// 添加 未满足的条件 到映射表
-        /// </summary>
-        /// <param name="hashCode"></param>
-        /// <param name="condition"></param>
-        private void AddUnmetConditionByHashcode(int hashCode, AnimActionCondition condition)
-        {
-            // 添加到 未满足条件的映射表。不重复添加
-            _mapHashcodeToUnmetCondition.TryAdd(hashCode, condition);
-        }
-        #region 条件 等级进度条
+            if (conditions == null || conditions.IsEmpty) return true;
 
-        /// <summary>
-        /// 检查 条件-等级进度条
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="registerCallback">条件不满足时，是否监听 条件值变化。</param>
-        /// <returns></returns>
-        private bool CheckConditionLevelProgressBar(AnimActionCondition condition, bool registerCallback = false)
-        {
-            // 目标 进度条名称
-            string levelProgressName = condition.conditionTargetName;
-            // 参数解析。“要求等级”
-            var paramArray = condition.conditionTargetParameter.Split('|');
-            if (paramArray.Length >= 1 && int.TryParse(paramArray[0], out int requiredLevel))
+            var context = AnimSimulatorManager.ConditionContext;
+            if (context == null)
             {
-                // 获取 当前等级进度条 的等级。没有管理器时取不到进度条，与「进度条名称查不到」同样处理。
-                var manager = AnimSimulatorManager.Instance;
-                var uiLevelProgressBar = manager
-                    ? manager.GetProgressBar<UILevelProgressBar>(levelProgressName)
-                    : null;
-                // 检查是否满足要求
-                if (uiLevelProgressBar is not null && uiLevelProgressBar.LevelNumber < requiredLevel)
-                {
-                    // 条件不满足。注册等级变化的回调，等待下次检查
-                    if (registerCallback)
-                    {
-                        int hashcode = uiLevelProgressBar.GetHashCode();
-                        // 检查 是否已注册
-                        if (_mapHashcodeToUnmetCondition.ContainsKey(hashcode) == false)
-                        {
-                            // 注册 等级变化的回调
-                            uiLevelProgressBar.OnLevelNumberChanged += OnLevelNumberChanged;
-                            // 记录 条件映射表
-                            AddUnmetConditionByHashcode(hashcode, condition);
-                        }
-                    }
-                    // 不满足条件，返回 false
-                    return false;
-                }
+                AnimSimLog.Warn(nameof(AnimAction), $"'{actionName}' 配了条件，但场景中没有 AnimSimulatorManager，条件无从判定，按不满足处理。");
+                return false;
             }
-            
-            // 满足条件，返回 true
-            return true;
-        }
-        
-        /// <summary>
-        /// 等级变化时的回调
-        /// </summary>
-        /// <param name="uiLevelProgressBar"></param>
-        /// <param name="levelNumber"></param>
-        private void OnLevelNumberChanged(UILevelProgressBar uiLevelProgressBar, int levelNumber)
-        {
-            // 重新检查 条件
-            if (CheckUnmetConditionByHashcode(uiLevelProgressBar.GetHashCode()))
-                // 条件已满足，取消注册回调
-                uiLevelProgressBar.OnLevelNumberChanged -= OnLevelNumberChanged;
-        }
-        #endregion
-        
-        /// <summary>
-        /// 动画动作 条件
-        /// </summary>
-        [Serializable]
-        public struct AnimActionCondition
-        {
-            [Tooltip("条件类型：指定条件的检查方式。")]
-            public EAnimActionConditionType conditionType;
-            [Tooltip("条件目标名称：根据条件类型，指定条件检查的目标对象名称。例如，等级进度条的名称，道具的名称(ID)。")]
-            public string conditionTargetName;
-            [Tooltip("条件目标参数：根据条件类型，设置相应的参数值。")]
-            public string conditionTargetParameter;
-        }
-        
-        /// <summary>
-        /// 动画动作 条件类型。
-        /// </summary>
-        [Serializable]
-        public enum EAnimActionConditionType
-        {
-            /// <summary>
-            /// 等级进度条。
-            /// 参数为 "等级进度条名称|要求等级"。大于等于 指定等级时，条件满足。
-            /// </summary>
-            LevelProgress,
-            
-            /// <summary>
-            /// 道具持有。
-            /// 参数为 "道具ID"。持有该道具时，条件满足。
-            /// </summary>
-            Item,
+
+            return conditions.Evaluate(context).Passed;
         }
         #endregion
     }

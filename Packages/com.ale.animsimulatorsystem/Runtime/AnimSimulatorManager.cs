@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Ale.Condition;
 using Ale.Toolkit.Runtime;
 
 #if ATK_INPUT_SYSTEM
@@ -19,8 +20,64 @@ namespace Ale.AnimSimulatorSystem
     /// 动画模拟器管理器
     /// 主流程的执行与子组件的管理
     /// </summary>
-    public class AnimSimulatorManager : ToolkitMonoSingleton<AnimSimulatorManager>
+    public class AnimSimulatorManager : ToolkitMonoSingleton<AnimSimulatorManager>, IAnimSimConditionSource
     {
+        #region 条件系统 接线
+        /// <summary>
+        /// 条件输入已变化。动作解锁条件依赖的是进度条读数，读数一变就广播一次，
+        /// 由 <see cref="UIAnimActionList"/> 之类的使用方重新求值。
+        ///
+        /// <para>取代了旧实现里「条件不满足时登记回调、以 <c>GetHashCode()</c> 为键回查」那套：
+        /// 那张表以<b>活着的 UI 组件的哈希</b>作键（不是稳定标识），而且每次检查都会把回调置空再只留最新一个，
+        /// 两个列表 UI 同时在用时只有后者收得到通知。</para>
+        /// </summary>
+        public static event Action OnConditionInputsChanged;
+
+        // 判定器通过它拿到本管理器提供的读侧数据
+        private sealed class AnimSimConditionContext : IConditionContext
+        {
+            private readonly AnimSimulatorManager _owner;
+            public AnimSimConditionContext(AnimSimulatorManager owner) { _owner = owner; }
+
+            public object Subject => _owner;
+            public T GetService<T>() where T : class => _owner as T;
+        }
+
+        private IConditionContext _conditionContext;
+
+        /// <summary>条件判定用的上下文。场景中没有管理器时为 <c>null</c>。</summary>
+        public static IConditionContext ConditionContext
+        {
+            get
+            {
+                var instance = Instance;
+                if (!instance) return null;
+                return instance._conditionContext ??= new AnimSimConditionContext(instance);
+            }
+        }
+
+        /// <summary>取某条等级进度条的当前等级。</summary>
+        public bool TryGetLevel(string progressName, out int level)
+        {
+            level = 0;
+            var bar = GetProgressBar<UILevelProgressBar>(progressName);
+            if (!bar) return false;
+
+            level = bar.LevelNumber;
+            return true;
+        }
+
+        /// <summary>取某条进度条的当前进度值。</summary>
+        public bool TryGetProgressValue(string progressName, out float value)
+        {
+            value = 0f;
+            if (!_progressBarInstanceDic.TryGetValue(progressName, out var bar) || !bar) return false;
+
+            value = bar.ProgressValueCurrent;
+            return true;
+        }
+        #endregion
+
         /// <summary>
         /// 初始化。由基类在 Awake 中设置好单例实例、并完成 DontDestroyOnLoad 之后调用。
         /// 重复实例不会走到这里——基类在 Awake 里已把后来者销毁。
@@ -911,11 +968,15 @@ namespace Ale.AnimSimulatorSystem
         public void ModifyProgressBars(string progressName, float valueModify)
         {
             // 获取 进度条实例
-            if (_progressBarInstanceDic.TryGetValue(progressName, out var progressBarInstance))
-            {
-                // 修改 进度值
-                progressBarInstance.ModifyProgressValue(valueModify);
-            }
+            if (!_progressBarInstanceDic.TryGetValue(progressName, out var progressBarInstance)) return;
+
+            // 修改 进度值
+            progressBarInstance.ModifyProgressValue(valueModify);
+
+            // 进度条读数是动作解锁条件的唯一输入，改完广播一次让使用方重新求值。
+            // 等级变化也走这条路——升级结算是由进度值变化触发的。
+            var handler = OnConditionInputsChanged;
+            if (handler != null) handler.Invoke();
         }
         
         /// <summary>

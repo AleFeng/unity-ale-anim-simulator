@@ -4,7 +4,9 @@
     "references": [
         "Ale.AnimSimulatorSystem",
         "Ale.Toolkit.Runtime",
-        "Ale.Toolkit.Editor"
+        "Ale.Toolkit.Editor",
+        "Ale.Condition.Core",
+        "Ale.Condition.Editor"
     ],
     "includePlatforms": [
         "Editor"
