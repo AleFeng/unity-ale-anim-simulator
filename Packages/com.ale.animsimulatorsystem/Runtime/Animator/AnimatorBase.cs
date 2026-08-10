@@ -166,8 +166,20 @@ namespace Ale.AnimSimulatorSystem
         {
             if (!renderer) return;
             SetRendererAlpha(renderer, 0f);
-            renderer.gameObject.SetActive(false);
+            if (CanDeactivateRenderer(renderer)) renderer.gameObject.SetActive(false);
         }
+
+        /// <summary>
+        /// 该渲染器所在物体能否被禁用。
+        ///
+        /// <para><b>渲染器与本组件同体（或本组件在其子树内）时不能禁用它</b>——那会把本组件一起停掉，
+        /// 状态机、补间回调、协程就再也跑不起来了。两个后端的常见挂法正好一个踩一个不踩：
+        /// Live2D 的 <c>CubismRenderController</c> 通常就在模型根上，与 <c>Live2dAnimator</c> 同体；
+        /// Spine 的 <c>SkeletonAnimation</c> 一般在 <c>SpineAnimator</c> 的子物体上。
+        /// 这种情况下只把不透明度归零，物体保持激活。</para>
+        /// </summary>
+        private bool CanDeactivateRenderer(Component renderer)
+            => renderer && !transform.IsChildOf(renderer.transform);
 
         // 取状态实际使用的渲染器：状态指定了就用它，否则用默认渲染器
         private Component ResolveStateRenderer(FAnimStateData stateData)
@@ -717,8 +729,9 @@ namespace Ale.AnimSimulatorSystem
                     {
                         if (clearAnimOnFadeOut)
                             ClearRenderer(renderer);
-                        // 禁用对象（临时隐藏 和 正常销毁 都需要）
-                        if (renderer) renderer.gameObject.SetActive(false);
+                        // 禁用对象（临时隐藏 和 正常销毁 都需要）。
+                        // 与本组件同体的渲染器不能禁用，否则会把本组件一起停掉——见 CanDeactivateRenderer。
+                        if (renderer && CanDeactivateRenderer(renderer)) renderer.gameObject.SetActive(false);
                     }
 
                     // 移除记录
