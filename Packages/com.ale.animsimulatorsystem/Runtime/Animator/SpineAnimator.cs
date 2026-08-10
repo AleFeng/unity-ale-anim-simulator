@@ -137,7 +137,7 @@ namespace Ale.AnimSimulatorSystem
             var animation = skeletonData.FindAnimation(animName);
             if (animation == null)
             {
-                Debug.LogWarning($"SpineAnimator >> PlayAnimOnRenderer: 骨架中不存在动画 '{animName}'，播放失败，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"骨架中不存在动画 '{animName}'，播放失败，GameObject={gameObject.name}");
                 return false;
             }
 

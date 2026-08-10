@@ -48,7 +48,7 @@ namespace Ale.AnimSimulatorSystem
             {
                 _dicActionPlayCounter.Clear();
                 SetProgressPercent(0f, true);
-                Debug.LogWarning("[ActionProgressBar] SetInfo: 传入的 ActionProgressBarConfig 为空，请检查调用。");
+                AnimSimLog.Warn(this, "传入的 ActionProgressBarConfig 为空，请检查调用。");
                 return;
             }
 
@@ -182,7 +182,7 @@ namespace Ale.AnimSimulatorSystem
                 var manager = AnimSimulatorManager.Instance;
                 if (!manager)
                 {
-                    Debug.LogWarning("[ActionProgressBar] PlayAnimAction: 场景中没有 AnimSimulatorManager，无法播放动画动作。");
+                    AnimSimLog.Warn(this, "场景中没有 AnimSimulatorManager，无法播放动画动作。");
                     return;
                 }
 
@@ -213,7 +213,7 @@ namespace Ale.AnimSimulatorSystem
                     {
                         if (!animActionPlayer)
                         {
-                            Debug.LogWarning($"[ActionProgressBar] PlayAnimAction: 无法找到名为 {actionPlayConfig.actionPlayerName} 的 AnimActionPlayer，请检查配置。");
+                            AnimSimLog.Warn(this, $"无法找到名为 {actionPlayConfig.actionPlayerName} 的 AnimActionPlayer，请检查配置。");
                             return;
                         }
                         

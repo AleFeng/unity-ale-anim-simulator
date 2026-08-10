@@ -58,7 +58,7 @@ namespace Ale.AnimSimulatorSystem
         {
             if (levelProgressBarConfig == null)
             {
-                Debug.LogWarning("[LevelProgressBarConfig] GetExpForLevel: 传入的 LevelProgressBarConfig 为空，返回0。");
+                AnimSimLog.Warn(this, "传入的 LevelProgressBarConfig 为空，返回0。");
                 return 0;
             }
             
@@ -72,14 +72,14 @@ namespace Ale.AnimSimulatorSystem
             // 如果没有配置，返回0并警告
             if (expCurveConfigs == null || expCurveConfigs.Length == 0)
             {
-                Debug.LogWarning("[LevelProgressBarConfig] GetExpForLevel: 未配置 ExpCurveConfigs，返回0。");
+                AnimSimLog.Warn(this, "未配置 ExpCurveConfigs，返回0。");
                 return 0;
             }
             
             // 等级不能小于0
             if (levelCurrent < 0)
             {
-                Debug.LogWarning($"[LevelProgressBarConfig] GetExpForLevel: 参数等级不能小于0，已自动修正为0。");
+                AnimSimLog.Warn(this, $"参数等级不能小于0，已自动修正为0。");
                 levelCurrent = 0;
             }
             // 计算 下一级 等级

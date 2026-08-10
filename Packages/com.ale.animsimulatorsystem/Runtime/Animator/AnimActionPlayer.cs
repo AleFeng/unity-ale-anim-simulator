@@ -301,9 +301,8 @@ namespace Ale.AnimSimulatorSystem
                 // 常规流程下角色是由管理器自己加载并实例化的，不会走到这里；
                 // 手动把 AnimActionPlayer 摆进场景、却没有管理器时才会命中。
                 // 此处不静默跳过——注册失败意味着该播放器整个不受管理器驱动，必须让它可被发现。
-                Debug.LogWarning(
-                    $"[AnimActionPlayer] OnEnable: 场景中没有 AnimSimulatorManager，'{name}' 未能注册，将不受管理器驱动。",
-                    this);
+                AnimSimLog.Warn(this,
+                    $"场景中没有 AnimSimulatorManager，'{name}' 未能注册，将不受管理器驱动。");
             }
         }
 
@@ -937,7 +936,7 @@ namespace Ale.AnimSimulatorSystem
                     var manager = AnimSimulatorManager.Instance;
                     if (!manager)
                     {
-                        Debug.LogWarning("[AnimActionPlayer] PlayAnimActionByType: 场景中没有 AnimSimulatorManager，无法打开动画动作列表。");
+                        AnimSimLog.Warn(this, "场景中没有 AnimSimulatorManager，无法打开动画动作列表。");
                         break;
                     }
                     // 替换 当前悬停的 动画动作播放器。强制设置为 允许操作。
@@ -1158,7 +1157,7 @@ namespace Ale.AnimSimulatorSystem
                 // 停止动画
                 animator.StopAnim(_animDataCurrent);
             else
-                Debug.LogWarning($"[AnimActionPlayer] StopAnimActionImmediate: {gameObject.name} 的动画控制器 未设置。", this);
+                AnimSimLog.Warn(this, $"{gameObject.name} 的动画控制器 未设置。");
 
             // 触发 动作完成的回调
             _onActionCompleteEvent?.Invoke(this);
@@ -1332,7 +1331,7 @@ namespace Ale.AnimSimulatorSystem
             // 索引无效，直接返回
             if (actionIndex < 0 || actionIndex >= animActions.Length)
             {
-                Debug.LogWarning($"[AnimActionPlayer] PlayAnimActionByIndex: Invalid action index {actionIndex}.");
+                AnimSimLog.Warn(this, $"Invalid action index {actionIndex}.");
                 return false;
             }
             

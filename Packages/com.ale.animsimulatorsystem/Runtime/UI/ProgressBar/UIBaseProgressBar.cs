@@ -42,7 +42,7 @@ namespace Ale.AnimSimulatorSystem
             _progressBarConfig = progressBarConfigNew;
             if (_progressBarConfig == null)
             {
-                Debug.LogWarning("[BaseProgressBar] SetInfo: 传入的 ProgressBarConfig 为空，请检查调用。");
+                AnimSimLog.Warn(this, "传入的 ProgressBarConfig 为空，请检查调用。");
                 return;
             }
             

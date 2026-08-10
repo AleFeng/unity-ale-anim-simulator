@@ -59,10 +59,10 @@ namespace Ale.AnimSimulatorSystem
 
             if (moved.Count == 0) return false;
 
-            Debug.LogWarning(
-                $"[AnimActor] MigrateLegacyAnimatorConfig: {gameObject.name} 上的旧配置已迁移到 " +
+            AnimSimLog.Warn(this,
+                $"{gameObject.name} 上的旧配置已迁移到 " +
                 $"{animator.GetType().Name}——{string.Join("；", moved)}。" +
-                "这两项现在只配在动画组件上；请保存该预制体 / 场景以固化本次迁移。", this);
+                "这两项现在只配在动画组件上；请保存该预制体 / 场景以固化本次迁移。");
             return true;
         }
 

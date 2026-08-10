@@ -37,7 +37,7 @@ namespace Ale.AnimSimulatorSystem
         {
             if (levelProgressBarConfigNew == null)
             {
-                Debug.LogWarning("[LevelProgressBar] SetInfo: 传入的 LevelProgressBarConfig 为空，请检查调用。");
+                AnimSimLog.Warn(this, "传入的 LevelProgressBarConfig 为空，请检查调用。");
                 return;
             }
             
@@ -55,7 +55,7 @@ namespace Ale.AnimSimulatorSystem
             var manager = AnimSimulatorManager.Instance;
             if (!manager)
             {
-                Debug.LogWarning("[LevelProgressBar] SetInfo: 场景中没有 AnimSimulatorManager，无法取得升级所需经验值。");
+                AnimSimLog.Warn(this, "场景中没有 AnimSimulatorManager，无法取得升级所需经验值。");
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace Ale.AnimSimulatorSystem
             var manager = AnimSimulatorManager.Instance;
             if (!manager)
             {
-                Debug.LogWarning("[LevelProgressBar] OnProgressValueModified: 场景中没有 AnimSimulatorManager，无法计算升级所需经验值，已跳过本次升级结算。");
+                AnimSimLog.Warn(this, "场景中没有 AnimSimulatorManager，无法计算升级所需经验值，已跳过本次升级结算。");
                 return;
             }
 
@@ -113,7 +113,7 @@ namespace Ale.AnimSimulatorSystem
             {
                 if (expRequire <= 0)
                 {
-                    Debug.LogWarning("[LevelProgressBar] OnProgressValueModified: 升级所需经验值 不可小于等于0，请检查设置。");
+                    AnimSimLog.Warn(this, "升级所需经验值 不可小于等于0，请检查设置。");
                     break;
                 }
 

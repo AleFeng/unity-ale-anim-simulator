@@ -66,13 +66,13 @@ namespace Ale.AnimSimulatorSystem
             foreach (var m in live2dTrackLayers)
             {
                 if (m.layerIndex >= 0 && m.layerIndex < layerCount) continue;
-                Debug.LogWarning($"Live2dAnimator >> 轨道映射的层索引 {m.layerIndex} 越界：" +
-                                 $"CubismMotionController.LayerCount = {layerCount}（有效范围 0..{layerCount - 1}）。" +
-                                 $"GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"轨道映射的层索引 {m.layerIndex} 越界：" +
+                                      $"CubismMotionController.LayerCount = {layerCount}（有效范围 0..{layerCount - 1}）。" +
+                                      $"GameObject={gameObject.name}");
             }
             if (live2dLayerIndexDefault < 0 || live2dLayerIndexDefault >= layerCount)
-                Debug.LogWarning($"Live2dAnimator >> 默认层索引 {live2dLayerIndexDefault} 越界（LayerCount = {layerCount}）。" +
-                                 $"GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"默认层索引 {live2dLayerIndexDefault} 越界（LayerCount = {layerCount}）。" +
+                                      $"GameObject={gameObject.name}");
         }
 #endif
 
@@ -119,8 +119,8 @@ namespace Ale.AnimSimulatorSystem
                 string key = string.IsNullOrEmpty(item.animName) ? item.clip.name : item.animName;
                 if (_clipByName.ContainsKey(key))
                 {
-                    Debug.LogWarning($"Live2dAnimator >> 动作查找表中有重复的动画名 '{key}'，后一条被忽略。" +
-                                     $"GameObject={gameObject.name}", this);
+                    AnimSimLog.Warn(this, $"动作查找表中有重复的动画名 '{key}'，后一条被忽略。" +
+                                          $"GameObject={gameObject.name}");
                     continue;
                 }
                 _clipByName[key] = item.clip;
@@ -156,8 +156,8 @@ namespace Ale.AnimSimulatorSystem
             {
                 if (_trackToLayer.ContainsKey(m.TrackIndex))
                 {
-                    Debug.LogWarning($"Live2dAnimator >> 轨道映射中有重复的轨道 {m.TrackIndex}，后一条被忽略。" +
-                                     $"GameObject={gameObject.name}", this);
+                    AnimSimLog.Warn(this, $"轨道映射中有重复的轨道 {m.TrackIndex}，后一条被忽略。" +
+                                          $"GameObject={gameObject.name}");
                     continue;
                 }
                 _trackToLayer[m.TrackIndex] = m.layerIndex;
@@ -190,12 +190,12 @@ namespace Ale.AnimSimulatorSystem
                 if (!_layerOverflowWarned)
                 {
                     _layerOverflowWarned = true;
-                    Debug.LogWarning(
-                        $"Live2dAnimator >> 轨道 {trackIndex} 没有显式的层映射，且已无空闲层可分配" +
+                    AnimSimLog.Warn(this,
+                        $"轨道 {trackIndex} 没有显式的层映射，且已无空闲层可分配" +
                         $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），" +
                         $"退到默认层 {layer}（配置值 {live2dLayerIndexDefault}）。" +
                         "同层的动作会互相覆盖——请在「轨道映射」里显式指定，或调大 CubismMotionController 的 Layer Count。" +
-                        $" GameObject={gameObject.name}", this);
+                        $" GameObject={gameObject.name}");
                 }
             }
 
@@ -241,8 +241,8 @@ namespace Ale.AnimSimulatorSystem
             var clip = FindClip(animName);
             if (!clip)
             {
-                Debug.LogWarning($"Live2dAnimator >> PlayAnimOnRenderer: 动作查找表中不存在动画 '{animName}'，" +
-                                 $"播放失败。请在 Inspector 的「Live2D 动作查找表」中登记。GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"动作查找表中不存在动画 '{animName}'，" +
+                                      $"播放失败。请在 Inspector 的「Live2D 动作查找表」中登记。GameObject={gameObject.name}");
                 return false;
             }
 
@@ -272,8 +272,8 @@ namespace Ale.AnimSimulatorSystem
 
             if (!live2dMotionController)
             {
-                Debug.LogWarning($"Live2dAnimator >> PlayAnimOnRenderer: 未设置 CubismMotionController，" +
-                                 $"无法播放 '{animName}'。GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"未设置 CubismMotionController，" +
+                                      $"无法播放 '{animName}'。GameObject={gameObject.name}");
                 return false;
             }
 
@@ -459,8 +459,8 @@ namespace Ale.AnimSimulatorSystem
                 if (skin == null || string.IsNullOrEmpty(skin.skinName)) continue;
                 if (_skinByName.ContainsKey(skin.skinName))
                 {
-                    Debug.LogWarning($"Live2dAnimator >> 皮肤定义中有重复的皮肤名 '{skin.skinName}'，后一条被忽略。" +
-                                     $"GameObject={gameObject.name}", this);
+                    AnimSimLog.Warn(this, $"皮肤定义中有重复的皮肤名 '{skin.skinName}'，后一条被忽略。" +
+                                          $"GameObject={gameObject.name}");
                     continue;
                 }
                 _skinByName[skin.skinName] = skin;

@@ -170,7 +170,7 @@ namespace Ale.AnimSimulatorSystem
                 if (_dicStateData.ContainsKey(data.stateName))
                 {
                     // 重复的状态数据，添加失败
-                    Debug.LogWarning($"{GetType().Name} >> InitAnimState: 重复的状态数据 State={data.stateName} GameObject={gameObject.name}", this);
+                    AnimSimLog.Warn(this, $"重复的状态数据 State={data.stateName} GameObject={gameObject.name}");
                     continue;
                 }
 
@@ -226,7 +226,7 @@ namespace Ale.AnimSimulatorSystem
             var renderer = ResolveStateRenderer(stateData);
             if (!renderer)
             {
-                Debug.LogWarning($"{GetType().Name} >> AddAnimState: 渲染器为空，无法添加状态 {state} 的动画，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"渲染器为空，无法添加状态 {state} 的动画，GameObject={gameObject.name}");
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace Ale.AnimSimulatorSystem
             var renderer = ResolveStateRenderer(stateData);
             if (!renderer)
             {
-                Debug.LogWarning($"{GetType().Name} >> RemoveAnimState: 渲染器为空，无法移除状态 {state} 的动画，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"渲染器为空，无法移除状态 {state} 的动画，GameObject={gameObject.name}");
                 return;
             }
 
@@ -516,7 +516,7 @@ namespace Ale.AnimSimulatorSystem
             if (!renderer) renderer = DefaultRenderer;
             if (!renderer)
             {
-                Debug.LogWarning($"{GetType().Name} >> PlayAnim: 渲染器为空，播放动画失败，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"渲染器为空，播放动画失败，GameObject={gameObject.name}");
                 return;
             }
 
@@ -546,7 +546,7 @@ namespace Ale.AnimSimulatorSystem
             string animName = animData.ResolveAnimName();
             if (string.IsNullOrEmpty(animName))
             {
-                Debug.LogWarning($"{GetType().Name} >> PlayAnimImmediate: 动画名为空，播放失败，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"动画名为空，播放失败，GameObject={gameObject.name}");
                 return;
             }
 
@@ -976,7 +976,7 @@ namespace Ale.AnimSimulatorSystem
             foreach (var skinName in baseSkins)
             {
                 if (!HasSkin(skinName))
-                    Debug.LogWarning($"{GetType().Name} >> SetBaseSkin: 基础皮肤名称 {skinName} 不存在，GameObject={gameObject.name}", this);
+                    AnimSimLog.Warn(this, $"基础皮肤名称 {skinName} 不存在，GameObject={gameObject.name}");
             }
 
             if (isRefresh) RefreshSkin();
@@ -993,7 +993,7 @@ namespace Ale.AnimSimulatorSystem
 
             if (!HasSkin(skinName))
             {
-                Debug.LogWarning($"{GetType().Name} >> AddSkin: 皮肤名称 {skinName} 不存在，无法添加皮肤，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"皮肤名称 {skinName} 不存在，无法添加皮肤，GameObject={gameObject.name}");
                 return;
             }
 
@@ -1015,7 +1015,7 @@ namespace Ale.AnimSimulatorSystem
 
             if (!HasSkin(skinName))
             {
-                Debug.LogWarning($"{GetType().Name} >> RemoveSkin: 皮肤名称 {skinName} 不存在，无法移除皮肤，GameObject={gameObject.name}", this);
+                AnimSimLog.Warn(this, $"皮肤名称 {skinName} 不存在，无法移除皮肤，GameObject={gameObject.name}");
                 return;
             }
 

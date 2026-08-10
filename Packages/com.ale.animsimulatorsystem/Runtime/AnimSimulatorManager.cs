@@ -28,7 +28,7 @@ namespace Ale.AnimSimulatorSystem
         protected override void Init()
         {
             if (!animSimulatorConfig)
-                Debug.LogWarning("[AnimSimulatorManager] AnimSimulatorConfig 未设置，动画模拟器系统 无法正常工作！");
+                AnimSimLog.Warn(this, "AnimSimulatorConfig 未设置，动画模拟器系统 无法正常工作！");
 
             // 初始化 UI设置
             InitUI();
@@ -116,7 +116,7 @@ namespace Ale.AnimSimulatorSystem
         {
             if (string.IsNullOrEmpty(param))
             {
-                Debug.LogWarning("[AnimSimulatorManager] StartAnimSimulatorWithParam: param 为空，无法启动动画模拟器。");
+                AnimSimLog.Warn(this, "param 为空，无法启动动画模拟器。");
                 return;
             }
             
@@ -576,7 +576,7 @@ namespace Ale.AnimSimulatorSystem
             if (!animActionPlayer) return false;
             // 重名则 直接覆盖。之后也会分配对应的 列表UI
             if (_animActionPlayerRegisterDic.ContainsKey(animActionPlayer.ActionPlayerName))
-                Debug.LogWarning($"[AnimSimulatorManager] RegisterAnimActionPlayer: 动画动作播放器 名称 '{animActionPlayer.ActionPlayerName}' 重复注册，已覆盖旧的实例。");
+                AnimSimLog.Warn(this, $"动画动作播放器 名称 '{animActionPlayer.ActionPlayerName}' 重复注册，已覆盖旧的实例。");
             _animActionPlayerRegisterDic[animActionPlayer.ActionPlayerName] = animActionPlayer;
 
             // 从空闲列表 获取  动画动作播放器列表UI 实例
@@ -690,7 +690,7 @@ namespace Ale.AnimSimulatorSystem
                 // 播放 动画动作
                 animActionPlayer.PlayAnimActionByType(animActionSelectType, null, onActionStart);
             else
-                Debug.LogWarning($"[AnimSimulatorManager] PlayAnimAction: 未找到名称为 '{animActionPlayerName}' 的 动画动作播放器，请检查 注册情况。");
+                AnimSimLog.Warn(this, $"未找到名称为 '{animActionPlayerName}' 的 动画动作播放器，请检查 注册情况。");
         }
         
         /// <summary>
@@ -710,7 +710,7 @@ namespace Ale.AnimSimulatorSystem
                     animActionListInstance.SetToCanvasSpacePosition(_cursorWorldPos);
             }
             else
-                Debug.LogWarning($"[AnimSimulatorManager] MoveAnimActionPlayerToCursor: 未找到名称为 '{animActionPlayerName}' 的 动画动作播放器，请检查 注册情况。");
+                AnimSimLog.Warn(this, $"未找到名称为 '{animActionPlayerName}' 的 动画动作播放器，请检查 注册情况。");
         }
         
         /// <summary>
@@ -778,7 +778,7 @@ namespace Ale.AnimSimulatorSystem
             // 实例化新的 角色皮肤组 列表UI 实例
             if (!animSimulatorConfig.uiAnimActorSkinGroupListPrefab)
             {
-                Debug.LogWarning("[AnimSimulatorManager] AwakeProgressBar: AnimSimulatorConfig 中 未配置 UIAnimActorSkinGroupListPrefab，角色皮肤功能无法使用！");
+                AnimSimLog.Warn(this, "AnimSimulatorConfig 中 未配置 UIAnimActorSkinGroupListPrefab，角色皮肤功能无法使用！");
             }
             else
             {
@@ -788,7 +788,7 @@ namespace Ale.AnimSimulatorSystem
             }
             if (!_uiAnimActorSkinGroupListInstance)
             {
-                Debug.LogWarning("[AnimSimulatorManager] InitActorSkin: 角色皮肤组 列表UI实例化失败，角色皮肤功能无法使用！");
+                AnimSimLog.Warn(this, "角色皮肤组 列表UI实例化失败，角色皮肤功能无法使用！");
             }
         }
         
@@ -836,7 +836,7 @@ namespace Ale.AnimSimulatorSystem
             // 实例化新的 进度条UI实例
             if (!animSimulatorConfig.uiProgressBarViewPrefab)
             {
-                Debug.LogWarning("[AnimSimulatorManager] AwakeProgressBar: AnimSimulatorConfig 中 未配置 ProgressBarUI，进度条功能无法使用！");
+                AnimSimLog.Warn(this, "AnimSimulatorConfig 中 未配置 ProgressBarUI，进度条功能无法使用！");
             }
             else
             {
@@ -845,7 +845,7 @@ namespace Ale.AnimSimulatorSystem
             }
             if (!_uiProgressBarViewInstance)
             {
-                Debug.LogWarning("[AnimSimulatorManager] InitProgressBar: 进度条UI实例化失败，进度条功能无法使用！");
+                AnimSimLog.Warn(this, "进度条UI实例化失败，进度条功能无法使用！");
                 return;
             }
             
@@ -873,7 +873,7 @@ namespace Ale.AnimSimulatorSystem
                 var progressBarPrefab = progressBarConfig.ResolvePrefab(animSimulatorConfig);
                 if (!progressBarPrefab)
                 {
-                    Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: '{progressBarConfig.progressName}' 自身与全局默认都未配置 {label} 预制体，该条已跳过。", this);
+                    AnimSimLog.Warn(this, $"'{progressBarConfig.progressName}' 自身与全局默认都未配置 {label} 预制体，该条已跳过。");
                     continue;
                 }
 
@@ -883,7 +883,7 @@ namespace Ale.AnimSimulatorSystem
 
                 // 设置信息
                 if (!progressBarConfig.ApplyTo(progressBarInstance))
-                    Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: '{progressBarConfig.progressName}' 配的预制体类型不对（拿到的是 {progressBarInstance.GetType().Name}，期望 {label}），初始值未写入。", this);
+                    AnimSimLog.Warn(this, $"'{progressBarConfig.progressName}' 配的预制体类型不对（拿到的是 {progressBarInstance.GetType().Name}，期望 {label}），初始值未写入。");
             }
         }
 
@@ -906,7 +906,7 @@ namespace Ale.AnimSimulatorSystem
 
             // 检查是否重名 并添加到字典
             if (!_progressBarInstanceDic.TryAdd(progressBarConfig.progressName, progressBarInstance))
-                Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: 进度条名称 '{progressBarConfig.progressName}' 重复，请确保名称唯一。", this);
+                AnimSimLog.Warn(this, $"进度条名称 '{progressBarConfig.progressName}' 重复，请确保名称唯一。");
 
             return progressBarInstance;
         }
@@ -957,7 +957,7 @@ namespace Ale.AnimSimulatorSystem
             // 检查 配置有效性
             if (!animSimulatorConfig)
             {
-                Debug.LogWarning("[AnimSimulatorManager] GetExpForLevel: AnimSimulatorConfig 未设置，无法获取经验值！");
+                AnimSimLog.Warn(this, "AnimSimulatorConfig 未设置，无法获取经验值！");
                 return 0;
             }
             
@@ -1132,7 +1132,7 @@ namespace Ale.AnimSimulatorSystem
                 string folder = _folderGetter?.Invoke();
                 if (folder == null)
                 {
-                    Debug.LogWarning($"[AnimSimulatorManager] LoadByName: AnimSimulatorConfig 未设置，无法加载{_label}资产！", _owner);
+                    AnimSimLog.Warn(_owner, $"AnimSimulatorConfig 未设置，无法加载{_label}资产！");
                     return;
                 }
 
