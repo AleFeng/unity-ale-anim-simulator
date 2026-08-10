@@ -436,7 +436,7 @@ namespace Ale.AnimSimulatorSystem
             animator.PlayAnim
             (
                 _animDataCurrent,
-                animDataCompleted =>
+                _ =>
                 {
                     // 已经停止播放、或正在延迟停止中，忽略本次回调
                     if (_delayStopAnimActionCor == null && _animActionCurrent != null)
@@ -1494,7 +1494,7 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("随机权重：当选择类型为 随机时，权重较高的动作被选择的概率更大。")]
         public int randomTypeWeight = 100;
         [Tooltip("限制播放次数：当选择类型为 随机时，限制动作的播放次数。0表示不限制。")]
-        public int randomTypePlayLimit = 0;
+        public int randomTypePlayLimit;
         
         [Header("点击模式 设置")]
         [Tooltip("动画播放速度：速度倍率。"), Range(0.01f, 3f)]
