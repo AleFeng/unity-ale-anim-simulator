@@ -163,6 +163,22 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("UI中显示的名称")]
         public string uiDisplayName;
 #endif
+
+        // ── 由子类落实的两件事 ──────────────────────────────────────────────────────
+        // 「用哪个预制体」与「怎么把配置写进实例」是等级条与动作条仅有的差异。把它们收在这里，
+        // 管理器那边两段除了类型参数几乎逐字相同的实例化循环就能合成一个。
+
+        /// <summary>
+        /// 解析本条配置实际要用的进度条预制体：自身指定的优先，未指定则回退到全局默认。
+        /// 两者都为空时返回 <c>null</c>。
+        /// </summary>
+        public virtual UIBaseProgressBar ResolvePrefab(AnimSimulatorConfig config) => null;
+
+        /// <summary>
+        /// 把本配置写入已实例化的进度条。
+        /// </summary>
+        /// <returns>实例类型与本配置是否匹配。<c>false</c> 表示配错了预制体，初始值未写入。</returns>
+        public virtual bool ApplyTo(UIBaseProgressBar progressBar) => false;
     }
 
     #region 等级进度条
@@ -180,6 +196,18 @@ namespace Ale.AnimSimulatorSystem
         
         [Tooltip("经验曲线配置组：根据等级范围，使用不同的经验曲线配置。")]
         public ExpCurveConfig[] expCurveConfigs;
+
+        /// <inheritdoc/>
+        public override UIBaseProgressBar ResolvePrefab(AnimSimulatorConfig config)
+            => uiLevelProgressBar ? uiLevelProgressBar : (config ? config.uiLevelProgressBarDefault : null);
+
+        /// <inheritdoc/>
+        public override bool ApplyTo(UIBaseProgressBar progressBar)
+        {
+            if (!(progressBar is UILevelProgressBar levelProgressBar)) return false;
+            levelProgressBar.SetInfo(this, 0, 0);
+            return true;
+        }
     }
 
     /// <summary>
@@ -239,6 +267,18 @@ namespace Ale.AnimSimulatorSystem
         
         [Tooltip("动作播放 配置组")]
         public ActionPlayConfig[] actionPlayConfigs;
+
+        /// <inheritdoc/>
+        public override UIBaseProgressBar ResolvePrefab(AnimSimulatorConfig config)
+            => uiActionProgressBar ? uiActionProgressBar : (config ? config.uiActionProgressBarDefault : null);
+
+        /// <inheritdoc/>
+        public override bool ApplyTo(UIBaseProgressBar progressBar)
+        {
+            if (!(progressBar is UIActionProgressBar actionProgressBar)) return false;
+            actionProgressBar.SetInfo(this, 0);
+            return true;
+        }
     }
     
     /// <summary>

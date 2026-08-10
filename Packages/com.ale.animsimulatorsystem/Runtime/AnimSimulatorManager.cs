@@ -80,16 +80,9 @@ namespace Ale.AnimSimulatorSystem
             
             // 淡入 UI
             FadeInUI();
-            // 淡入 角色。可能被暂时隐藏，之后继续使用。
-            if (_animActorCurrent)
-                _animActorCurrent.FadeIn();
-            else if (_actorCurrentInstance)
-                _actorCurrentInstance.SetActive(true);
-            // 淡入 背景。可能被暂时隐藏，之后继续使用。
-            if (_backgroundAnimActorCurrent)
-                _backgroundAnimActorCurrent.FadeIn();
-            else if (_backgroundCurrentInstance)
-                _backgroundCurrentInstance.SetActive(true);
+            // 淡入 角色与背景。可能被暂时隐藏，之后继续使用。
+            ActorSlot.Fade(true);
+            BackgroundSlot.Fade(true);
         }
         
         /// <summary>
@@ -106,20 +99,13 @@ namespace Ale.AnimSimulatorSystem
                 // 清除 所有数据
                 if (clearAllData)
                 {
-                    UnloadActor(); // 卸载角色
-                    UnloadBackground(); // 卸载背景
+                    ActorSlot.Unload();      // 卸载角色
+                    BackgroundSlot.Unload(); // 卸载背景
                 }
             });
-            // 淡出 角色
-            if (_animActorCurrent)
-                _animActorCurrent.FadeOut();
-            else if (_actorCurrentInstance)
-                _actorCurrentInstance.SetActive(false);
-            // 淡出 背景
-            if (_backgroundAnimActorCurrent)
-                _backgroundAnimActorCurrent.FadeOut();
-            else if (_backgroundCurrentInstance)
-                _backgroundCurrentInstance.SetActive(false);
+            // 淡出 角色与背景
+            ActorSlot.Fade(false);
+            BackgroundSlot.Fade(false);
         }
         
         /// <summary>
@@ -142,12 +128,12 @@ namespace Ale.AnimSimulatorSystem
             // 加载 角色
             if (!string.IsNullOrEmpty(actorName))
             {
-                LoadActor(actorName);
+                ActorSlot.LoadByName(actorName);
             }
             // 加载 场景（背景）
             if (!string.IsNullOrEmpty(sceneName))
             {
-                LoadBackground(sceneName);
+                BackgroundSlot.LoadByName(sceneName);
             }
             
             // 开始 动画模拟器
@@ -397,7 +383,19 @@ namespace Ale.AnimSimulatorSystem
         // 当前光标悬停的 AnimActionPlayer组件
         private AnimActionPlayer _animActionPlayerHover;
         // 当前正在播放的 AnimActionPlayer组件 列表
-        private List<AnimActionPlayer> _animActionPlayerPlayingList = new List<AnimActionPlayer>();
+        private readonly List<AnimActionPlayer> _animActionPlayerPlayingList = new List<AnimActionPlayer>();
+
+        // 遍历上表时的快照。分发给播放器的输入回调可能同步走完一个动作，其完成回调会把该播放器
+        // 从上表里移除——直接在上表上 foreach 会撞 InvalidOperationException。提为字段免得每次都新分配。
+        private readonly List<AnimActionPlayer> _animActionPlayerPlayingSnapshot = new List<AnimActionPlayer>();
+
+        /// <summary>取「正在播放」列表的一份快照，供遍历中可能改动该列表的场合使用。</summary>
+        private List<AnimActionPlayer> SnapshotPlayingList()
+        {
+            _animActionPlayerPlayingSnapshot.Clear();
+            _animActionPlayerPlayingSnapshot.AddRange(_animActionPlayerPlayingList);
+            return _animActionPlayerPlayingSnapshot;
+        }
         
 #if ATK_INPUT_SYSTEM
         /// <summary>
@@ -437,8 +435,9 @@ namespace Ale.AnimSimulatorSystem
                     // 播放中的模块 处理拖拽移动
                     if (_isDragging && _animActionPlayerPlayingList.Count > 0)
                     {
-                        foreach (var animActionPlayer in _animActionPlayerPlayingList)
+                        foreach (var animActionPlayer in SnapshotPlayingList())
                         {
+                            if (!animActionPlayer) continue;
                             // 通知模块拖拽移动。屏幕空间
                             animActionPlayer.OnDragMoveSS(_cursorScreenPos, cursorDeltaDirSs);
                             // 通知模块拖拽移动。世界空间
@@ -509,8 +508,8 @@ namespace Ale.AnimSimulatorSystem
                 _cursorWorldPosLast = _cursorWorldPos; // 记录 结束世界位置
                 
                 // 通知 正在播放的模块
-                foreach (var animActionPlayer in _animActionPlayerPlayingList)
-                    animActionPlayer.OnLeftClickUp(_cursorWorldPos);
+                foreach (var animActionPlayer in SnapshotPlayingList())
+                    if (animActionPlayer) animActionPlayer.OnLeftClickUp(_cursorWorldPos);
                 // 通知 悬停的模块（若不是 正在播放的模块）
                 if (_animActionPlayerHover && _animActionPlayerPlayingList.Contains(_animActionPlayerHover) == false)
                     _animActionPlayerHover.OnLeftClickUp(_cursorWorldPos);
@@ -798,11 +797,12 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void RefreshUIAnimActorSkinGroupList()
         {
-            if (_animActorCurrent)
+            var animActor = AnimActorCurrent;
+            if (animActor)
             {
                 // 刷新 皮肤列表UI
                 if (_uiAnimActorSkinGroupListInstance)
-                    _uiAnimActorSkinGroupListInstance.SetAnimActor(_animActorCurrent);
+                    _uiAnimActorSkinGroupListInstance.SetAnimActor(animActor);
             }
         }
         #endregion
@@ -849,93 +849,66 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
             
-            // 初始化 等级进度条
-            for (int i = 0; i < animSimulatorConfig.levelProgressBarConfigs.Length; i++)
+            // 等级进度条 与 动作进度条 走同一套流程，差异（用哪个预制体、怎么写初始值）
+            // 由 ProgressBarConfig 的 ResolvePrefab / ApplyTo 两个虚方法承担。
+            InitProgressBarGroup(animSimulatorConfig.levelProgressBarConfigs, "等级进度条");
+            InitProgressBarGroup(animSimulatorConfig.actionProgressBarConfigs, "动作进度条");
+        }
+
+        /// <summary>
+        /// 按一组配置实例化进度条。
+        /// </summary>
+        /// <param name="progressBarConfigs">进度条配置数组。为 <c>null</c> 时直接返回
+        /// ——新建的 AnimSimulatorConfig 里这些数组默认就是 <c>null</c> 而非空数组。</param>
+        /// <param name="label">日志用的中文名。</param>
+        private void InitProgressBarGroup(ProgressBarConfig[] progressBarConfigs, string label)
+        {
+            if (progressBarConfigs == null) return;
+
+            foreach (var progressBarConfig in progressBarConfigs)
             {
-                var levelProgressBarConfig = animSimulatorConfig.levelProgressBarConfigs[i];
-                if (levelProgressBarConfig == null) continue;
-                
-                // 获取 等级进度条 预制体
-                var levelProgressBar = levelProgressBarConfig.uiLevelProgressBar;
-                if (!levelProgressBar)
-                    levelProgressBar = animSimulatorConfig.uiLevelProgressBarDefault;
-                if (!levelProgressBar)
+                if (progressBarConfig == null) continue;
+
+                // 获取 进度条 预制体
+                var progressBarPrefab = progressBarConfig.ResolvePrefab(animSimulatorConfig);
+                if (!progressBarPrefab)
                 {
-                    Debug.LogWarning("[AnimSimulatorManager] InitProgressBar: AnimSimulatorConfig 中 未配置 LevelProgressBar预制体，等级进度条功能无法使用！");
+                    Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: '{progressBarConfig.progressName}' 自身与全局默认都未配置 {label} 预制体，该条已跳过。", this);
                     continue;
                 }
-                
-                // 实例化 等级进度条
-                var levelProgressBarInstance = InstantiateProgressBar<UILevelProgressBar>
-                (
-                    levelProgressBarConfig,
-                    levelProgressBar,
-                    levelProgressBarConfig.uiGroupName
-                );
+
+                // 实例化 进度条
+                var progressBarInstance = InstantiateProgressBar(progressBarConfig, progressBarPrefab);
+                if (!progressBarInstance) continue;
+
                 // 设置信息
-                levelProgressBarInstance.SetInfo(levelProgressBarConfig, 0, 0);
-            }
-            
-            // 初始化 动作进度条
-            for (int i = 0; i < animSimulatorConfig.actionProgressBarConfigs.Length; i++)
-            {
-                var actionProgressBarConfig = animSimulatorConfig.actionProgressBarConfigs[i];
-                if (actionProgressBarConfig == null) continue;
-                
-                // 获取 动作进度条 预制体
-                var actionProgressBar = actionProgressBarConfig.uiActionProgressBar;
-                if (!actionProgressBar)
-                    actionProgressBar = animSimulatorConfig.uiActionProgressBarDefault;
-                if (!actionProgressBar)
-                {
-                    Debug.LogWarning("[AnimSimulatorManager] InitProgressBar: AnimSimulatorConfig 中 未配置 ActionProgressBar预制体，动作进度条功能无法使用！");
-                    continue;
-                }
-                
-                // 实例化 动作进度条
-                var actionProgressBarInstance = InstantiateProgressBar<UIActionProgressBar>
-                (
-                    actionProgressBarConfig,
-                    actionProgressBar,
-                    actionProgressBarConfig.uiGroupName
-                );
-                // 设置信息
-                actionProgressBarInstance.SetInfo(actionProgressBarConfig, 0);
+                if (!progressBarConfig.ApplyTo(progressBarInstance))
+                    Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: '{progressBarConfig.progressName}' 配的预制体类型不对（拿到的是 {progressBarInstance.GetType().Name}，期望 {label}），初始值未写入。", this);
             }
         }
-        
+
         /// <summary>
-        /// 实例化 进度条
+        /// 实例化 进度条 并登记到名称字典。
         /// </summary>
         /// <param name="progressBarConfig">进度条 配置</param>
         /// <param name="progressBarPrefab">进度条 预制体</param>
-        /// <param name="uiGroupName">UI分组名称</param>
-        /// <typeparam name="T">进度条子类</typeparam>
-        /// <returns></returns>
-        private T InstantiateProgressBar<T>
-        (
-            ProgressBarConfig progressBarConfig, 
-            UIBaseProgressBar progressBarPrefab, 
-            string uiGroupName
-        ) where T : UIBaseProgressBar
+        /// <returns>实例；实例化失败时返回 <c>null</c>。</returns>
+        private UIBaseProgressBar InstantiateProgressBar(ProgressBarConfig progressBarConfig, UIBaseProgressBar progressBarPrefab)
         {
             // 获取 UI分组 根节点
-            Transform uiGroupRoot = _uiProgressBarViewInstance.GetUiGroupRoot(uiGroupName);
-            // 实例化 等级进度条
-            var levelProgressBarInstance = Instantiate
-            (
-                progressBarPrefab,
-                uiGroupRoot
-            );
-            levelProgressBarInstance.gameObject.SetActive(true); // 确保激活
-            levelProgressBarInstance.gameObject.name = progressBarConfig.progressName; // 设置名称
-            
+            Transform uiGroupRoot = _uiProgressBarViewInstance.GetUiGroupRoot(progressBarConfig.uiGroupName);
+            // 实例化 进度条
+            var progressBarInstance = Instantiate(progressBarPrefab, uiGroupRoot);
+            if (!progressBarInstance) return null;
+
+            progressBarInstance.gameObject.SetActive(true); // 确保激活
+            progressBarInstance.gameObject.name = progressBarConfig.progressName; // 设置名称
+
             // 检查是否重名 并添加到字典
-            if (!_progressBarInstanceDic.TryAdd(progressBarConfig.progressName, levelProgressBarInstance))
-                Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: 进度条名称 '{progressBarConfig.progressName}' 重复，请确保名称唯一。");
-            
-            // 返回 实例
-            return levelProgressBarInstance as T;
+            if (!_progressBarInstanceDic.TryAdd(progressBarConfig.progressName, progressBarInstance))
+                Debug.LogWarning($"[AnimSimulatorManager] InitProgressBar: 进度条名称 '{progressBarConfig.progressName}' 重复，请确保名称唯一。", this);
+
+            return progressBarInstance;
         }
         #endregion
 
@@ -1029,104 +1002,19 @@ namespace Ale.AnimSimulatorSystem
             // 因此不必再走「配置文件夹 + 名称」拼地址那条路。
             if (testBackgroundReference != null && testBackgroundReference.RuntimeKeyIsValid())
             {
-                LoadBackgroundByAddress(testBackgroundReference.RuntimeKey.ToString());
+                BackgroundSlot.LoadByAddress(testBackgroundReference.RuntimeKey.ToString());
                 return;
             }
 #endif
-            LoadBackground(testBackgroundName);
+            BackgroundSlot.LoadByName(testBackgroundName);
         }
 #endif
         
-        // 背景名称 当前记录
-        private string _backgroundCurrentName;
-        // 背景实例 当前引用
-        private GameObject _backgroundCurrentInstance;
-        // 背景实例的动画组件 当前引用
-        private AnimActor _backgroundAnimActorCurrent;
-        
-        /// <summary>
-        /// 加载 背景
-        /// </summary>
-        /// <param name="backgroundName">背景的名称</param>
-        private void LoadBackground(string backgroundName)
-        {
-            // 参数 有效性检查
-            if (string.IsNullOrEmpty(backgroundName)) return;
-            // 配置 有效性检查
-            if (!animSimulatorConfig)
-            {
-                Debug.LogWarning("[AnimSimulatorManager] LoadBackground: AnimSimulatorConfig 未设置，无法加载背景资产！");
-                return;
-            }
-            
-            // 组合 背景资产 地址 并加载
-            LoadBackgroundByAddress(
-                $"{animSimulatorConfig.backgroundAddressableFolder}{backgroundName}.prefab");
-        }
-
-        /// <summary>
-        /// 按 Addressable 地址 加载 背景。
-        /// <para>地址可以是「文件夹 + 名称」拼出的路径，也可以是资产 GUID——Addressables 两者都认。</para>
-        /// </summary>
-        /// <param name="address">背景资产地址</param>
-        private void LoadBackgroundByAddress(string address)
-        {
-            if (string.IsNullOrEmpty(address)) return;
-
-            // 卸载 旧的背景
-            UnloadBackground();
-
-            // 记录 当前地址（卸载时按同一地址释放）
-            _backgroundCurrentName = address;
-            // 使用 资产门面 加载并实例化 背景资产。直接挂到本管理器下，实例化时即完成父子关系，
-            // 免得先建到场景根部再重挂一次（其组件的 Awake 也就能在已挂好父节点的状态下执行）。
-            ToolkitAssets.InstantiateByAddress<GameObject>(
-                _backgroundCurrentName, OnLoadBackgroundComplete, transform);
-        }
-        
-        /// <summary>
-        /// 背景 加载完成回调
-        /// </summary>
-        /// <param name="backgroundInstance"></param>
-        private void OnLoadBackgroundComplete(GameObject backgroundInstance)
-        {
-            // 记录 背景实例
-            if (backgroundInstance)
-            {
-                _backgroundCurrentInstance = backgroundInstance;
-                // 父节点已在实例化时设好，此处无需再挂。
-                // 从实例上 获取 AnimActor组件
-                _backgroundAnimActorCurrent = _backgroundCurrentInstance.GetComponent<AnimActor>();
-                if (_backgroundAnimActorCurrent)
-                {
-                    // TODO:加载背景数据。
-                    _backgroundAnimActorCurrent.LoadData(new AnimActorSaveData());
-                }
-            }
-            // 加载失败，立刻卸载
-            else
-                UnloadBackground();
-        }
-        
-        /// <summary>
-        /// 卸载 背景
-        /// </summary>
-        private void UnloadBackground()
-        {
-            // 销毁 背景实例
-            if (_backgroundCurrentInstance)
-            {
-                Destroy(_backgroundCurrentInstance);
-                _backgroundCurrentInstance = null;
-                _backgroundAnimActorCurrent = null;
-            }
-            // 卸载 背景资产。释放的是源资源句柄，与上面销毁实例是两件事。
-            if (!string.IsNullOrEmpty(_backgroundCurrentName))
-            {
-                ToolkitAssets.ReleaseAddress(_backgroundCurrentName);
-                _backgroundCurrentName = null;
-            }
-        }
+        // 背景 资产槽
+        private AnimAssetSlot _backgroundSlot;
+        private AnimAssetSlot BackgroundSlot => _backgroundSlot ??= new AnimAssetSlot(
+            "背景", this,
+            () => animSimulatorConfig ? animSimulatorConfig.backgroundAddressableFolder : null);
         #endregion
         
         #region 角色 管理
@@ -1162,21 +1050,36 @@ namespace Ale.AnimSimulatorSystem
             // 资产引用优先：RuntimeKey 即该资产的 GUID，Addressables 可直接作为地址使用。
             if (testActorReference != null && testActorReference.RuntimeKeyIsValid())
             {
-                LoadActorByAddress(testActorReference.RuntimeKey.ToString());
+                ActorSlot.LoadByAddress(testActorReference.RuntimeKey.ToString());
                 return;
             }
 #endif
-            LoadActor(testActorName);
+            ActorSlot.LoadByName(testActorName);
         }
 #endif
         
-        // 角色名称 当前记录
-        private string _actorCurrentName;
-        // 角色实例 当前引用
-        private GameObject _actorCurrentInstance;
-        // 角色动画演员 当前引用
-        private AnimActor _animActorCurrent;
-        
+        // 角色 资产槽。比背景多两件事：角色初始化完成后、以及角色卸载后，都要刷新皮肤组列表 UI。
+        private AnimAssetSlot _actorSlot;
+        private AnimAssetSlot ActorSlot => _actorSlot ??= new AnimAssetSlot(
+            "角色", this,
+            () => animSimulatorConfig ? animSimulatorConfig.actorAddressableFolder : null,
+            onLoaded: animActor =>
+            {
+                // 订阅 初始化完成事件。在Start中完成初始化后的回调。
+                animActor.OnInitComplete += loadedActor =>
+                {
+                    // 仍是当前这一位角色时才刷新——期间可能已经换过人了
+                    if (ActorSlot.Actor == loadedActor)
+                        RefreshUIAnimActorSkinGroupList();
+                };
+            },
+            onUnloaded: RefreshUIAnimActorSkinGroupList);
+
+        /// <summary>
+        /// 当前角色的动画演员组件。没有角色时为 <c>null</c>。
+        /// </summary>
+        private AnimActor AnimActorCurrent => ActorSlot.Actor;
+
         /// <summary>
         /// 初始化 角色
         /// </summary>
@@ -1185,98 +1088,128 @@ namespace Ale.AnimSimulatorSystem
             // 初始化 角色皮肤
             InitActorSkin();
         }
-        
+        #endregion
+
+        #region 资产槽
         /// <summary>
-        /// 加载 角色
+        /// 「按地址加载 → 实例化 → 持有 → 卸载」的资产槽，同一时刻只持有一份实例。
+        ///
+        /// <para>角色与背景走的是同一条链路。抽出本类之前，那是六对逐字重复的方法
+        /// （加载 / 按地址加载 / 加载完成 / 卸载 / 淡入淡出）外加六个孪生字段，
+        /// 差别只有名字，以及角色侧在「加载完成」与「卸载后」各多一次皮肤组列表刷新
+        /// ——这两处差异由构造时传入的两个可选回调承担。</para>
         /// </summary>
-        /// <param name="actorName">角色的名称</param>
-        private void LoadActor(string actorName)
+        private sealed class AnimAssetSlot
         {
-            // 参数 有效性检查
-            if (string.IsNullOrEmpty(actorName)) return;
-            // 配置 有效性检查
-            if (!animSimulatorConfig)
+            private readonly string _label;                 // 日志用的中文名（"角色" / "背景"）
+            private readonly AnimSimulatorManager _owner;   // 实例化时的父节点来源
+            private readonly Func<string> _folderGetter;    // 从配置取 Addressable 文件夹；配置缺失时返回 null
+            private readonly Action<AnimActor> _onLoaded;   // 加载完成且拿到 AnimActor 后的附加处理
+            private readonly Action _onUnloaded;            // 实例被销毁后的附加处理
+
+            /// <summary>当前实例所用的资产地址；无实例时为 <c>null</c>。卸载时按同一地址释放。</summary>
+            public string Address { get; private set; }
+            /// <summary>当前实例。</summary>
+            public GameObject Instance { get; private set; }
+            /// <summary>当前实例上的动画演员组件；实例没挂该组件时为 <c>null</c>。</summary>
+            public AnimActor Actor { get; private set; }
+
+            public AnimAssetSlot(string label, AnimSimulatorManager owner, Func<string> folderGetter,
+                                 Action<AnimActor> onLoaded = null, Action onUnloaded = null)
             {
-                Debug.LogWarning("[AnimSimulatorManager] LoadActor: AnimSimulatorConfig 未设置，无法加载角色资产！");
-                return;
+                _label = label;
+                _owner = owner;
+                _folderGetter = folderGetter;
+                _onLoaded = onLoaded;
+                _onUnloaded = onUnloaded;
             }
-            
-            // 组合 角色资产 地址 并加载
-            LoadActorByAddress(
-                $"{animSimulatorConfig.actorAddressableFolder}{actorName}.prefab");
-        }
 
-        /// <summary>
-        /// 按 Addressable 地址 加载 角色。
-        /// <para>地址可以是「文件夹 + 名称」拼出的路径，也可以是资产 GUID——Addressables 两者都认。</para>
-        /// </summary>
-        /// <param name="address">角色资产地址</param>
-        private void LoadActorByAddress(string address)
-        {
-            if (string.IsNullOrEmpty(address)) return;
-
-            // 卸载 旧的角色
-            UnloadActor();
-
-            // 记录 当前地址（卸载时按同一地址释放）
-            _actorCurrentName = address;
-            // 加载 新的角色 并实例化。同背景，直接挂到本管理器下。
-            ToolkitAssets.InstantiateByAddress<GameObject>(
-                _actorCurrentName, OnLoadActorComplete, transform);
-        }
-        
-        /// <summary>
-        /// 角色 加载完成回调
-        /// </summary>
-        /// <param name="actorInstance"></param>
-        private void OnLoadActorComplete(GameObject actorInstance)
-        {
-            // 记录 角色实例
-            if (actorInstance)
+            /// <summary>按名称加载：用配置里的 Addressable 文件夹拼出地址。</summary>
+            public void LoadByName(string name)
             {
-                _actorCurrentInstance = actorInstance;
-                // 父节点已在实例化时设好，此处无需再挂。
-                // 从实例上 获取 AnimActor组件
-                _animActorCurrent = _actorCurrentInstance.GetComponent<AnimActor>();
-                if (_animActorCurrent)
+                if (string.IsNullOrEmpty(name)) return;
+
+                string folder = _folderGetter?.Invoke();
+                if (folder == null)
                 {
-                    // TODO:加载角色数据。
-                    _animActorCurrent.LoadData(new AnimActorSaveData());
-                    // 订阅 初始化完成事件。在Start中完成初始化后的回调。
-                    _animActorCurrent.OnInitComplete += (animActor) =>
-                    {
-                        if (_animActorCurrent == animActor)
-                        {
-                            // 刷新 角色皮肤组 列表UI
-                            RefreshUIAnimActorSkinGroupList();
-                        }
-                    };
+                    Debug.LogWarning($"[AnimSimulatorManager] LoadByName: AnimSimulatorConfig 未设置，无法加载{_label}资产！", _owner);
+                    return;
+                }
+
+                LoadByAddress($"{folder}{name}.prefab");
+            }
+
+            /// <summary>
+            /// 按 Addressable 地址 加载。
+            /// <para>地址可以是「文件夹 + 名称」拼出的路径，也可以是资产 GUID——Addressables 两者都认。</para>
+            /// </summary>
+            public void LoadByAddress(string address)
+            {
+                if (string.IsNullOrEmpty(address)) return;
+
+                // 卸载 旧的
+                Unload();
+
+                // 记录 当前地址（卸载时按同一地址释放）
+                Address = address;
+                // 使用 资产门面 加载并实例化。直接挂到管理器下，实例化时即完成父子关系，
+                // 免得先建到场景根部再重挂一次（其组件的 Awake 也就能在已挂好父节点的状态下执行）。
+                ToolkitAssets.InstantiateByAddress<GameObject>(Address, OnLoadComplete, _owner.transform);
+            }
+
+            /// <summary>卸载：销毁实例并释放资产句柄。两者是两件事，缺一不可。</summary>
+            public void Unload()
+            {
+                if (Instance)
+                {
+                    // 本类不是 MonoBehaviour，Destroy 不在继承链上，需显式限定
+                    UnityEngine.Object.Destroy(Instance);
+                    Instance = null;
+                    Actor = null;
+                    _onUnloaded?.Invoke();
+                }
+
+                if (!string.IsNullOrEmpty(Address))
+                {
+                    ToolkitAssets.ReleaseAddress(Address);
+                    Address = null;
                 }
             }
-            // 加载失败，立刻卸载
-            else
-                UnloadActor();
-        }
-        
-        /// <summary>
-        /// 卸载 角色
-        /// </summary>
-        private void UnloadActor()
-        {
-            // 销毁 角色实例
-            if (_actorCurrentInstance)
+
+            /// <summary>
+            /// 淡入 / 淡出。挂了 <see cref="AnimActor"/> 就走它的淡入淡出，否则退化为直接激活 / 禁用物体。
+            /// </summary>
+            public void Fade(bool fadeIn)
             {
-                Destroy(_actorCurrentInstance);
-                _actorCurrentInstance = null;
-                _animActorCurrent = null;
-                // 刷新 角色皮肤组 列表UI
-                RefreshUIAnimActorSkinGroupList();
+                if (Actor)
+                {
+                    if (fadeIn) Actor.FadeIn();
+                    else Actor.FadeOut();
+                }
+                else if (Instance)
+                {
+                    Instance.SetActive(fadeIn);
+                }
             }
-            // 卸载 角色资产。释放的是源资源句柄，与上面销毁实例是两件事。
-            if (!string.IsNullOrEmpty(_actorCurrentName))
+
+            private void OnLoadComplete(GameObject instance)
             {
-                ToolkitAssets.ReleaseAddress(_actorCurrentName);
-                _actorCurrentName = null;
+                // 加载失败，立刻卸载（把已记录的地址一并释放掉）
+                if (!instance)
+                {
+                    Unload();
+                    return;
+                }
+
+                Instance = instance;
+                // 父节点已在实例化时设好，此处无需再挂。
+                // 从实例上 获取 AnimActor组件
+                Actor = Instance.GetComponent<AnimActor>();
+                if (!Actor) return;
+
+                // TODO:加载存档数据。
+                Actor.LoadData(new AnimActorSaveData());
+                _onLoaded?.Invoke(Actor);
             }
         }
         #endregion
