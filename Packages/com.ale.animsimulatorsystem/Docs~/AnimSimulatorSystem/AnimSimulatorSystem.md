@@ -11,6 +11,21 @@
 - [测试场景](#测试场景)
 - [快速入门](#快速入门)
 - [资源导入](#资源导入)
+- [动画后端](#动画后端)
+  - [启用后端](#启用后端)
+  - [Spine 接入](#spine-接入)
+    - [一、安装运行时](#一安装运行时)
+    - [二、Spine 角色预制体](#二spine-角色预制体)
+    - [三、状态与动画](#三状态与动画)
+    - [四、Spine 皮肤](#四spine-皮肤)
+    - [五、其它](#五其它)
+  - [Live2D 接入](#live2d-接入)
+    - [一、导入 SDK](#一导入-sdk)
+    - [二、Live2D 角色预制体](#二live2d-角色预制体)
+    - [三、动作查找表（必填）](#三动作查找表必填)
+    - [四、轨道 → 层 映射](#四轨道--层-映射)
+    - [五、Live2D 皮肤](#五live2d-皮肤)
+    - [六、两条使用约束](#六两条使用约束)
 - [系统配置](#系统配置)
   - [动画模拟管理器](#动画模拟管理器)
   - [资源文件路径](#资源文件路径)
@@ -125,14 +140,14 @@
 - 挂载 AnimActor组件。
   - 双击刚制作好的 角色预制体，打开 预制体编辑模式。
   - 在 Hierarchy面板中 选中 角色预制体的 根物体，在 Inspector面板中 点击 [Add Component]按钮，添加 AnimActor组件。
-  - 将 Spine动画的SkeletonAnimation组件，拖拽到 AnimActor组件的 Spine Animator 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（Spine 角色是 **SpineAnimator**，Live2D 角色是 **Live2dAnimator**），拖拽到 AnimActor组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](image-63.png)
 
 - 放置 AnimActionPlayer(动画动作播放器)。
   - 将 Demo 中的 `Assets\UI\AnimActionPlayer\AnimActionPlayer.prefab` 预制体（导入 Sample 后位于 `Assets\Samples\Anim Simulator System\<版本号>\...` 下），拖拽放置到 角色预制体中。
   - 也可以自己手动创建空物体，并挂载 AnimActionPlayer组件 与 SphereCollider组件 来完成。只是通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
-  - 将 Spine动画的SkeletonAnimation组件，拖拽到 AnimActionPlayer组件的 Spine Animator 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（SpineAnimator 或 Live2dAnimator），拖拽到 AnimActionPlayer组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](image-65.png)
 
@@ -148,7 +163,7 @@
   - 在 AnimActionPlayer组件的 Anim Actions(动画动作列表)中，点击右下角的[+][-]按钮，在列表末尾 增加一个 动画动作条目。
   - 将 Action Name(动作名称)设置成“动作-测试”。这个名称 仅用于配置文件之间的识别与指定。游戏中显示的名称，需要在 UiDisplayActionName(显示动作名称)中进行设置。
   - 将 Action Operation Type(动作操作类型)设置成 Click(点击)。表示这个 动画动作 是通过玩家点击 来触发的。
-  - 将Spine的动画文件"dress-up"拖拽到 Anim Reference Asset(动画引用文件)栏中，作为这个 动画动作 的动画资源。
+  - 在 **Anim Name(动画名称)** 栏中，填写这个动作要播放的动画名，例如“dress-up”。这个名字就是在 Spine 或 Live2D 中制作动画时起的名字，**两个后端使用相同的命名规则**。
 
 ![alt text](image-67.png)
 
@@ -165,6 +180,141 @@
 具体的导入方法与流程，请参考 [Spine 官方的 spine-unity 文档](https://zh.esotericsoftware.com/spine-unity)（骨骼数据的导入、SkeletonAnimation 预制体的生成、材质与图集的设置）。
 
 > 本节原先链接的是 Fs 框架的《资源导入文档》。本插件已不再依赖 Fs，那份文档也不随本包分发，故改为指向 Spine 官方文档。
+
+# 动画后端
+
+插件支持 **Spine** 与 **Live2D** 两个动画后端，**可在同一工程内同时启用**。一个工程里两种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator` 还是 `Live2dAnimator` 决定。
+
+上层的 AnimActor 与 AnimActionPlayer 只与动画控制器的公共基类 `AnimatorBase` 打交道，对具体后端无感。**动画与皮肤都用字符串名指定，两个后端使用相同的命名规则**，因此同一份动作 / 皮肤组配置对两边都成立。
+
+## 启用后端
+
+后端由编译宏控制，在插件的欢迎窗口里开关：菜单 `Tools > Ale Toolkit > Anim Simulator System > Welcome`。
+
+| 宏 | 需要的运行时 | 安装方式 |
+|---|---|---|
+| `ASS_SPINE` | `com.esotericsoftware.spine.spine-unity`（+ `spine-csharp`） | git URL，经 Package Manager 安装 |
+| `ASS_LIVE2D` | Cubism SDK for Unity（≥ Cubism 5 SDK R1 beta2） | **不是 UPM 包**，需从官网下载 `.unitypackage` 手动导入 |
+
+- 两个宏**可以同时启用**，互不排斥。
+- 只装了运行时、没开宏，对应的动画控制器不会参与编译；欢迎窗口会显示运行时的安装状态，开宏时若检测不到运行时会先弹确认。
+- 两个都不启用时插件仍能编译，但角色动画无法播放——编辑器加载时会给出提示。
+
+## Spine 接入
+
+### 一、安装运行时
+
+Spine 的 Unity 运行时以 **git URL** 分发（不在 UPM 注册表中），在 `Packages/manifest.json` 里按需添加，或经 Package Manager 的 `Add package from git URL...` 添加：
+
+| 包 | git URL（`#4.2` 为分支，按项目使用的 Spine 版本调整） |
+|---|---|
+| `com.esotericsoftware.spine.spine-csharp` | `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.2` |
+| `com.esotericsoftware.spine.spine-unity` | `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.2` |
+| `com.esotericsoftware.spine.urp-shaders` | `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Modules/com.esotericsoftware.spine.urp-shaders#4.2` |
+
+- `spine-unity` 依赖 `spine-csharp`，两者都要装。
+- **URP 工程还需装 `urp-shaders`**，否则 Spine 材质在 URP 下不显示。
+- 装好后在欢迎窗口中启用 `ASS_SPINE`。
+
+骨骼数据的导入、`SkeletonAnimation` 预制体的生成、材质与图集设置，见 [Spine 官方的 spine-unity 文档](https://zh.esotericsoftware.com/spine-unity)。
+
+### 二、Spine 角色预制体
+
+- 按 Spine 官方流程把骨骼数据导入 Unity，生成带 **`SkeletonAnimation`** 组件的物体。
+  > 本系统**只支持 `SkeletonAnimation`**，不支持 `SkeletonGraphic`（UI 用）与 `SkeletonMecanim`。
+- 在该物体上挂载 **`SpineAnimator`**，并配置：
+  - **Spine Skeleton Animation**：同物体上的 `SkeletonAnimation`。添加组件时会自动寻找并填入。
+  - **Spine State Data**：状态数据列表，见下面的[状态与动画](#三状态与动画)。
+- 角色预制体的**根物体**上挂 **`AnimActor`**，把 `SpineAnimator` 拖到它的 Animator 栏。
+  > 惯例上 `SkeletonAnimation` + `SpineAnimator` 放在根物体的**子物体**里，`AnimActor` 在根物体上——Demo 的 `Actor_Test_1` 就是这么搭的。放在同一个物体上也能正常工作。
+
+### 三、状态与动画
+
+`SpineAnimator` 的 **Spine State Data(状态数据列表)** 定义「状态名 → 该状态要播的一组动画」，`AnimActor` 的 State Init List 里填的状态名就是在这里定义的。每条状态：
+
+- **State Name**：状态名称，例如 `idle`。
+- **Spine Skeleton Animation**（可选）：该状态专用的渲染器。留空则用上面配置的默认渲染器；**填了则该状态的动画会播到这个渲染器上**，用于一个角色由多个 Spine 模型拼成的场合（该渲染器会随状态的启用 / 停用自动淡入淡出）。
+- **Spine Anim Datas**：这个状态要播放的动画列表，每条包含：
+  - **Anim Name**：动画名，即在 Spine 中制作动画时起的名字。**Spine 侧按名直接在骨架数据中查找，不需要额外的查找表**（这是与 Live2D 的一处差异）。
+  - **Anim Ref Asset**：动画引用文件（**兼容字段，仅 Spine**）。旧版本用它指定动画，现已被 Anim Name 取代，仅在 Anim Name 留空时作为回退读取。计划在 2.2.0 移除，新配置请直接填 Anim Name。
+  - **Anim Track / Anim Track Sub**：动画轨道与子轨道。**Spine 的 `AnimationState` 轨道数不受限制**，本系统的轨道号（`主轨道 × 10 + 子轨道`）可直接当作 Spine 的轨道索引使用，无需任何映射（Live2D 侧则必须映射到有限的层）。
+  - **Is Loop / Is Reverse / Speed**：是否循环、是否反向、播放速度倍率。
+  - **Start Delay Time**：起播延迟（秒）。
+  - **Loop Interval Time Range**：循环间隔（秒）。仅循环动画有效，填非零范围后，每播完一次会在该范围内随机等待一段时间再播下一次——用于眨眼、耳朵抖动这类「偶尔来一下」的动画。
+
+### 四、Spine 皮肤
+
+Spine 的 Skin 是骨架数据里的一等公民，因此**皮肤名直接就是 Spine 中制作时的皮肤名**（含文件夹路径时用 `/` 分隔，例如 `clothes/dress-green`），不需要像 Live2D 那样另做映射配置。
+
+- **Base Skins**：始终显示的基础皮肤，`SpineAnimator` 与 `AnimActor` 上都有，两处都会被合并进来。
+- 可切换的皮肤在 `AnimActor` 的[皮肤组](#皮肤组)里配置。
+- 运行时，系统把「基础皮肤 + 当前应用中的皮肤」合并成一个名为 `Combined Skin` 的组合皮肤整体套到骨架上，因此**多件皮肤可以叠加显示**（配饰之类的皮肤组把 Skin Select Count Max 设为 0 即可不限数量）。
+- 皮肤名字段会**自动列出骨架里可用的皮肤名下拉**，不必手打。
+
+> `SpineAnimator` 另有一个 Spine 专有的 `RepackedSkin()` 方法（把当前组合皮肤重打包成单张图集以减少绘制调用）。它开销较大，一般在换装全部完成后再手动调用，系统不会自动调。
+
+### 五、其它
+
+- **Anim Fade Duration**：切换模型时的淡入淡出时长（秒）。系统补间的是骨架的整体透明度 `Skeleton.A`。
+- **Is Display On Init**：初始化时就显示。默认关闭——角色初始为透明且非激活，等状态生效后再淡入。
+- **进度控制（拖拽 / 旋转 / 按压）在 Spine 侧是原生支持的**：直接读写 `TrackEntry.TrackTime`，不像 Live2D 那样需要走单独的采样通道。
+
+## Live2D 接入
+
+### 一、导入 SDK
+
+Live2D Cubism SDK for Unity **不是 UPM 包**：官方以 `.unitypackage` 分发，其中包含专有的 Cubism Core 原生库（开源的 `Live2D/CubismUnityComponents` 仓库既没有 `package.json`、也不含 Core）。因此它无法写进本包的 `dependencies`，只能手动导入。
+
+1. 从 [Live2D 官方下载页](https://www.live2d.com/en/sdk/download/unity/) 下载 Cubism SDK for Unity。
+2. 把 `.unitypackage` 拖入工程，导入到 `Assets/Live2D/Cubism/`。导入完成后**关闭并重新打开工程**（官方要求）。
+3. 在欢迎窗口中启用 `ASS_LIVE2D`。SDK 自带 `Live2D.Cubism` 程序集定义，本插件会自动引用到。
+
+> URP 工程还需按 [官方 URP 导入说明](https://docs.live2d.com/en/cubism-sdk-tutorials/urp-import/) 把渲染管线资产的 Renderer List 指向 `CubismURPRenderer.asset`，否则模型不显示。
+
+### 二、Live2D 角色预制体
+
+Live2D 角色预制体的搭法与 Spine 一致，只是组件不同：
+
+- 模型根物体上，除了 Cubism 导入时自带的组件外，还需要 **`CubismFadeController`**（指定模型的 `.fadeMotionList` 资产）与 **`CubismMotionController`**（设置 Layer Count）——它们是 Cubism 播放动作的前提。
+- 挂载 **`Live2dAnimator`**，并配置：
+  - **Live2d Render Controller**：模型的 `CubismRenderController`。本系统以它作为「渲染器」，淡入淡出即补间它的 Opacity。
+  - **Live2d Motion Controller**：上面添加的 `CubismMotionController`。
+  - **Live2d State Data**：状态名 → 该状态要播的一组动画。与 Spine 的状态数据列表一一对应。
+- 根物体上再挂 **`AnimActor`**，把 `Live2dAnimator` 拖到它的 Animator 栏。之后的皮肤组、动画动作播放器配置与 Spine 完全相同。
+
+### 三、动作查找表（必填）
+
+Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会生成一个个散落的 `AnimationClip`，彼此之间没有索引。因此需要在 `Live2dAnimator` 的 **Live2d Anim Clips(动作查找表)** 里，把动画名与动作剪辑一一对应起来。
+
+- **Anim Name**：动画名。动作配置里填的就是这个名字。
+- **Clip**：motion3.json 导入后生成的 `AnimationClip`。
+- 动画名留空时，会用剪辑自身的资产名兜底，省去手填。
+- 重复的动画名会给出告警，后一条被忽略。
+
+### 四、轨道 → 层 映射
+
+本系统的动画轨道号是 `主轨道 × 10 + 子轨道`（例如 Body/0 = 10、Eyes/0 = 40），值域最大到 9990；而 Cubism 的**层（layer）数量很少**，在 `CubismMotionController` 的 Layer Count 上配置。两者必须映射。
+
+在 `Live2dAnimator` 的 **Live2d Track Layers(轨道映射)** 中显式指定「哪条轨道走哪一层」：
+
+- 未显式指定的轨道，会**自动分配第一个尚未被占用的层**（自动分配会避开所有显式映射已占用的层）。
+- 无空闲层可分配时，钳制到最后一层并**告警一次**——此时同层的动作会互相覆盖，请显式指定映射，或调大 Layer Count。
+- 映射里的层索引若超出 Layer Count，选中组件时 Inspector 就会告警，不必等到运行时才发现。
+
+### 五、Live2D 皮肤
+
+**Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2dAnimator` 的 **Live2d Skins** 中定义：
+
+- **Skin Name**：皮肤名。与 Spine 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对两个后端都适用。
+- **Part Ids**：该皮肤要显示的部件 ID 列表（即 Cubism Editor 中的部件 ID）。
+- **Textures**（可选）：贴图替换，把某个可绘制对象的主贴图换成另一张。用于「同一套部件、不同花色」的场合。
+
+换装时取「基础皮肤 + 应用中皮肤」的并集展开成部件集合，集合内的部件不透明度置 1、其余**被本组件管辖的**部件置 0。**未在任何皮肤里出现过的部件（身体、脸等模型固有部件）不受影响**，不会被误伤。
+
+### 六、两条使用约束
+
+1. **动作不要动画「模型整体不透明度」**。若 motion3.json 给模型不透明度打了关键帧（导入后表现为剪辑里一条 `CubismRenderController.Opacity` 曲线），它会与本系统的淡入淡出同帧争写。整体淡入淡出请交给系统，动作里不要碰。
+2. **进度控制与反向播放走单独的采样通道**。Cubism 没有读写播放进度的 API、播放速度也必须 ≥ 0，因此拖拽 / 旋转 / 按压三种交互，以及反向播放、速度为 0 的场合，改由本插件逐帧采样剪辑来驱动；这条通道**不经过 Cubism 自己的动作淡入淡出**（常规的循环 / 正向播放仍走原生通道，淡入淡出正常）。
 
 # 系统配置
 
@@ -379,8 +529,9 @@
 
 - 角色预制体的根物体，需要挂载 AnimActor组件。
   - AnimActor组件 是角色预制体的核心组件，负责管理角色的动画状态、皮肤等动画相关的功能。
-  - State Init List：状态初始化列表。状态的切换，通常会伴随 动画的切换。状态列表与对应的动画组，通常在子物体的 Spine Animator(动画播放器)或 Live2D Animator组件中进行配置。
-  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。
+  - Animator：动画控制器。指向角色的 **SpineAnimator** 或 **Live2dAnimator**。AnimActor 只与动画控制器的公共基类打交道，因此**同一份角色配置对两个后端都成立**，换后端只需换这个组件。
+  - State Init List：状态初始化列表。状态的切换，通常会伴随 动画的切换。状态列表与对应的动画组，在 Spine Animator 或 Live2D Animator 组件中进行配置。
+  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。填写时会**自动列出该角色可用的皮肤名下拉**（Spine 取骨架里的皮肤，Live2D 取 Live2dAnimator 上配置的皮肤）。
 
 ### 皮肤组
 
@@ -391,7 +542,8 @@
   - Is Must Select Skin：必须选择皮肤。是否 必须选择 至少一个皮肤。例如，眼睛的皮肤组，必须选择一个眼睛皮肤。饰品的皮肤组，可以不选择任何一个饰品皮肤。
   - Default Skin Number：默认皮肤序号。在必须选择皮肤时，默认选择的皮肤序号。从1开始计数。
   - Anim Actor Skins：角色皮肤列表。配置了这个皮肤组中，所有的皮肤选项。每个皮肤选项，代表一个可切换的皮肤。
-    - Skin Name：皮肤名称。Spine或Live2D中制作的皮肤，通常会通过 文本名称 来进行指定。 这个名称 仅用于配置文件之间的 识别与指定。游戏中显示的名称，需要在 UiDisplaySkinName(显示皮肤名称)中进行设置。
+    - Skin Name：皮肤名称。Spine或Live2D中制作的皮肤，通过 文本名称 来进行指定，**两个后端使用相同的命名规则**（含文件夹路径时用 '/' 分隔）。这个名称 仅用于配置文件之间的 识别与指定。游戏中显示的名称，需要在 UiDisplaySkinName(显示皮肤名称)中进行设置。
+      - 该栏会**自动列出当前角色可用的皮肤名下拉**。取不到候选时（未指定动画控制器、骨架数据缺失、Live2D 尚未配置皮肤）会退化为普通文本框，仍可手工填写；已填但不在候选内的值会被保留并标注「缺失」，不会被下拉洗掉。
     - Ui Display Skin Name：显示皮肤名称。玩家在UI中，看到的这个皮肤的名称。通常是 多语言的条目，需要预先在 多语言系统中，添加好这个 文本条目。
     - Skin Image：皮肤图标。这个图标 会显示在UI中，作为这个皮肤的 预览图标，玩家通过点击这个图标，来选择切换这个皮肤。
 
@@ -403,7 +555,7 @@
   - 可以将 AnimActionPlayer预制体，直接拖拽放置到 角色预制体中。也可以自己手动创建空物体，并挂载 AnimActionPlayer组件(SphereCollider组件通常会自动添加)来完成。通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
   - Action Player Name：动画动作播放器名称。这个名称 仅用于配置文件之间的识别与指定。
   - Comment：备注。对于这个动画动作播放器的备注说明，便于策划进行识别与区分。
-  - Spine Animator：Spine动画播放器。这个组件 是Spine动画的核心组件，负责Spine动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
+  - Animator：动画控制器。指向角色的 SpineAnimator 或 Live2dAnimator，负责动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
   - Anim Track Default：动画轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画轨道，就会使用这个默认的动画轨道。
   - Anim Track Sub Default：动画子轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画子轨道，就会使用这个默认的动画子轨道。
   - Play Anim Action Interval Time：最小间隔时间，连续播放 动画动作的 最小间隔时间，单位是秒。避免玩家连续快速地 触发动画动作，导致动画播放过于频繁，影响动画播放效果。一般设置成0.5秒左右。
@@ -436,7 +588,9 @@
   - Action Direction X：动作的交互方向 X轴。对交互方向的X轴进行旋转，调整交互的方向。例如，拖拽的交互方向，默认是水平垂直向上的，可以通过这个值进行选择来调整。
   - Action Direction Y：动作的交互方向 Y轴。对交互方向的Y轴进行旋转，调整交互的方向。
   - Action Direction Z：动作的交互方向 Z轴。对交互方向的Z轴进行旋转，调整交互的方向。
-  - Anim Reference Asset：动画引用文件。这个文件 是从Spine导入到Unity中的SkeletonData资源文件，包含了Spine动画的所有数据。通过这个文件，来指定这个动画动作所使用的 动画资源。
+  - Anim Name：动画名称。这个动作要播放的动画，用**动画制作时起的名字**来指定，例如“dress-up”。Spine 与 Live2D **使用相同的命名规则**——同一份动作配置对两个后端都成立。
+    - Spine 侧按名在骨架数据中查找；Live2D 侧按名在 Live2dAnimator 的「动作查找表」中查找（Cubism 没有按名找动作的 API，需先在那张表里把动画名与动作剪辑对应起来）。
+    - Anim Reference Asset：动画引用文件（**兼容字段，仅 Spine**）。旧版本用它指定动画，现已被 Anim Name 取代，仅在 Anim Name 留空时作为回退读取。计划在 2.2.0 移除，新配置请直接填 Anim Name。
   - Damping Time：阻尼时间。用于平滑过渡动画的进度变化，单位是秒。一般设置成0.05秒左右，能够让动画进度的变化更自然一些。增大这个值，可以让动画的反应更迟钝，更有重量感。
   - Is Loop：是否循环。这个动画动作 是否需要循环播放。例如，从Idle动画切换到Walk动画，两个动画均为循环动画，那么这个动画动作就需要设置成 循环。
   - Is Reverse：是否反向。这个动画动作 是否需要反向播放。
@@ -598,5 +752,5 @@ if (hits.Count > 0)
 ## 背景预制体
 
 背景预制体 需要放置在 系统配置中 [资源文件路径](#资源文件路径) 中指定的背景文件夹路径下，才可以在动画模拟器系统中进行配置与使用。\
-背景预制体 与 角色预制体的 配置方式 其实是相同的，都是由Spine动画资源导入到Unity中，制作成预制体，并挂载AnimActor组件与Spine Animator组件来完成。\
+背景预制体 与 角色预制体的 配置方式 其实是相同的，都是由 Spine 或 Live2D 动画资源导入到Unity中，制作成预制体，并挂载 AnimActor组件 与对应的动画控制器（SpineAnimator 或 Live2dAnimator）来完成。\
 做出区分是为了方便 分类整理，以及在系统配置中，能够区分背景与角色的文件夹路径，来进行不同的资源管理。

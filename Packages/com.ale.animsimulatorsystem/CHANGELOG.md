@@ -4,6 +4,64 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.0] - 2026-08-10
+
+**接入 Live2D，并使 Spine 与 Live2D 可在同一工程内同时生效。** 此前插件只有 `SpineAnimator` 一个动画后端，且 `AnimActor` / `AnimActionPlayer` 用 `#if ASS_SPINE / #else` 的互斥分支硬绑它——`#else` 分支里那个 `Animator live2DAnimator` 字段全仓库零引用，只是个占位。现在后端无关的机制全部收敛到新的抽象基类 `AnimatorBase`，两个后端各自实现差异部分，上层对具体后端完全无感。
+
+同时**移除了 DOTween 这个第三方硬依赖**——插件现在只依赖 Ale Toolkit 与 Unity 官方包。
+
+### 新增
+
+- **`AnimatorBase` 抽象基类**：承载状态机与渲染器引用计数、每轨道的播放栈（被覆盖时压栈、停止时弹栈并恢复上一条）、循环动画去重、循环随机间隔调度、起播延时、单次播放完成计时、皮肤名册、淡入淡出、轨道编号规则。后端差异收敛为 13 个抽象成员，公开 API 16 个。
+  - **渲染器一律以 `Component` 表示**。共享机制从不调用后端渲染器的任何 API，只把它当三样东西用：字典的引用身份键、可 `SetActive` 的 GameObject 宿主、原样回传给后端虚方法的不透明令牌。授权侧仍由各子类声明强类型字段（Spine 的 `SkeletonAnimation` / Live2D 的 `CubismRenderController`），在 `EnumerateStateDatas()` 里转成中性记录——Inspector 的类型约束不退化，既有预制体的字段名与序列化布局也一字不改。
+  - **新增 `GetAnimPlayToken(int trackIndex)`**：每次成功播放自增的单调令牌，供调用方判断「我发起的那次播放是否已被顶替」。它取代了原先持有后端播放句柄做引用比较的做法——见「修复」。
+- **`Live2dAnimator` 与 `Live2dSkinData`**（受 `ASS_LIVE2D` 约束）。Cubism 与 Spine 有三处根本差异，决定了它的实现形态：
+  - **不能按名找动作**（motion3.json 导入成一个个散落的 `AnimationClip`），故需一张「动画名 → 剪辑」查找表；
+  - **层（layer）数量很少**且在 `CubismMotionController` 上配置，而本系统的轨道号是 `主轨道*10+子轨道`（值域 0..9990），二者必须显式映射；缺映射时自动分配第一个空闲层，无空闲则钳制并告警。
+  - **没有读写播放进度的 API，速度也必须 ≥ 0**。故常规播放（循环 / 正向 / 速度>0）走 `CubismMotionController`，保留 motion3.json 自带的淡入淡出；而反向播放、速度为 0、以及拖拽 / 旋转 / 按压三种进度擦洗，改由 `AnimationClip.SampleAnimation` 逐帧采样驱动，进入前先停掉该层的原生播放以免同帧争写。**采样通道刻意不另建 `PlayableGraph`**：模型上的 `Animator` 已被 Cubism 自己的图占用，再挂一个 `AnimationPlayableOutput` 会互相覆盖。
+  - **Cubism 没有「皮肤」概念**，故 `Live2dSkinData` 把一件皮肤定义为「皮肤名 → 部件 ID 集合（+ 可选的贴图替换）」。换装只动「被任一皮肤管辖的部件」，未在任何皮肤里出现过的部件（身体、脸等模型固有部件）不受影响。
+- **`ASS_LIVE2D` 编译宏**，与 `ASS_SPINE` **可同时启用**——一个工程里两种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator` 还是 `Live2dAnimator` 决定。
+- **包内 Editor 程序集与欢迎窗口**（`Tools > Ale Toolkit > Anim Simulator System > Welcome`）：两个后端宏的开关、运行时安装状态检测、快捷操作与文档入口。宏的增删复用 toolkit 的 `DefineUtils`，界面三语复用 `ToolkitEditorL10n`。
+- **动画改为按字符串名配置**：`AnimData.animName` / `AnimAction.animName`，两个后端使用相同的命名规则——同一份动作配置对 Spine 与 Live2D 都成立。Spine 侧按名在 `SkeletonData` 中查找，Live2D 侧按名查动作表。
+- **`[AnimSkinName]` 特性与皮肤名下拉**，替代原先直接挂在皮肤名字段上的 Spine 专有特性 `[SpineSkin]`（两个后端同时启用后，它会给 Live2D 角色也弹出 Spine 的下拉）。候选由各后端经 `AnimatorBase.EditorCollectSkinNames()` 提供，因此**编辑器程序集不必引用 spine-unity / Live2D.Cubism**。取不到候选时退化为文本框；已填但不在候选内的值会被保留并标注「缺失」，不会一打开 Inspector 就被洗掉。
+
+### 破坏性变更
+
+- **`SpineAnimator` 的公开 API 全部移入基类并去 Spine 化**。该类现在只剩 `RepackedSkin()` 一个自有公开方法（Spine 专有优化，Live2D 无对应概念）。
+
+  | 旧 | 新 |
+  |---|---|
+  | `PlaySpineAnim(SpineAnimData, Action<TrackEntry>)` | `PlayAnim(AnimData, Action<AnimData>)` |
+  | `StopSpineAnim` / `DestroySpineAnim` / `ClearAllSpineAnim` | `StopAnim` / `DestroyAnim` / `ClearAllAnim` |
+  | `AddSpineAnimState` / `RemoveSpineAnimState` / `SwitchStateArray` | `AddAnimState` / `RemoveAnimState` / `SwitchAnimStateArray` |
+  | `FadeSpineAnimator(bool, SkeletonAnimation, bool)` | `FadeAnimator(bool, Component, bool)` |
+  | `GetTrackEntry(int)` | 删除 → `GetAnimProgress` / `SetAnimProgress` / `GetAnimPlayToken` |
+  | 嵌套类型 `SpineAnimator.SpineAnimData` | 顶层类型 `AnimData` |
+
+- **序列化字段更名与移位**（均带 `[FormerlySerializedAs]`，既有预制体数据自动迁移）：
+  - `SpineAnimator.spineAnimSwitchSpineDuration` → `AnimatorBase.animFadeDuration`
+  - `SpineAnimator.spineStateInitList` → `AnimatorBase.stateInitList`
+  - `SpineAnimator.baseSkins` → `AnimatorBase.baseSkins`（同名，移到基类）
+  - `AnimActor.spineAnimator` / `AnimActionPlayer.spineAnimator` → `animator`，类型由 `SpineAnimator` 改为 `AnimatorBase`
+- **删除 `AnimActor.live2DAnimator`**：`#else` 分支里的占位字段，全仓库零引用。
+- **`AnimAction.animReferenceAsset` 与 `AnimData.animRefAsset` 降级为兼容字段**，仅在 `animName` 留空时作为回退。计划在 2.2.0 移除，新配置请直接填动画名。
+- **不再依赖 DOTween**：`DOTWEEN` 宏与相关 `#if` 分支全部删除，asmdef 中解析不到的 DOTween 引用一并移除。补间改用 toolkit 的 `ToolkitTween`（需 `com.ale.toolkit` **≥ 1.7.3**，该版本新增了通用浮点补间 `To()`）。
+- asmdef 中 Spine 的两个引用由 GUID 改为**名称引用**（`spine-csharp` / `spine-unity`），并新增名称引用 `Live2D.Cubism`。可选依赖用名称而非 GUID：未安装时 Inspector 能显示缺的是谁，且 SDK 重新导入后 asmdef 的 GUID 若变化，名称引用能自动接上。
+
+### 修复
+
+- **`HAS_SPINE` → `ASS_SPINE` 未落地**。2.0.0 改了宏名却没改工程的 Player Settings，于是**所有 Spine 代码实际上一直被编译掉**，`SpineAnimator` 编译产物是个没有任何序列化字段的空 `MonoBehaviour`——而预制体上那些配置成了孤儿 YAML，一旦有人弄脏并保存就会被静默丢弃。现由 `AnimSimulatorDefineChecker` 在编辑器加载时一次性改写（幂等）。
+- **「启用 `ASS_SPINE` 但未装 DOTween」的组合根本无法编译**：循环间隔的记录表声明在 `#if DOTWEEN` 内，却在宏外被访问（3 处 `CS0103`）。因 `ASS_SPINE` 从未真正打开过而一直没暴露。随 DOTween 移除彻底消失。
+- **单次播放完成的计时器无法取消**：原先那个延时调用无人持有，动画被提前停止后计时照走，到点再触发一次停止与回调。现登记句柄，`StopAnim` 会取消它。
+- **状态自带的渲染器覆盖从不影响真正的播放**：`AddSpineAnimState` 把该渲染器传了下去，但下游的播放实现写死用默认字段——覆盖只影响淡入淡出与引用计数。新的 `PlayAnimOnRenderer(renderer, …)` 接收渲染器。
+- **循环动画去重表永远是空的**：悬垂 `else` 导致「表中无记录时不登记」，于是去重从未生效，同一轨道上重复添加同名循环动画会把它重头拉起、产生可见跳帧。
+- **进度阻尼协程的轨道身份误判**：原先持有 Spine 的 `TrackEntry` 做引用比较，而它是**对象池复用**的——旧句柄被回收再分配后比较会假阳性，协程会继续去写一条早已易主的轨道。改用 `(轨道, 播放令牌)` 比对。
+- **无阻尼分支的空引用**：轨道为空时取到 `null` 却紧接着解引用，且漏了播放器判空。现经 `SetAnimProgress` 返回 `false` 而非抛异常。
+- **渲染器与动画组件同体时被误禁用**：淡出会 `SetActive(false)` 渲染器所在物体，若它正是承载动画组件的那个物体，就把组件自己一起停掉，状态机再也跑不起来。Live2D 的 `CubismRenderController` 通常就在模型根上、与 `Live2dAnimator` 同体，一装上就会命中。现同体时只把不透明度归零，物体保持激活。
+- **UI 淡入淡出互相打架**：淡出中途改淡入时，旧淡出的完成回调仍会在稍后触发并把刚激活的 UI 关掉。现在发起前先打断在途补间。
+- **起播延时句柄无效时永久卡住动画**：无效句柄仍被登记，导致后续播放一律被开头的「已在等待」判断挡回。现仅登记真正在途的延时。
+- 所有补间与延时均绑定 `owner`，组件销毁后自动作废，不再对已失效的骨架 / 模型下发写入。
+
 ## [2.0.0] - 2026-08-10
 
 **底层框架由 Fs Game Framework 整体迁移到 [Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)（`com.ale.toolkit` ≥ 1.7.2）。** 迁移前插件编译期依赖 6 个 Fs 程序集，而 Fs 并不随本仓库分发——任何干净检出都无法编译。迁移后依赖仅剩 toolkit 与 Unity 官方包。**功能与交互语义保持不变**，但命名空间、包名与编译宏全部更换，属破坏性变更。
