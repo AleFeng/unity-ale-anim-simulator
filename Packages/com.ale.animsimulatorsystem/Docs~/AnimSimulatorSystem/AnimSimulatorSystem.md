@@ -8,7 +8,7 @@
 - [📜目录](#目录)
 - [官方教程](#官方教程)
 - [示例场景](#示例场景)
-- [测试场景](#测试场景)
+- [正式项目的资产布局](#正式项目的资产布局)
 - [快速入门](#快速入门)
 - [资源导入](#资源导入)
 - [动画后端](#动画后端)
@@ -58,9 +58,9 @@
 - [Spine 官方网站](https://zh.esotericsoftware.com/)
   - 官方的视频教程。只在 YouTube 提供了英文教程。
   - 可以使用 浏览器翻译插件 翻译中文字幕 进行阅读。
-  - 另外，也可以在 [Bilibili](https://search.bilibili.com/all?keyword=Dialogue+System&from_source=webtop_search&spm_id_from=333.1007&search_source=5) 上查找到相关教程。
+  - 另外，也可以在 [Bilibili](https://search.bilibili.com/all?keyword=Spine) 上查找到相关教程。
 - [Live2D 官方网站](https://www.live2d.com/zh-CHS/)
-  - 官方的详细文档，详细描述了 Dialogue System 的各项功能。
+  - 官方的详细文档，详细描述了 Live2D Cubism 的各项功能。
   - 只有 英文 的版本。可以使用 浏览器翻译插件 进行阅读。
 - [浏览器 翻译插件](https://microsoftedge.microsoft.com/addons/detail/%E6%B2%89%E6%B5%B8%E5%BC%8F%E7%BF%BB%E8%AF%91-%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%8F%92%E4%BB%B6-pdf%E7%BF%BB%E8%AF%91-/amkbmndfnliijdhojkpoglbnaaahippg)
   - 这里提供 微软Edge浏览器 中的翻译插件的安装链接。
@@ -93,26 +93,28 @@
 ![alt text](image-51.png)
 
 - 示例场景的配置
-  - 示例场景的 剧情演出数据的配置，具有很多参考价值。
+  - 示例场景里那套 动画模拟器 的完整配置，具有很多参考价值。
     ![alt text](image-52.png)
   - 在场景的AnimSimulatorManager预制体上，配置了AnimSimulatorConfig(动画模拟器配置)的文件，上面对 背景、角色、动画动作的播放器、皮肤组、等级进度条、动作进度条等项目，做了详细的配置。
     ![alt text](image-60.png)
   - 在角色的预制体上，配置了多个 动画动作的播放器，用于指定 角色身上每个位置 可以播放的 动画动作。例如，在头部配置摸头的动画，在身体配置空闲与走路的动画。之后通过玩家操作，在不同的动画之间进行切换与操作。
 
-# 测试场景
+# 正式项目的资产布局
 
-示例场景 仅作为功能的演示。在制作 正式的游戏资产 与 配置时，请使用已经创建好的 正式游戏资产。
+上面的示例场景 仅作为功能的演示，导入后归你的工程所有、可以随意改动。但**不建议直接在 Sample 目录里长出正式内容**——`Assets\Samples\` 是 Package Manager 的导入落点，重新导入或升级包时容易被覆盖或产生重复副本。正式的游戏资产请另建目录存放。
+
 ![alt text](image-11.png)
 
-- 正式游戏资产
-  - 动画模拟器管理器：Assets\Resources\Managers\AnimSimulatorManager.prefab
-  - 角色预制体：Assets\ProductAssets\AnimSimulator\Actors\
-  - 背景预制体：Assets\ProductAssets\AnimSimulator\Backgrounds\
-  - UI预制体：Assets\ProductAssets\AnimSimulator\UI\
-  - 动画模拟器配置文件：Assets\ProductAssets\AnimSimulator\Config\AnimSimulatorConfig.asset
-- 测试场景
-  - Assets\Scenes\Test\VNStoryTest.unity
-  - 打开测试场景，直接 运行游戏 就能在 Game窗口中看到 剧情演出的内容。
+下面是一份**建议布局**（不是既存目录，需要自己建）。它与本文档其余章节的示例路径一致，照着摆能少改几处配置：
+
+- 动画模拟器管理器：`Assets\Resources\Managers\AnimSimulatorManager.prefab`
+  - 放在 `Resources` 下，是为了让它能被随场景加载；也可以直接把该预制体拖进启动场景。
+- 角色预制体：`Assets\ProductAssets\AnimSimulator\Actors\`
+- 背景预制体：`Assets\ProductAssets\AnimSimulator\Backgrounds\`
+- UI 预制体：`Assets\ProductAssets\AnimSimulator\UI\`
+- 动画模拟器配置文件：`Assets\ProductAssets\AnimSimulator\Config\AnimSimulatorConfig.asset`
+
+> 角色与背景的文件夹路径**必须与 AnimSimulatorConfig 里配置的一致**，否则按地址加载会找不到资产。改法见下面的 [资源文件路径](#资源文件路径) 一节。
 
 # 快速入门
 
@@ -473,7 +475,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 ![alt text](image-8.png)
 
 - UI Level Progress Bar组件，是等级进度条UI预制体中的 核心组件。
-  - Localize Txt Name：本地化文本，名称。通常不需要修改。点击已配置的内容，就可以在Hierarchy面板中，快速选中这个物体。直接修改 文本的排版、颜色、大小等，来修改UI样式。显示的文本内容，会根据 [等级进度条配置](#等级进度条) 的 Ui Display Name(显示名称)进行替换。
+  - Localize Txt Name：本地化文本，名称。通常不需要修改。点击已配置的内容，就可以在Hierarchy面板中，快速选中这个物体。直接修改 文本的排版、颜色、大小等，来修改UI样式。显示的文本内容，会根据 [等级进度条 配置](#等级进度条-配置) 的 Ui Display Name(显示名称)进行替换。
   - Slider Progress：进度滑条组件。通常不需要修改。直接修改 滑条的大小、位置、排版等，来修改UI样式。滑条的填充量，会根据 当前经验值/升级所需经验值 的比例进行填充。
   - Slider Tween Base Duration：滑条数值平滑变化的 持续时间(秒)。当经验值发生变化时，滑条的填充量 会平滑地变化到 新的数值。数值越大，变化就越慢。
   - Txt Level Number：等级数字文本。通常不需要修改。直接修改 文本的排版、颜色、大小等，来修改UI样式。显示的文本内容，会根据 当前等级数值 来进行替换。
@@ -511,7 +513,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 ![alt text](image-10.png)
 
 - UI Action Progress Bar组件，是动作进度条UI预制体中的 核心组件。
-  - Localize Txt Name：本地化文本，名称。通常不需要修改。点击已配置的内容，就可以在Hierarchy面板中，快速选中这个物体。直接修改 文本的排版、颜色、大小等，来修改UI样式。显示的文本内容，会根据 [动作进度条配置](#动作进度条) 的 Ui Display Name(显示名称)进行替换。
+  - Localize Txt Name：本地化文本，名称。通常不需要修改。点击已配置的内容，就可以在Hierarchy面板中，快速选中这个物体。直接修改 文本的排版、颜色、大小等，来修改UI样式。显示的文本内容，会根据 [动作进度条 配置](#动作进度条-配置) 的 Ui Display Name(显示名称)进行替换。
   - Slider Progress：进度滑条组件。通常不需要修改。直接修改 滑条的大小、位置、排版等，来修改UI样式。滑条的填充量，会根据 当前进度值/Progress Value Required(进度值要求) 的比例进行填充。
   - Slider Tween Base Duration：滑条数值平滑变化的 持续时间(秒)。当进度值发生变化时，滑条的填充量 会平滑地变化到 新的数值。数值越大，变化就越慢。
   - Button：播放动作的按钮。当 Anim Action Play Type(动画动作播放方式)设置成 Manual(手动)时，这个按钮会被激活显示，玩家需要点击这个按钮，来触发动画动作的播放。可以调整这个按钮组件的大小、位置等，来修改按钮的可点击范围。

@@ -4,6 +4,32 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.1] - 2026-08-10
+
+**收尾 2.1.0 的动画名迁移，并消除 Spine 侧一处埋着的每帧空转。**
+
+### 破坏性变更
+
+- **移除兼容字段 `AnimData.animRefAsset` 与 `AnimAction.animReferenceAsset`**，动画一律由字符串 `animName` 指定。
+  - ⚠️ **这次移除原本公告在 2.2.0，实际提前到了本版本**（2.1.1 是 patch 号，按语义化版本本不该承载破坏性变更，特此说明）。升级前请确认自己工程里的角色预制体与动画动作已经填好 `Anim Name`——2.1.0 起 Inspector 里就有这个字段，留空时才回退读旧的引用资源，现在回退分支已不存在，留空即播不出动画。
+  - 随之 `AnimData` 的「按 Spine 动画引用资源」构造重载一并移除；`ResolveAnimName()` 未填名时返回 `null`。
+  - 预制体里残留的 `animRefAsset:` / `animReferenceAsset:` YAML 键会被 Unity 忽略，并在下次保存该预制体时自动清除，无需手工处理。
+- 副作用（正面）：`AnimData.cs` 与 `AnimActionPlayer.cs` 的 `#if ASS_SPINE` 条件编译**归零**。后端宏现在只出现在各自的后端文件里——`SpineAnimator.cs` 与 `Live2dAnimator.cs`。
+
+### 变更
+
+- **`SpineAnimator` 内部对轨道号做保序压缩**，序列化配置与对外 API 均不变。
+  - 起因：`EAnimTrack.Action = 900`、`Other = 999`，算出的轨道号（`主轨道 × 10 + 子轨道`）高达 9000..9999；而 Spine 的 `SetAnimation` 会把 `AnimationState.tracks` 扩容到 `trackIndex + 1`，并在 Update / Apply 等六处按 `tracks.Count` 全量遍历——播一条 `Other` 轨道的动画就要每帧空转近六万次。
+  - 做法：改用 `EAnimTrack` 的**声明序数**作紧凑主轨道号。这保住了「轨道号即混合优先级、高轨道覆盖低轨道」这一 `EAnimTrack.Action` 所依赖的语义（若按首次使用顺序发号则会把优先级压反）。
+  - **`Body`..`Parts`（值 1..18）的序数恰等于其值，因此除 `Action`(900→19) 与 `Other`(999→20) 外，既有配置的换算都是恒等式**，行为零变化。轨道号上界由 9999 降至 209。
+
+### 文档
+
+- 使用文档的「测试场景」一节改写为 **「正式项目的资产布局」**：删除遗留的 `VNStoryTest.unity`（该场景属于另一个系统，本包内无从验证），并把其中的路径清单明确为**建议布局**而非既存目录；「打开场景直接运行」的内容本就由上面的「示例场景」一节完整覆盖。
+- 美术资产规范文档清理同批遗留：标题、简介与目录项由 “VNStoryManager 剧情演出系统” 更正为本系统，其中指向外部仓库 VNStoryManager 文档的链接改为指向本包自己的使用文档。
+- 状态数据与动画动作两处的 “Anim Ref Asset / Anim Reference Asset” 说明随字段移除一并删除；「Anim Track」条目补充上述保序压缩的说明。
+- 修正使用文档中 4 处失效 / 张冠李戴的链接与措辞：两处进度条章节的锚点缺了「 配置」后缀而点不过去；Spine 官方教程那条的 B 站搜索关键词写的是 “Dialogue System”；Live2D 官方网站那条把其文档描述成了 “Dialogue System 的各项功能”。
+
 ## [2.1.0] - 2026-08-10
 
 **接入 Live2D，并使 Spine 与 Live2D 可在同一工程内同时生效。** 此前插件只有 `SpineAnimator` 一个动画后端，且 `AnimActor` / `AnimActionPlayer` 用 `#if ASS_SPINE / #else` 的互斥分支硬绑它——`#else` 分支里那个 `Animator live2DAnimator` 字段全仓库零引用，只是个占位。现在后端无关的机制全部收敛到新的抽象基类 `AnimatorBase`，两个后端各自实现差异部分，上层对具体后端完全无感。
@@ -44,7 +70,7 @@
   - `SpineAnimator.baseSkins` → `AnimatorBase.baseSkins`（同名，移到基类）
   - `AnimActor.spineAnimator` / `AnimActionPlayer.spineAnimator` → `animator`，类型由 `SpineAnimator` 改为 `AnimatorBase`
 - **删除 `AnimActor.live2DAnimator`**：`#else` 分支里的占位字段，全仓库零引用。
-- **`AnimAction.animReferenceAsset` 与 `AnimData.animRefAsset` 降级为兼容字段**，仅在 `animName` 留空时作为回退。计划在 2.2.0 移除，新配置请直接填动画名。
+- **`AnimAction.animReferenceAsset` 与 `AnimData.animRefAsset` 降级为兼容字段**，仅在 `animName` 留空时作为回退。计划在 2.2.0 移除，新配置请直接填动画名。（*后续更正：实际已在 2.1.1 移除，见上。*）
 - **不再依赖 DOTween**：`DOTWEEN` 宏与相关 `#if` 分支全部删除，asmdef 中解析不到的 DOTween 引用一并移除。补间改用 toolkit 的 `ToolkitTween`（需 `com.ale.toolkit` **≥ 1.7.3**，该版本新增了通用浮点补间 `To()`）。
 - asmdef 中 Spine 的两个引用由 GUID 改为**名称引用**（`spine-csharp` / `spine-unity`），并新增名称引用 `Live2D.Cubism`。可选依赖用名称而非 GUID：未安装时 Inspector 能显示缺的是谁，且 SDK 重新导入后 asmdef 的 GUID 若变化，名称引用能自动接上。
 

@@ -1,14 +1,14 @@
-# VNStoryManager 剧情演出系统-美术资产规范
+# AnimSimulatorSystem 动画模拟器系统-美术资产规范
 
-此插件，是基于 Dialogue System，开发了 视觉小说(Visual Novel) 相关的各项功能。\
-例如，背景的切换、角色的切换与位置、大小的设定、Spine动画的支持 。
+此插件，是在 Unity 中使用 Spine 或 Live2D 制作的 2D 动画资源，进行游玩的 动画模拟器系统。\
+可使用光标进行 点击、拖拽、旋转、按压 4 种操作方式，来游玩 2D 动画资源的 动画动作，并支持可分组的 自定义换装。
 
 在这里对各类 美术资产 的 格式、尺寸、布局 等规范进行说明。\
 美术在制作 相关资产 时，请参考以下规范进行制作。
 
 # 📜目录
 
-- [VNStoryManager 剧情演出系统-美术资产规范](#vnstorymanager-剧情演出系统-美术资产规范)
+- [AnimSimulatorSystem 动画模拟器系统-美术资产规范](#animsimulatorsystem-动画模拟器系统-美术资产规范)
 - [📜目录](#目录)
 - [示例场景](#示例场景)
 - [原文件规范](#原文件规范)
@@ -23,8 +23,8 @@
 
 # 示例场景
 
-在示例场景中，演示了所有 剧情演出的功能与所需的 美术资产类型。\
-具体可以参考 [剧情演出系统-使用文档](https://github.com/MikanSoftStudio/unity-game-base-2d-doc/blob/main/Plugins/VNStoryManager/VNStoryManager.md)  中的 「示例场景」 部分。
+在示例场景中，演示了所有 动画模拟器 的功能与所需的 美术资产类型。\
+示例场景以 UPM 的 Sample 形式随包分发，导入方法见 [AnimSimulatorSystem 使用文档](../AnimSimulatorSystem.md#示例场景) 的「示例场景」一节。
 
 # 原文件规范
 
