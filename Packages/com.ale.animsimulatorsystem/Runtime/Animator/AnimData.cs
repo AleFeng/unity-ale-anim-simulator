@@ -8,6 +8,23 @@ using Spine.Unity;
 namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
+    /// 动画状态数据（后端中性的运行期形态）：状态名 → 该状态下要播放的一组动画，以及可选的专用渲染器。
+    ///
+    /// <para>各后端的授权类型（如 Spine 的 <c>FSpineStateData</c>，其渲染器字段是强类型的
+    /// <c>SkeletonAnimation</c>）在 <c>AnimatorBase.EnumerateStateDatas()</c> 里转换成本记录，
+    /// 使基类的状态机实现与后端完全无关。<see cref="renderer"/> 为空表示使用默认渲染器。</para>
+    /// </summary>
+    public struct FAnimStateData
+    {
+        /// <summary>状态名称。</summary>
+        public string stateName;
+        /// <summary>该状态专用的渲染器；为空则使用默认渲染器。</summary>
+        public Component renderer;
+        /// <summary>该状态下要播放的动画列表。</summary>
+        public AnimData[] animDatas;
+    }
+
+    /// <summary>
     /// 动画数据：一次动画播放的全部参数（播哪条、放在哪条轨道、循环 / 反转 / 速度 / 延时 / 间隔）。
     ///
     /// <para><b>后端中性</b>——同一份配置既描述 Spine 动画也描述 Live2D 动作，动画由
