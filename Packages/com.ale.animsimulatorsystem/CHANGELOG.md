@@ -4,6 +4,40 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.2.0] - 2026-08-10
+
+**两处自研的小系统换成 toolkit 的通用实现：展示文本改用 `TextValue`，动作解锁条件改用 `Ale.Condition`。** 两项都改动序列化布局，属破坏性变更。
+
+顺带查出并修好了一个一直没人发现的问题：**展示名配置从来没接到 UI 上**（详见「修复」第一条）。
+
+### 破坏性变更
+
+- **展示名字段统一改用 `TextValue`**（toolkit 提供）。涉及 `AnimAction.uiDisplayActionName`、`AnimActorSkin.uiDisplaySkinName`、`ProgressBarConfig.uiDisplayName`，以及列表项数据 `UIAnimActionListBoxContent.UIDisplayActionName`。
+  - 旧实现是「同名字段按 `ATK_LOCALIZATION` 在 `LocalizedString` 与 `string` 之间换类型」，切宏即丢数据。`TextValue` 把纯文本与多语言条目并置：**纯文本那一项始终存在**，多语言条目是附加的、取不到时自动回退。
+  - ⚠️ **升级后需重新指定多语言条目。** 新字段沿用了原字段名，而 Unity 反序列化时真实字段名优先于 `[FormerlySerializedAs]`——旧 YAML 会被喂给新类型、因形状不符而丢弃，兼容字段接不住。这一点无法绕过，故本版不提供自动迁移。纯文本一项本就是新增的，不存在丢失。
+  - 三个 UI 组件（`UIBaseProgressBar` / `UIAnimActionListBox` / `UIAnimActorSkinBox`）不再持有 `LocalizeStringEvent` 与 `Text` 两个按宏二选一的字段，改为一个 `TMP_Text`，直接写 `TextValue.ResolveText()`。**预制体需要重新指定该文本组件。**
+  - 新增 `AnimLocale`：运行期语言切换的广播。`LocalizeStringEvent` 自带的「语言变了就重刷」由它补回。
+  - 副作用（正面）：`ATK_LOCALIZATION` 条件编译由 **7 个运行时文件、20 处** 收敛到 **`AnimLocale.cs` 一处**。
+
+- **动作解锁条件改用 `Ale.Condition`**。`AnimAction.conditions` 由 `AnimActionCondition[]` 改为 `ConditionExpression`；`AnimActionCondition` 结构与 `EAnimActionConditionType` 枚举删除。
+  - 免费获得**两级 AND/OR、两级取反、条件分组**，以及内联的条件编辑界面——声明字段即可渲染，本包没有为此写任何编辑器代码。
+  - 新增两个判定器：`AnimSim.LevelProgress`（等级进度条的等级）与 `AnimSim.ActionProgress`（进度条的当前进度值）。比较符由旧实现写死的「大于等于」扩展为五种下拉可选。
+  - ⚠️ **升级后需重新配置条件。** 同上，类型变更无法自动迁移。
+  - **删除「道具持有」条件类型**：它是个 TODO 空壳，且**静默返回「条件满足」**。需要的话自行实现一个 `[ConditionEvaluator("...")]` 类并注册即可，这正是换用条件系统的价值所在。
+  - `AnimAction.CheckAllConditionsIsMet(Action<AnimAction>)` → `CheckConditionsIsMet()`；`AnimActionPlayer.GetAnimActionsMeetConditions(Action<AnimAction>)` 去掉入参，成为纯查询。
+  - asmdef 新增引用：运行时 `Ale.Condition.Core` / `Ale.Condition.Runtime`，编辑器 `Ale.Condition.Core` / `Ale.Condition.Editor`。
+
+### 修复
+
+- **展示名配置一直没接到 UI 上，同一预制体的多个实例全部显示同一个名字。** 三个 UI 组件的本地化文本字段在示例预制体里**全部未赋值**，`uiDisplayName` 等配置流向 `null`；屏幕上的文字实际来自预制体上 toolkit 的 `LocalizedTextEvent`，而它配的是**每个预制体一个写死的条目**——可这些预制体会被反复实例化。于是三条等级进度条全显示「手臂敏感度」、两条动作进度条全显示「快感」、所有皮肤格与动作格也各自只显示同一个名字。改用 `TextValue` 后这条链路接通，各实例显示各自的名称。示例预制体上那几个 `LocalizedTextEvent` 随之移除（否则两个写入方争写同一个文本组件）。
+- **条件判定「失败即开」。** 旧实现在参数解析失败、取不到管理器、进度条名称查不到时一律返回「条件满足」——配错名字的条件会静默失效、动作凭空解锁。新判定器一律判否，并在缺少管理器时给出明确警告。
+- **增量解锁只有最后一个订阅者收得到通知。** 旧实现在条件不满足时登记回调，而每次检查都会先把回调置空再只登记最新的一个；那张「未满足条件」映射表还以**活着的 UI 组件的 `GetHashCode()`** 为键，不是稳定标识。现由 `AnimSimulatorManager.OnConditionInputsChanged` 统一广播，各使用方收到后重新求值。
+
+### 新增
+
+- `AnimSimulatorManager` 实现 `IAnimSimConditionSource`（按名取等级 / 取进度值），并提供条件判定用的 `IConditionContext`。
+- `AnimSimulatorManager.OnConditionInputsChanged`：条件输入（进度条读数、等级）变化的广播。
+
 ## [2.1.2] - 2026-08-10
 
 **一轮全包体检。** 扫描下来，这个包的问题集中在「同一件事写了两遍」——Spine / Live2D 两个后端、角色 / 背景两条资产链、等级条 / 动作条两种进度条、本地化的开 / 关两个分支，四组孪生结构各自复制了一份逻辑，并派生出若干只在其中一份里修过的缺陷。本版把这些结构收敛掉，并修掉沿途查出的运行期缺陷。

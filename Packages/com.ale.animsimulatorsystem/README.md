@@ -46,7 +46,9 @@ Cubism 与 Spine 的模型差异较大，有三点需要在配置时注意：
 | `ToolkitTween` | 淡入淡出、起播延时、单次播放完成、循环随机间隔的全部计时 |
 | `UIUtility.WorldPosToUILocalPos` | 动作列表跟随角色的世界坐标定位 |
 | `UiwFocusOrderList<,>` / `UiwVirtualOrderList<,>` | 动画动作列表与皮肤列表的虚拟滚动 |
-| `LocalizedTextEvent` / `LocalizedFontEvent` | Demo 预制体的文本与字体本地化 |
+| `TextValue` | 动作名 / 皮肤名 / 进度条名的展示文本（纯文本 + 可选的多语言条目） |
+| `Ale.Condition`（条件系统） | 动画动作的解锁条件：两级与或非组合、内联编辑界面、可扩展判定器 |
+| `LocalizedFontEvent` | Demo 预制体的字体随语言切换 |
 | `DefineUtils` / `ToolkitEditorL10n` | 本插件欢迎窗口的宏开关与界面三语 |
 
 toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写进 `package.json` 的 `dependencies`，需自行安装。
@@ -63,7 +65,7 @@ toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写�
 
 | 宏 | 由谁管理 | 需要的运行时 | 未启用时的影响 |
 |---|---|---|---|
-| `ATK_LOCALIZATION` | Ale Toolkit 欢迎窗口<br/>（`Tools > Ale Toolkit > Welcome`） | `com.unity.localization` | 动作名 / 皮肤名 / 进度条名 退化为纯 `string` 字段 |
+| `ATK_LOCALIZATION` | Ale Toolkit 欢迎窗口<br/>（`Tools > Ale Toolkit > Welcome`） | `com.unity.localization` | `TextValue` 只剩纯文本一项，多语言条目不参与编译 |
 | `ATK_TMP` | 同上 | 内置于 `com.unity.ugui` | toolkit 的本地化字体组件不参与编译 |
 | `ATK_INPUT_SYSTEM` | 同上 | `com.unity.inputsystem` | 光标操作输入（点击 / 拖拽 / 旋转 / 按压）不可用 |
 | `ATK_ADDRESSABLE` | 同上 | `com.unity.addressables` | 角色 / 背景无法按地址异步加载（退化为 `Resources` 兜底并告警） |
@@ -72,7 +74,9 @@ toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写�
 
 `ASS_` 是本插件自有前缀（= AnimSimulatorSystem）。**两个后端宏可以同时启用**，互不排斥。两个都不启用时插件仍能编译，但角色动画无法播放——欢迎窗口会在加载时给出提示。
 
-> ⚠️ **`ATK_LOCALIZATION` 会改变序列化字段的类型**（`LocalizedString` ↔ `string`）。在已有配置资产的工程里切换该宏会丢失对应字段的数据，请在项目初期就定好。
+> **2.2.0 起，关掉 `ATK_LOCALIZATION` 不再丢失展示名。** 此前动作名 / 皮肤名 / 进度条名是「同名字段按宏在 `LocalizedString` 与 `string` 之间换类型」，切宏即丢数据；现在统一为 `TextValue`——纯文本那一项<b>始终存在</b>，多语言条目是附加的。关掉宏只是不再走本地化查表，纯文本照常显示。
+>
+> 但另一个方向仍需注意：**关着宏保存过的资产，其多语言条目会被丢弃**（该字段此时不参与序列化）。这一点对所有按宏门控的字段都成立，两个后端宏（`ASS_SPINE` / `ASS_LIVE2D`）同理——关着宏保存角色预制体会丢掉对应后端的配置。
 
 > 从 2.0.0 升级上来的工程，`ASS_SPINE` 的前身 `HAS_SPINE` 会在编辑器加载时被自动改写（幂等），无需手动处理。
 
