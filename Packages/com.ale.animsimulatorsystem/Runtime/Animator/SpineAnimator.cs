@@ -230,7 +230,7 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         /// <param name="spineAnimator"></param>
         /// <param name="spineAnimDatas"></param>
-        private void PlaySpineAnimDatas(SkeletonAnimation spineAnimator,SpineAnimData[] spineAnimDatas)
+        private void PlaySpineAnimDatas(SkeletonAnimation spineAnimator,AnimData[] spineAnimDatas)
         {
             // 播放 状态数据中配置的 Spine动画
             foreach (var animData in spineAnimDatas)
@@ -377,7 +377,7 @@ namespace Ale.AnimSimulatorSystem
         private void StartSpineAnimLoopCoroutine
         (
             SkeletonAnimation spineAnimator,
-            SpineAnimData animData)
+            AnimData animData)
         {
             // 停止已有
             StopSpineAnimLoopCoroutine(spineAnimator, animData.AnimTrack);
@@ -415,7 +415,7 @@ namespace Ale.AnimSimulatorSystem
         private void PlaySpineAnimLoopIntervalTime
         (
             SkeletonAnimation spineAnimator,
-            SpineAnimData animData
+            AnimData animData
         )
         {
             if (!spineAnimator || !animData.animRefAsset || animData.animRefAsset.Animation == null) return;
@@ -470,8 +470,8 @@ namespace Ale.AnimSimulatorSystem
         /// 相同轨道上 被新的动画 覆盖时，将新动画 记录到列表，并播放新动画。
         /// 当新动画 停止时，会从列表中移除，并在列表中找到 最后一个动画继续播放，实现动画的 切换与恢复。
         /// </summary>
-        private readonly Dictionary<int, List<SpineAnimData>> _trackToAnimDataListPlayingMap = 
-            new Dictionary<int, List<SpineAnimData>>();
+        private readonly Dictionary<int, List<AnimData>> _trackToAnimDataListPlayingMap = 
+            new Dictionary<int, List<AnimData>>();
         
         /// <summary>
         /// 播放 Spine动画
@@ -480,7 +480,7 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="onOncePlayComplete">单次播放 完成的回调。（循环播放时 不会被调用）</param>
         public void PlaySpineAnim
         (
-            SpineAnimData animData,
+            AnimData animData,
             Action<TrackEntry> onOncePlayComplete = null
         )
         {
@@ -517,7 +517,7 @@ namespace Ale.AnimSimulatorSystem
         /// <returns></returns>
         private TrackEntry PlaySpineAnimImmediate
         (
-            SpineAnimData animData,
+            AnimData animData,
             Action<TrackEntry> onOncePlayComplete = null
         )
         {
@@ -532,7 +532,7 @@ namespace Ale.AnimSimulatorSystem
             int animTrackIndex = animData.AnimTrack;
             if (!_trackToAnimDataListPlayingMap.TryGetValue(animTrackIndex, out var animDataListPlaying))
             {
-                animDataListPlaying = new List<SpineAnimData>();
+                animDataListPlaying = new List<AnimData>();
                 _trackToAnimDataListPlayingMap.Add(animTrackIndex, animDataListPlaying);
             }
             // 检查，是否 已经在播放 该动画数据。
@@ -583,7 +583,7 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="onOncePlayComplete"></param>
         private void OncePlaySpineAnimComplete
         (
-            SpineAnimData animData,
+            AnimData animData,
             TrackEntry trackEntry = null,
             Action<TrackEntry> onOncePlayComplete = null
         )
@@ -607,7 +607,7 @@ namespace Ale.AnimSimulatorSystem
         /// 停止 Spine动画
         /// </summary>
         /// <param name="animData"></param>
-        public void StopSpineAnim(SpineAnimData animData)
+        public void StopSpineAnim(AnimData animData)
         {
             if (!spineSkeletonAnimation || animData == null) return;
             
@@ -642,7 +642,7 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         /// <param name="animData">动画数据</param>
         /// <returns></returns>
-        private TrackEntry PlaySpineAnimWhenTrackEmpty(SpineAnimData animData)
+        private TrackEntry PlaySpineAnimWhenTrackEmpty(AnimData animData)
         {
             if (!spineSkeletonAnimation || animData == null ) return null;
             
@@ -672,8 +672,8 @@ namespace Ale.AnimSimulatorSystem
         
         #region 延时播放动画
         // 映射表 动画数据：延时播放补间句柄。记录正在进行的 延时播放动画，以便在需要时 取消延时播放。
-        private readonly Dictionary<SpineAnimData, ToolkitTweenHandle> _spineAnimStartDelayTweenMap =
-            new Dictionary<SpineAnimData, ToolkitTweenHandle>();
+        private readonly Dictionary<AnimData, ToolkitTweenHandle> _spineAnimStartDelayTweenMap =
+            new Dictionary<AnimData, ToolkitTweenHandle>();
 
         /// <summary>
         /// 清除所有 延时播放的 Spine动画。
@@ -691,7 +691,7 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         /// <param name="animData"></param>
         /// <returns>是否确实取消了一条在途的延时播放。</returns>
-        private bool CancelSpineAnimStartDelay(SpineAnimData animData)
+        private bool CancelSpineAnimStartDelay(AnimData animData)
         {
             if (animData == null) return false;
 
@@ -978,9 +978,12 @@ namespace Ale.AnimSimulatorSystem
         }
         #endregion
         
-        #region 定义-状态与动画数据
+        #region 定义-状态数据
         /// <summary>
-        /// 游戏角色 状态数据
+        /// 游戏角色 状态数据（Spine 授权用）。
+        /// 状态名 → 该状态下要播放的一组动画，以及可选的专用渲染器。
+        ///
+        /// <para>动画数据本身由后端中性的 <see cref="AnimData"/> 承载（原嵌套类型 <c>SpineAnimData</c> 已提升为顶层）。</para>
         /// </summary>
         [Serializable]
         public struct FSpineStateData
@@ -990,94 +993,7 @@ namespace Ale.AnimSimulatorSystem
             [Tooltip("Spine 动画组件")]
             public SkeletonAnimation spineSkeletonAnimation;
             [Tooltip("Spine 动画数据 列表")]
-            public SpineAnimData[] spineAnimDatas;
-        }
-    
-        /// <summary>
-        /// 游戏角色 动画数据
-        /// </summary>
-        [Serializable]
-        public class SpineAnimData
-        {
-            [Tooltip("动画引用资源：Spine动画资产引用。")]
-            public AnimationReferenceAsset animRefAsset;
-            [Tooltip("动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。")]
-            [SerializeField] private EAnimTrack animTrack;
-            [Tooltip("动画子轨道：用于同一类型动画的区分。不同子轨道的动画 可以同时播放。"), Range(0, 9)]
-            [SerializeField] private int animTrackSub;
-            [Tooltip("是否循环播放")]
-            public bool isLoop;
-            [Tooltip("是否反转播放。反转时，动画将从 结束位置开始，并反方向播放。")]
-            public bool isReverse;
-            [Tooltip("播放速度倍率。默认为 1.0。"), Range(0f, 5f)]
-            public float speed;
-
-            [Tooltip("开始播放的延迟时间（秒）：动画将在指定的延迟后开始播放。")]
-            public float startDelayTime;
-            [Tooltip("循环间隔时间（秒）：仅当动画为 循环播放 时有效。动画播放完成后，在设定的范围内 随机一次 间隔时间。")]
-            public Vector2 loopIntervalTimeRange;
-
-            /// <summary>
-            /// 动画轨道 默认：主轨道 * 10 + 子轨道，主轨道间隔10，子轨道0-9，保证不同 子轨道的动画 可以同时播放。
-            /// </summary>
-            public int AnimTrack
-            {
-                get
-                {
-                    if (_animTrack > 0)
-                        return _animTrack;
-                    else
-                        return (int)animTrack * 10 + animTrackSub;
-                }
-            }
-            // 动画轨道。构造函数时，由外部传参进行设置。
-            private int _animTrack = -1;
-            
-            /// <summary>
-            /// 构造函数：初始化动画数据
-            /// </summary>
-            public SpineAnimData()
-            {
-                animRefAsset = null;
-                animTrack = EAnimTrack.None;
-                animTrackSub = 0;
-                isLoop = false;
-                isReverse = false;
-                speed = 1.0f;
-                startDelayTime = 0f;
-                loopIntervalTimeRange = Vector2.zero;
-            }
-
-            /// <summary>
-            /// 构造函数：初始化动画数据
-            /// </summary>
-            /// <param name="animRefAsset">动画引用资源：Spine动画资产引用。</param>
-            /// <param name="animTrack">动画轨道：用于不同类型的动画的区分。不同轨道的动画 可以同时播放。</param>
-            /// <param name="isLoop">是否循环播放</param>
-            /// <param name="isReverse">是否反转播放。反转时，动画将从 结束位置开始，并反方向播放。</param>
-            /// <param name="speed">播放速度倍率。默认为 1.0。</param>
-            /// <param name="startDelayTime">开始播放的延迟时间（秒）：动画将在指定的延迟后开始播放。</param>
-            /// <param name="loopIntervalTimeRange">循环间隔时间（秒）：仅当动画为 循环播放 时有效。动画播放完成后，在设定的范围内 随机一次 间隔时间。</param>
-            public SpineAnimData
-            (
-                AnimationReferenceAsset animRefAsset,
-                int animTrack = 0,
-                bool isLoop = false, 
-                bool isReverse = false, 
-                float speed = 1f,
-                float startDelayTime = 0f,
-                Vector2 loopIntervalTimeRange = default
-            )
-            {
-                // 设置动画数据
-                this.animRefAsset = animRefAsset;
-                this._animTrack = animTrack;
-                this.isLoop = isLoop;
-                this.isReverse = isReverse;
-                this.speed = speed;
-                this.startDelayTime = startDelayTime;
-                this.loopIntervalTimeRange = loopIntervalTimeRange;
-            }
+            public AnimData[] spineAnimDatas;
         }
         #endregion
 #endif

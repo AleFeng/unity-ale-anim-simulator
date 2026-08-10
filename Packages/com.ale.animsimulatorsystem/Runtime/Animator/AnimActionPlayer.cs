@@ -949,7 +949,7 @@ namespace Ale.AnimSimulatorSystem
         private AnimAction _animActionCurrent;
 #if ASS_SPINE
         // 当前正在播放的 动画数据
-        private SpineAnimator.SpineAnimData _spineAnimDataCurrent;
+        private AnimData _spineAnimDataCurrent;
 #endif
         // 顺序播放时，当前的 动画动作索引
         private int _animActionIndexOrder;
@@ -1073,7 +1073,7 @@ namespace Ale.AnimSimulatorSystem
             _animActionCurrent = animAction; 
 #if ASS_SPINE
             // 记录 当前正在播放的 Spine动画数据
-            _spineAnimDataCurrent = new SpineAnimator.SpineAnimData
+            _spineAnimDataCurrent = new AnimData
             (
                 _animActionCurrent.animReferenceAsset,
                 GetCurrentAnimActionTrackIndex(),
