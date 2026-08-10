@@ -42,7 +42,7 @@ namespace Ale.AnimSimulatorSystem
 
         [Header("皮肤设置")]
         [Tooltip("基础皮肤 列表：始终显示的 基础皮肤名称。")]
-        public string[] baseSkins;
+        [AnimSkinName] public string[] baseSkins;
 
         #endregion
 
@@ -881,6 +881,17 @@ namespace Ale.AnimSimulatorSystem
 
         /// <summary>刷新皮肤：把 基础皮肤 与 应用中皮肤 的并集应用到渲染器上。</summary>
         public void RefreshSkin() => ApplySkins(baseSkins, _applySkinNames);
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// 【编辑器专用】列出该后端当前可用的皮肤名，供 <see cref="AnimSkinNameAttribute"/> 的下拉取用。
+        /// 取不到时返回 <c>null</c>，下拉会自动退化为文本框。
+        ///
+        /// <para>放在运行时类型上而非编辑器侧去反射私有字段，是为了让编辑器程序集
+        /// <b>不必引用 spine-unity / Live2D.Cubism</b>——后端各自知道自己的皮肤从哪来，报上来即可。</para>
+        /// </summary>
+        public virtual IReadOnlyList<string> EditorCollectSkinNames() => null;
+#endif
 
         #endregion
     }

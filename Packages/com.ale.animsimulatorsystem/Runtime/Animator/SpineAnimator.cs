@@ -246,6 +246,25 @@ namespace Ale.AnimSimulatorSystem
             skeleton.SetSlotsToSetupPose();
         }
 
+#if UNITY_EDITOR
+        /// <inheritdoc/>
+        /// <remarks>直接读骨架数据资产，不依赖运行期已初始化的 <c>Skeleton</c>，故编辑模式下也能列出。</remarks>
+        public override IReadOnlyList<string> EditorCollectSkinNames()
+        {
+            var dataAsset = spineSkeletonAnimation ? spineSkeletonAnimation.SkeletonDataAsset : null;
+            if (!dataAsset) return null;
+
+            // quiet: true —— 资产未就绪时静默返回 null，不在 Inspector 刷屏报错
+            var skeletonData = dataAsset.GetSkeletonData(true);
+            if (skeletonData == null || skeletonData.Skins == null) return null;
+
+            var names = new List<string>(skeletonData.Skins.Count);
+            foreach (var skin in skeletonData.Skins)
+                if (skin != null) names.Add(skin.Name);
+            return names;
+        }
+#endif
+
         #endregion
 
         #region Spine 专有-皮肤重打包

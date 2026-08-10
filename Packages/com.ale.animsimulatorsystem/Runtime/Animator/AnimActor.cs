@@ -172,7 +172,7 @@ namespace Ale.AnimSimulatorSystem
         // 皮肤名对两个后端使用相同的命名规则，故不再按宏区分；
         // 下拉选择由包内 Editor 程序集的皮肤名 Drawer 按角色实际后端提供。
         [Tooltip("基础皮肤列表：始终显示的 基础皮肤名称列表。")]
-        [SerializeField] private string[] baseSkins;
+        [AnimSkinName] [SerializeField] private string[] baseSkins;
         [Tooltip("皮肤组 列表：用于定义角色 可切换的皮肤组。")]
         [SerializeField] private AnimActorSkinGroup[] animActorSkinGroups;
         
@@ -371,7 +371,7 @@ namespace Ale.AnimSimulatorSystem
     {
         // 皮肤名对 Spine 与 Live2D 使用相同的命名规则；下拉选择由 Editor 程序集的 Drawer 按后端提供。
         [Tooltip("皮肤: 在动画软件中制作时的名称，用于指定皮肤。有文件夹路径时，一般使用 '/' 进行分隔。")]
-        public string skinName;
+        [AnimSkinName] public string skinName;
 #if ATK_LOCALIZATION
         [Tooltip("UI中显示的皮肤名称：多语言Key。")]
         public LocalizedString uiDisplaySkinName;

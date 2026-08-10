@@ -512,6 +512,19 @@ namespace Ale.AnimSimulatorSystem
             }
         }
 
+#if UNITY_EDITOR
+        /// <inheritdoc/>
+        /// <remarks>直接读 Inspector 上配置的皮肤定义，不依赖运行期状态。</remarks>
+        public override IReadOnlyList<string> EditorCollectSkinNames()
+        {
+            if (live2dSkins == null) return null;
+            var names = new List<string>(live2dSkins.Length);
+            foreach (var skin in live2dSkins)
+                if (skin != null && !string.IsNullOrEmpty(skin.skinName)) names.Add(skin.skinName);
+            return names;
+        }
+#endif
+
         private void ApplySkinTextures(IReadOnlyList<string> skinNames)
         {
             if (skinNames == null) return;
