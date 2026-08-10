@@ -167,7 +167,8 @@ namespace Ale.AnimSimulatorSystem
 
         /// <summary>
         /// 把本系统的轨道号映射到 Cubism 的层索引。
-        /// 显式映射优先；缺失时分配<b>第一个尚未被占用的层</b>，无空闲层时钳制到最后一层并告警一次。
+        /// 显式映射优先；缺失时分配<b>第一个尚未被占用的层</b>；无空闲层时退到
+        /// <see cref="live2dLayerIndexDefault"/>（越界则钳进有效范围）并告警一次。
         /// </summary>
         private int MapTrackToLayer(int trackIndex)
         {
@@ -183,14 +184,16 @@ namespace Ale.AnimSimulatorSystem
 
             if (layer < 0)
             {
-                // 无空闲层：钳到最后一层，并告警一次（同层动作会互相覆盖，必须让人知道）
-                layer = maxLayer;
+                // 无空闲层：退到配置的默认层（Inspector 上那个「默认层索引」的用途就在这里），
+                // 越界时钳进有效范围，并告警一次——同层的动作会互相覆盖，必须让人知道。
+                layer = Mathf.Clamp(live2dLayerIndexDefault, 0, maxLayer);
                 if (!_layerOverflowWarned)
                 {
                     _layerOverflowWarned = true;
                     Debug.LogWarning(
                         $"Live2dAnimator >> 轨道 {trackIndex} 没有显式的层映射，且已无空闲层可分配" +
-                        $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），被钳制到层 {layer}。" +
+                        $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），" +
+                        $"退到默认层 {layer}（配置值 {live2dLayerIndexDefault}）。" +
                         "同层的动作会互相覆盖——请在「轨道映射」里显式指定，或调大 CubismMotionController 的 Layer Count。" +
                         $" GameObject={gameObject.name}", this);
                 }
@@ -586,21 +589,8 @@ namespace Ale.AnimSimulatorSystem
         }
 
         #endregion
-#else
-        // ASS_LIVE2D 未启用：保留空实现，使预制体上的组件引用不至于变成 Missing Script。
-        protected override Component ResolveDefaultRenderer() => null;
-        protected override IEnumerable<FAnimStateData> EnumerateStateDatas() { yield break; }
-        protected override bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex) => false;
-        protected override void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData) { }
-        protected override void ClearRendererAnim(Component renderer) { }
-        protected override float GetAnimDuration(Component renderer, string animName) => 0f;
-        protected override float GetRendererAlpha(Component renderer) => 0f;
-        protected override void SetRendererAlpha(Component renderer, float alpha) { }
-        protected override void InitSkinBackend() { }
-        protected override bool HasSkin(string skinName) => false;
-        protected override void ApplySkins(IReadOnlyList<string> baseSkinNames, IReadOnlyList<string> applySkinNames) { }
-        protected override float GetAnimProgressOnRenderer(Component renderer, int trackIndex) => 0f;
-        protected override bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress) => false;
+        // ASS_LIVE2D 未启用时，本类只剩一个空的类声明——预制体上的组件引用因此不会变成 Missing Script，
+        // 后端契约的 13 个成员直接继承 AnimatorBase 的默认空实现，不必在这里再抄一份空桩。
 #endif
     }
 }

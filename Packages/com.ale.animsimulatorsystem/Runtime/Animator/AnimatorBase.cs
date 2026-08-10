@@ -16,7 +16,7 @@ namespace Ale.AnimSimulatorSystem
     /// 单次播放完成计时、皮肤名册、淡入淡出、轨道编号规则。</para>
     ///
     /// <para><b>子类负责</b>：把「播放 / 停止 / 清除 / 查时长 / 读写透明度 / 读写进度 / 皮肤是否存在 / 应用皮肤」
-    /// 这些动作落到具体后端上——见本类的抽象成员。</para>
+    /// 这些动作落到具体后端上——见本类的「后端契约」区。</para>
     ///
     /// <para><b>渲染器一律以 <see cref="Component"/> 表示。</b>共享机制从不调用后端渲染器的任何 API，
     /// 只把它当三样东西用：① 字典的引用身份键 ② 可 <c>SetActive</c> 的 GameObject 宿主
@@ -48,50 +48,60 @@ namespace Ale.AnimSimulatorSystem
 
         #region 后端契约
 
+        // 这 13 个成员是 virtual 而非 abstract，默认实现一律「什么也不做 / 返回空值」。
+        //
+        // 这样声明是为了服务后端宏关闭的场合：ASS_SPINE / ASS_LIVE2D 未启用时，对应子类的整个类体
+        // 都不参与编译，只剩一个空的类声明——若这些成员是 abstract，子类就必须在 #else 分支里再抄
+        // 一遍 13 个空桩（两个后端各一份，逐字节相同），改动契约要同步 4 处。改为带默认实现的
+        // virtual 之后，空类体直接继承默认实现，编辑点只剩本处一个。
+        //
+        // 代价：子类漏写 override 会静默无效而不是编译报错。本包只有 SpineAnimator 与 Live2dAnimator
+        // 两个子类且同在本目录下，新增后端时请对照本区逐条实现。
+
         /// <summary>解析默认渲染器（状态未指定专用渲染器时使用）。<c>Awake</c> 时调用一次。</summary>
-        protected abstract Component ResolveDefaultRenderer();
+        protected virtual Component ResolveDefaultRenderer() => null;
 
         /// <summary>
         /// 枚举授权配置里的状态数据，转换为后端中性的记录。基类负责去重与建表。
         /// </summary>
-        protected abstract IEnumerable<FAnimStateData> EnumerateStateDatas();
+        protected virtual IEnumerable<FAnimStateData> EnumerateStateDatas() => Array.Empty<FAnimStateData>();
 
         /// <summary>在指定渲染器的指定轨道上播放一条动画。返回是否成功。</summary>
-        protected abstract bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex);
+        protected virtual bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex) => false;
 
         /// <summary>
         /// 停止指定渲染器上某条轨道的动画。
         /// <paramref name="resumeAnimData"/> 非空时表示该轨道的播放栈里还压着上一条动画，应恢复播放它（循环）；
         /// 为空则直接停止该轨道。
         /// </summary>
-        protected abstract void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData);
+        protected virtual void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData) { }
 
         /// <summary>清除指定渲染器上的全部动画并复位到初始姿势。</summary>
-        protected abstract void ClearRendererAnim(Component renderer);
+        protected virtual void ClearRendererAnim(Component renderer) { }
 
         /// <summary>取某条动画的时长（秒，不含速度倍率）。取不到返回 0。</summary>
-        protected abstract float GetAnimDuration(Component renderer, string animName);
+        protected virtual float GetAnimDuration(Component renderer, string animName) => 0f;
 
         /// <summary>读取渲染器的整体透明度（0~1）。</summary>
-        protected abstract float GetRendererAlpha(Component renderer);
+        protected virtual float GetRendererAlpha(Component renderer) => 0f;
 
         /// <summary>写入渲染器的整体透明度（0~1）。</summary>
-        protected abstract void SetRendererAlpha(Component renderer, float alpha);
+        protected virtual void SetRendererAlpha(Component renderer, float alpha) { }
 
         /// <summary>初始化后端的皮肤表（缓存皮肤名 → 后端皮肤对象）。首次用到皮肤时调用一次。</summary>
-        protected abstract void InitSkinBackend();
+        protected virtual void InitSkinBackend() { }
 
         /// <summary>后端是否存在该名称的皮肤。</summary>
-        protected abstract bool HasSkin(string skinName);
+        protected virtual bool HasSkin(string skinName) => false;
 
         /// <summary>把「基础皮肤 + 应用中皮肤」的并集应用到渲染器上。</summary>
-        protected abstract void ApplySkins(IReadOnlyList<string> baseSkinNames, IReadOnlyList<string> applySkinNames);
+        protected virtual void ApplySkins(IReadOnlyList<string> baseSkinNames, IReadOnlyList<string> applySkinNames) { }
 
         /// <summary>读取指定轨道上动画的播放进度（0~1）。轨道为空或无效时返回 0。</summary>
-        protected abstract float GetAnimProgressOnRenderer(Component renderer, int trackIndex);
+        protected virtual float GetAnimProgressOnRenderer(Component renderer, int trackIndex) => 0f;
 
         /// <summary>写入指定轨道上动画的播放进度（0~1）。轨道为空或无效时返回 false。</summary>
-        protected abstract bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress);
+        protected virtual bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress) => false;
 
         #endregion
 
@@ -192,6 +202,10 @@ namespace Ale.AnimSimulatorSystem
 
             // 如果状态已存在，则不处理
             if (_listStateCurrent.Contains(state)) return;
+
+            // 顺手清掉已销毁渲染器留下的条目
+            PruneDestroyedRenderers();
+
             // 记录新状态
             _listStateCurrent.Add(state);
 
@@ -265,6 +279,10 @@ namespace Ale.AnimSimulatorSystem
 
             // 如果状态不存在，则不处理
             if (!_listStateCurrent.Contains(state)) return;
+
+            // 顺手清掉已销毁渲染器留下的条目
+            PruneDestroyedRenderers();
+
             // 移除状态
             _listStateCurrent.Remove(state);
 
@@ -372,22 +390,29 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void StartLoopIntervalSchedule(Component renderer, AnimData animData)
         {
-            // 停止已有
+            if (!renderer || animData == null) return;
+
+            // 停止已有（判空之后再做，否则 animData 为 null 时这一行就先抛了）
             StopLoopIntervalSchedule(renderer, animData.AnimTrack);
 
-            if (!renderer || animData == null) return;
             string animName = animData.ResolveAnimName();
             if (string.IsNullOrEmpty(animName)) return;
 
             float duration = GetAnimDuration(renderer, animName);
             if (duration <= 0f) return;
 
-            // 设置为 非循环播放，由 递归调度 控制 循环和间隔
-            animData.isLoop = false;
+            // 本调度要求「每次都按单次播放」，播完才等间隔。这个「单次」必须传到下游：后端据
+            // isLoop 决定是否循环，PlayAnimImmediate 也据它决定要不要排「单次播放完成」的计时
+            // ——而正是那次计时把动画从轨道播放栈里摘掉，下一轮才有空轨道可播。
+            //
+            // 所以取一份 isLoop=false 的副本，而不是把 animData.isLoop 就地改掉：animData 通常是
+            // 本组件序列化数组里的元素，改了就永久生效，下次 AddAnimState 时 PlayAnimDatas 里的
+            // hasLoopInterval 判不出来，这条「循环 + 随机间隔」就退化成只播一次。
+            var animDataOnce = animData.CloneAsOnce();
 
             // 预计算动画时长（考虑速度倍率）
-            float animDuration = duration / Mathf.Max(0.001f, Mathf.Abs(animData.speed));
-            int trackIndex = animData.AnimTrack;
+            float animDuration = duration / Mathf.Max(0.001f, Mathf.Abs(animDataOnce.speed));
+            int trackIndex = animDataOnce.AnimTrack;
 
             // 获取或创建轨道字典
             if (!_dicRendererTrackToLoopHandle.TryGetValue(renderer, out var dicTrackToHandle))
@@ -402,10 +427,10 @@ namespace Ale.AnimSimulatorSystem
                 if (!renderer || !renderer.gameObject.activeInHierarchy) return;
 
                 // 仅当该轨道空闲时才播放，避免与其它来源的动画抢轨道
-                PlayAnimWhenTrackEmpty(renderer, animData);
+                PlayAnimWhenTrackEmpty(renderer, animDataOnce);
 
                 // 计算随机间隔，等待 动画时长 + 间隔时间 后，调度下一次循环
-                float intervalDelay = UnityEngine.Random.Range(animData.loopIntervalTimeRange.x, animData.loopIntervalTimeRange.y);
+                float intervalDelay = UnityEngine.Random.Range(animDataOnce.loopIntervalTimeRange.x, animDataOnce.loopIntervalTimeRange.y);
                 intervalDelay = Mathf.Max(0.001f, intervalDelay); // 最小等待时间保护
                 // owner 传 this：本组件被销毁后调度自动中止，不会再对已失效的渲染器下发播放。
                 dicTrackToHandle[trackIndex] =
@@ -413,9 +438,9 @@ namespace Ale.AnimSimulatorSystem
             }
 
             // 处理初始延迟
-            if (animData.startDelayTime > 0f)
+            if (animDataOnce.startDelayTime > 0f)
                 dicTrackToHandle[trackIndex] =
-                    ToolkitTween.DelayedCall(animData.startDelayTime, ScheduleNextLoop, owner: this);
+                    ToolkitTween.DelayedCall(animDataOnce.startDelayTime, ScheduleNextLoop, owner: this);
             else
                 ScheduleNextLoop();
         }
@@ -742,6 +767,38 @@ namespace Ale.AnimSimulatorSystem
             _dicRendererFadeHandle[renderer] = handleFadeNew;
         }
 
+        /// <summary>
+        /// 结清全部在途的淡入淡出。
+        /// </summary>
+        /// <param name="complete">
+        /// <c>true</c> = 立刻推到终点（与 <see cref="FadeAnimator"/> 内部处理旧句柄的做法一致）：
+        /// 透明度落到目标值，淡出的收尾还会顺带隐藏物体，不会把渲染器停在半透明的中途状态。
+        /// <c>false</c> = 直接掐断，不跑完成回调；仅用于组件销毁——那时再去 <c>SetActive</c> 已无意义，
+        /// 且在销毁流程里触发回调本身就有风险。
+        /// </param>
+        private void ClearAllRendererFade(bool complete)
+        {
+            if (_dicRendererFadeHandle.Count == 0) return;
+
+            // 先快照：Complete 会同步跑完成回调，而回调里带着 _dicRendererFadeHandle.Remove，
+            // 直接在字典上 foreach 会撞 InvalidOperationException。
+            _fadeHandleScratch.Clear();
+            foreach (var kv in _dicRendererFadeHandle)
+                _fadeHandleScratch.Add(kv.Value);
+
+            foreach (var handle in _fadeHandleScratch)
+            {
+                if (complete) handle.Complete();
+                else handle.Kill();
+            }
+
+            _fadeHandleScratch.Clear();
+            _dicRendererFadeHandle.Clear();
+        }
+
+        // 上面那趟结清用的暂存表，提为字段免得每次都新分配。
+        private readonly List<ToolkitTweenHandle> _fadeHandleScratch = new List<ToolkitTweenHandle>();
+
         #endregion
 
         #region 清除与销毁
@@ -779,6 +836,9 @@ namespace Ale.AnimSimulatorSystem
             // 清除所有 挂起中的 起播延时 与 单次完成计时
             ClearAllAnimStartDelay();
             ClearAllOnceComplete();
+            // 在途的淡入淡出也要结清：它会持续向渲染器写透明度，其完成回调还会再清一次动画。
+            // 推到终点而非掐断，避免把渲染器停在半透明的中途状态。
+            ClearAllRendererFade(complete: true);
 
             // 默认渲染器
             ClearRenderer(DefaultRenderer);
@@ -787,8 +847,81 @@ namespace Ale.AnimSimulatorSystem
             foreach (var kv in _dicRendererUsageCount)
                 ClearRenderer(kv.Key);
             _dicRendererUsageCount.Clear();
+            // ClearRenderer 只清了各渲染器名下的调度，外层这张表本身还留着一堆空字典
+            _dicRendererTrackToLoopHandle.Clear();
 
             // 清除 轨道记录
+            _dicTrackToAnimNameLooping.Clear();
+            _trackToAnimDataListPlayingMap.Clear();
+            _trackToRenderer.Clear();
+            _trackToPlayToken.Clear();
+        }
+
+        /// <summary>
+        /// 剔除以「已销毁的渲染器」为键的字典条目。
+        ///
+        /// <para>这些表都以 <see cref="Component"/> 的引用身份作键，而 Unity 对象被销毁后其托管引用仍然存在——
+        /// 条目不会自行消失，只会一直占着表并被后续的全表遍历（如 <see cref="ClearAllAnim"/>）扫到。
+        /// 在状态增删这两个低频入口顺手扫一遍即可，表的量级只有个位数。</para>
+        /// </summary>
+        private void PruneDestroyedRenderers()
+        {
+            if (_dicRendererUsageCount.Count == 0
+                && _dicRendererTrackToLoopHandle.Count == 0
+                && _dicRendererFadeHandle.Count == 0
+                && _trackToRenderer.Count == 0) return;
+
+            _prunedRendererScratch.Clear();
+            foreach (var kv in _dicRendererUsageCount)
+                if (!kv.Key) _prunedRendererScratch.Add(kv.Key);
+            foreach (var dead in _prunedRendererScratch)
+                _dicRendererUsageCount.Remove(dead);
+
+            _prunedRendererScratch.Clear();
+            foreach (var kv in _dicRendererTrackToLoopHandle)
+                if (!kv.Key) _prunedRendererScratch.Add(kv.Key);
+            foreach (var dead in _prunedRendererScratch)
+            {
+                foreach (var kv in _dicRendererTrackToLoopHandle[dead]) kv.Value.Kill();
+                _dicRendererTrackToLoopHandle.Remove(dead);
+            }
+
+            _prunedRendererScratch.Clear();
+            foreach (var kv in _dicRendererFadeHandle)
+                if (!kv.Key) _prunedRendererScratch.Add(kv.Key);
+            foreach (var dead in _prunedRendererScratch)
+            {
+                _dicRendererFadeHandle[dead].Kill();
+                _dicRendererFadeHandle.Remove(dead);
+            }
+
+            _prunedTrackScratch.Clear();
+            foreach (var kv in _trackToRenderer)
+                if (!kv.Value) _prunedTrackScratch.Add(kv.Key);
+            foreach (var dead in _prunedTrackScratch)
+                _trackToRenderer.Remove(dead);
+
+            _prunedRendererScratch.Clear();
+            _prunedTrackScratch.Clear();
+        }
+
+        // 上面那趟清扫用的暂存表。提为字段，免得每次状态增删都新分配两个 List。
+        private readonly List<Component> _prunedRendererScratch = new List<Component>();
+        private readonly List<int> _prunedTrackScratch = new List<int>();
+
+        /// <summary>组件销毁：断掉全部在途的补间 / 延时 / 调度，并清空所有登记表。</summary>
+        protected virtual void OnDestroy()
+        {
+            ClearAllAnimStartDelay();
+            ClearAllOnceComplete();
+            ClearAllRendererFade(complete: false);
+
+            foreach (var kv in _dicRendererTrackToLoopHandle)
+                foreach (var kvTrack in kv.Value)
+                    kvTrack.Value.Kill();
+            _dicRendererTrackToLoopHandle.Clear();
+
+            _dicRendererUsageCount.Clear();
             _dicTrackToAnimNameLooping.Clear();
             _trackToAnimDataListPlayingMap.Clear();
             _trackToRenderer.Clear();

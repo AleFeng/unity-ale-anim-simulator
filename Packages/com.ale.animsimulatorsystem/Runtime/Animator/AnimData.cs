@@ -77,6 +77,24 @@ namespace Ale.AnimSimulatorSystem
         public string ResolveAnimName() => string.IsNullOrEmpty(animName) ? null : animName;
 
         /// <summary>
+        /// 复制一份「按单次播放」的副本：除 <see cref="isLoop"/> 恒为 <c>false</c> 外，其余字段（含私有的
+        /// 轨道号哨兵）与本实例完全一致。
+        ///
+        /// <para>供「循环 + 随机间隔」的递归调度使用——那种播法要求每一次都按单次播放，播完才等间隔。
+        /// 调度器不能直接改本实例的 <see cref="isLoop"/>：本实例通常是动画组件上序列化数组的元素，
+        /// 改了就永久生效，下次进入该状态时就再也识别不出「这是个带间隔的循环」了。</para>
+        ///
+        /// <para>副本是<b>另一个引用</b>，这正是需要的——基类以引用地址作为轨道播放栈里的身份标识，
+        /// 副本与原件互不干扰。</para>
+        /// </summary>
+        public AnimData CloneAsOnce()
+        {
+            var clone = (AnimData)MemberwiseClone();
+            clone.isLoop = false;
+            return clone;
+        }
+
+        /// <summary>
         /// 构造函数：初始化动画数据
         /// </summary>
         public AnimData()

@@ -62,9 +62,24 @@ namespace Ale.AnimSimulatorSystem
 
         #region 轨道号压缩
 
-        // 主轨道值 → 紧凑序数。首次用到时按 EAnimTrack 的声明序数建表。
-        private static Dictionary<int, int> _mainTrackToOrdinal;
-        private static int _ordinalNext;
+        // 主轨道值 → 紧凑序数。静态只读：类型初始化时按 EAnimTrack 的声明序数一次建好，此后只读不写。
+        private static readonly Dictionary<int, int> MainTrackToOrdinal = BuildMainTrackOrdinals();
+        // 枚举内主轨道的个数，同时也是「枚举之外的主轨道」的序数起点。
+        private static readonly int OrdinalCountInEnum = MainTrackToOrdinal.Count;
+        // 留给「枚举之外的主轨道号」的序数槽位数（见 ToSpineTrack）。
+        private const int OrdinalSlotsOutOfEnum = 8;
+
+        private static Dictionary<int, int> BuildMainTrackOrdinals()
+        {
+            var map = new Dictionary<int, int>();
+            // Enum.GetValues 按枚举常量的数值升序返回，故遍历下标即保序的秩
+            foreach (EAnimTrack value in (EAnimTrack[])Enum.GetValues(typeof(EAnimTrack)))
+            {
+                int main = (int)value;
+                if (!map.ContainsKey(main)) map.Add(main, map.Count);
+            }
+            return map;
+        }
 
         /// <summary>
         /// 把系统轨道号（主轨道值 * 10 + 子轨道）换算为紧凑的 Spine 轨道号（主轨道序数 * 10 + 子轨道）。
@@ -78,8 +93,13 @@ namespace Ale.AnimSimulatorSystem
         /// 低轨道，这正是 <c>EAnimTrack.Action</c>「可能覆盖其它轨道」所依赖的语义。所以不能按「首次使用顺序」
         /// 发号，否则先播 Action 后播 Body 会让 Body 反过来盖住 Action。改用枚举的<b>声明序数</b>：
         /// <c>Enum.GetValues</c> 按常量数值升序返回，秩天然保序；且 <c>Body</c>..<c>Parts</c>（值 1..18）的序数
-        /// 恰等于其值，因此除 <c>Action</c>(900→19) 与 <c>Other</c>(999→20) 外，<b>既有配置的换算都是恒等式</b>。
-        /// 上界由 9999 降至 209。</para>
+        /// 恰等于其值，因此除 <c>Action</c>(900→19) 与 <c>Other</c>(999→20) 外，<b>既有配置的换算都是恒等式</b>。</para>
+        ///
+        /// <para><b>枚举之外的主轨道号</b>（<see cref="AnimData"/> 的构造函数允许直接传任意轨道号）折叠到枚举序数
+        /// 之后的 <see cref="OrdinalSlotsOutOfEnum"/> 个固定槽位里。刻意<b>不</b>按首次使用顺序发号——那样同一份
+        /// 配置会因播放顺序不同而算出不同的轨道号，还需要一张持续增长的可变静态表（所有实例共享，关闭
+        /// Domain Reload 时更会跨播放会话累积）。保序性对枚举外的轨道本就没有约定，取模折叠不破坏任何已承诺的语义。
+        /// 轨道号上界因此恒定为 289。</para>
         ///
         /// <para>换算<b>只发生在本类与 Spine 之间</b>：基类、<c>AnimActionPlayer</c> 与序列化数据一律仍用系统轨道号。</para>
         /// </summary>
@@ -87,27 +107,13 @@ namespace Ale.AnimSimulatorSystem
         {
             if (trackIndex < 0) return trackIndex;
 
-            if (_mainTrackToOrdinal == null)
-            {
-                _mainTrackToOrdinal = new Dictionary<int, int>();
-                // Enum.GetValues 按枚举常量的数值升序返回，故遍历下标即保序的秩
-                foreach (EAnimTrack value in (EAnimTrack[])Enum.GetValues(typeof(EAnimTrack)))
-                {
-                    int main = (int)value;
-                    if (!_mainTrackToOrdinal.ContainsKey(main))
-                        _mainTrackToOrdinal.Add(main, _ordinalNext++);
-                }
-            }
-
             int mainTrack = trackIndex / 10;
             int subTrack = trackIndex % 10;
-            if (!_mainTrackToOrdinal.TryGetValue(mainTrack, out var ordinal))
-            {
-                // 枚举之外的主轨道号（AnimData 的构造函数允许直接传任意轨道号）：追加到序数表尾部。
-                // 保序性对它们本就没有约定。
-                ordinal = _ordinalNext++;
-                _mainTrackToOrdinal.Add(mainTrack, ordinal);
-            }
+
+            int ordinal;
+            if (!MainTrackToOrdinal.TryGetValue(mainTrack, out ordinal))
+                ordinal = OrdinalCountInEnum + mainTrack % OrdinalSlotsOutOfEnum;
+
             return ordinal * 10 + subTrack;
         }
 
@@ -394,21 +400,8 @@ namespace Ale.AnimSimulatorSystem
         }
 
         #endregion
-#else
-        // ASS_SPINE 未启用：保留空实现，使预制体上的组件引用不至于变成 Missing Script。
-        protected override Component ResolveDefaultRenderer() => null;
-        protected override IEnumerable<FAnimStateData> EnumerateStateDatas() { yield break; }
-        protected override bool PlayAnimOnRenderer(Component renderer, AnimData animData, int trackIndex) => false;
-        protected override void StopAnimOnRenderer(Component renderer, int trackIndex, AnimData resumeAnimData) { }
-        protected override void ClearRendererAnim(Component renderer) { }
-        protected override float GetAnimDuration(Component renderer, string animName) => 0f;
-        protected override float GetRendererAlpha(Component renderer) => 0f;
-        protected override void SetRendererAlpha(Component renderer, float alpha) { }
-        protected override void InitSkinBackend() { }
-        protected override bool HasSkin(string skinName) => false;
-        protected override void ApplySkins(IReadOnlyList<string> baseSkinNames, IReadOnlyList<string> applySkinNames) { }
-        protected override float GetAnimProgressOnRenderer(Component renderer, int trackIndex) => 0f;
-        protected override bool SetAnimProgressOnRenderer(Component renderer, int trackIndex, float progress) => false;
+        // ASS_SPINE 未启用时，本类只剩一个空的类声明——预制体上的组件引用因此不会变成 Missing Script，
+        // 后端契约的 13 个成员直接继承 AnimatorBase 的默认空实现，不必在这里再抄一份空桩。
 #endif
     }
 }
