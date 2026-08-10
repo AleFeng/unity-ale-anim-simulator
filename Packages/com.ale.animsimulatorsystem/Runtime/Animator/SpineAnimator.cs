@@ -60,6 +60,59 @@ namespace Ale.AnimSimulatorSystem
 
         #endregion
 
+        #region 轨道号压缩
+
+        // 主轨道值 → 紧凑序数。首次用到时按 EAnimTrack 的声明序数建表。
+        private static Dictionary<int, int> _mainTrackToOrdinal;
+        private static int _ordinalNext;
+
+        /// <summary>
+        /// 把系统轨道号（主轨道值 * 10 + 子轨道）换算为紧凑的 Spine 轨道号（主轨道序数 * 10 + 子轨道）。
+        ///
+        /// <para><b>为什么要压缩</b>：<c>EAnimTrack.Action = 900</c>、<c>Other = 999</c>，算出来的系统轨道号
+        /// 高达 9000..9999。而 Spine 的 <c>AnimationState.SetAnimation</c> 会把内部的 <c>tracks</c> 列表
+        /// Resize 到 <c>trackIndex + 1</c>（spine-csharp 的 <c>ExpandToIndex</c>），并在 Update / Apply 等
+        /// <b>六处</b>按 <c>tracks.Count</c> 全量遍历——播一条 Other 轨道的动画就要每帧空转近六万次。</para>
+        ///
+        /// <para><b>为什么必须保序</b>：Spine 的轨道号同时是<b>混合优先级</b>，Apply 按轨道升序应用、高轨道覆盖
+        /// 低轨道，这正是 <c>EAnimTrack.Action</c>「可能覆盖其它轨道」所依赖的语义。所以不能按「首次使用顺序」
+        /// 发号，否则先播 Action 后播 Body 会让 Body 反过来盖住 Action。改用枚举的<b>声明序数</b>：
+        /// <c>Enum.GetValues</c> 按常量数值升序返回，秩天然保序；且 <c>Body</c>..<c>Parts</c>（值 1..18）的序数
+        /// 恰等于其值，因此除 <c>Action</c>(900→19) 与 <c>Other</c>(999→20) 外，<b>既有配置的换算都是恒等式</b>。
+        /// 上界由 9999 降至 209。</para>
+        ///
+        /// <para>换算<b>只发生在本类与 Spine 之间</b>：基类、<c>AnimActionPlayer</c> 与序列化数据一律仍用系统轨道号。</para>
+        /// </summary>
+        private static int ToSpineTrack(int trackIndex)
+        {
+            if (trackIndex < 0) return trackIndex;
+
+            if (_mainTrackToOrdinal == null)
+            {
+                _mainTrackToOrdinal = new Dictionary<int, int>();
+                // Enum.GetValues 按枚举常量的数值升序返回，故遍历下标即保序的秩
+                foreach (EAnimTrack value in (EAnimTrack[])Enum.GetValues(typeof(EAnimTrack)))
+                {
+                    int main = (int)value;
+                    if (!_mainTrackToOrdinal.ContainsKey(main))
+                        _mainTrackToOrdinal.Add(main, _ordinalNext++);
+                }
+            }
+
+            int mainTrack = trackIndex / 10;
+            int subTrack = trackIndex % 10;
+            if (!_mainTrackToOrdinal.TryGetValue(mainTrack, out var ordinal))
+            {
+                // 枚举之外的主轨道号（AnimData 的构造函数允许直接传任意轨道号）：追加到序数表尾部。
+                // 保序性对它们本就没有约定。
+                ordinal = _ordinalNext++;
+                _mainTrackToOrdinal.Add(mainTrack, ordinal);
+            }
+            return ordinal * 10 + subTrack;
+        }
+
+        #endregion
+
         #region 后端契约实现-播放
 
         /// <inheritdoc/>
@@ -67,6 +120,9 @@ namespace Ale.AnimSimulatorSystem
         {
             var skeletonAnimation = AsSkeleton(renderer);
             if (!skeletonAnimation || skeletonAnimation.AnimationState == null) return false;
+
+            // 交给 Spine 的轨道号一律先压缩
+            trackIndex = ToSpineTrack(trackIndex);
 
             var skeletonData = GetSkeletonData(skeletonAnimation);
             if (skeletonData == null) return false;
@@ -110,6 +166,9 @@ namespace Ale.AnimSimulatorSystem
         {
             var skeletonAnimation = AsSkeleton(renderer);
             if (!skeletonAnimation || skeletonAnimation.AnimationState == null) return;
+
+            // 交给 Spine 的轨道号一律先压缩
+            trackIndex = ToSpineTrack(trackIndex);
 
             if (resumeAnimData != null)
             {
@@ -172,7 +231,8 @@ namespace Ale.AnimSimulatorSystem
         {
             var skeletonAnimation = AsSkeleton(renderer);
             if (!skeletonAnimation || skeletonAnimation.state == null) return null;
-            return skeletonAnimation.state.GetCurrent(trackIndex);
+            // 交给 Spine 的轨道号一律先压缩
+            return skeletonAnimation.state.GetCurrent(ToSpineTrack(trackIndex));
         }
 
         #endregion
