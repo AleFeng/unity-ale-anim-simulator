@@ -88,38 +88,22 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="isSelected"></param>
         public void SetIsSelected(bool isSelected)
         {
-            if (isSelected)
-            {
-                // 设置 选中状态 颜色
-                // 皮肤组 图标
-                if (imgSkinGroupIcon != null)
-                    imgSkinGroupIcon.color = colorSelected;
-                // 皮肤组 背景
-                if (imgSkinGroupBackground != null)
-                    imgSkinGroupBackground.color = colorSelected;
-                
-                // 设置 选中/未选中 标记 显示状态
-                if (goIsSelected)
-                    goIsSelected.SetActive(true);
-                if (goIsUnselected)
-                    goIsUnselected.SetActive(false);
-            }
-            else
-            {
-                // 设置 未选中状态 颜色
-                // 皮肤组 图标
-                if (imgSkinGroupIcon != null)
-                    imgSkinGroupIcon.color = colorUnselected;
-                // 皮肤组 背景
-                if (imgSkinGroupBackground != null)
-                    imgSkinGroupBackground.color = colorUnselected;
-                
-                // 设置 选中/未选中 标记 显示状态
-                if (goIsSelected)
-                    goIsSelected.SetActive(false);
-                if (goIsUnselected)
-                    goIsUnselected.SetActive(true);
-            }
+            // 原先是完整复制的 if/else 两段，逐行相同、只差 true/false 与两个颜色。
+            Color color = isSelected ? colorSelected : colorUnselected;
+
+            // 设置 状态颜色
+            // 皮肤组 图标
+            if (imgSkinGroupIcon)
+                imgSkinGroupIcon.color = color;
+            // 皮肤组 背景
+            if (imgSkinGroupBackground)
+                imgSkinGroupBackground.color = color;
+
+            // 设置 选中/未选中 标记 显示状态
+            if (goIsSelected)
+                goIsSelected.SetActive(isSelected);
+            if (goIsUnselected)
+                goIsUnselected.SetActive(!isSelected);
         }
     }
 }

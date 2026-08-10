@@ -152,43 +152,44 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="isForceFadeIn">强制淡入。不判断AnimActionListPlayer的设定。</param>
         public void FadeAnimActionList(bool isFadeIn, bool isForceFadeIn = false)
         {
-            // 淡入
-            if (isFadeIn)
-            {
-                // 检查是否已经淡入。不重复淡入。
-                if (!_isFadeIn)
-                {
-                    // 只有 Operate手动操作类型 或 强制操作 时，才淡入。
-                    if (_animActionPlayerCurrent.AnimActionPlayerType != EAnimActionPlayerType.Operate && 
-                        isForceFadeIn == false) return;
-                    
-                    animator.SetTrigger(AnimatorTriggerFadeIn);
-                    _isFadeIn = true;
-                    // 重置 打开状态
-                    _isOpen = false;
-                    // 清空所有Animator参数，防止状态冲突
-                    animator.ResetTrigger(AnimatorTriggerFadeOut);
-                    animator.ResetTrigger(AnimatorTriggerListOpen);
-                    animator.ResetTrigger(AnimatorTriggerListClose);
-                }
-            }
-            // 淡出
-            else
-            {
-                // 检查是否已经淡出。不重复淡出。
-                if (_isFadeIn)
-                {
-                    animator.SetTrigger(AnimatorTriggerFadeOut);
-                    _isFadeIn = false;
-                    // 重置 打开状态
-                    _isOpen = false;
-                    // 清空所有Animator参数，防止状态冲突
-                    animator.ResetTrigger(AnimatorTriggerFadeIn);
-                    animator.ResetTrigger(AnimatorTriggerListOpen);
-                    animator.ResetTrigger(AnimatorTriggerListClose);
-                }
-            }
+            // 状态未变化，不重复触发
+            if (_isFadeIn == isFadeIn) return;
+
+            // 只有 Operate手动操作类型 或 强制操作 时，才淡入。淡出不设此限制。
+            if (isFadeIn && !IsOperateMode && !isForceFadeIn) return;
+
+            // 触发对应的触发器，并复位其余三个——四个触发器互斥，留着旧的会让状态机跳错
+            SetTriggerExclusive(isFadeIn ? AnimatorTriggerFadeIn : AnimatorTriggerFadeOut);
+            _isFadeIn = isFadeIn;
+            // 重置 打开状态
+            _isOpen = false;
         }
+
+        /// <summary>
+        /// 当前播放器是否为「手动操作」类型。没有播放器时视为否。
+        /// <para>原先三处直接对 <c>_animActionPlayerCurrent</c> 取 <c>AnimActionPlayerType</c>，
+        /// 而本类的这几个方法都是 <c>public</c>——外部在没有播放器时调用即空引用。</para>
+        /// </summary>
+        private bool IsOperateMode =>
+            _animActionPlayerCurrent && _animActionPlayerCurrent.AnimActionPlayerType == EAnimActionPlayerType.Operate;
+
+        /// <summary>
+        /// 触发一个 Animator 触发器，并把其余三个复位。
+        /// <para>仅用于淡入淡出这一对：打开 / 关闭那一对必须<b>保留</b>已置位的淡入触发器
+        /// （打开流程会先淡入再打开），故不走这里。</para>
+        /// </summary>
+        private void SetTriggerExclusive(int trigger)
+        {
+            if (!animator) return;
+
+            animator.SetTrigger(trigger);
+            foreach (var other in AnimatorTriggersAll)
+                if (other != trigger) animator.ResetTrigger(other);
+        }
+
+        // 四个互斥触发器，供上面的复位遍历使用
+        private static readonly int[] AnimatorTriggersAll =
+            { AnimatorTriggerFadeIn, AnimatorTriggerFadeOut, AnimatorTriggerListOpen, AnimatorTriggerListClose };
         
         /// <summary>
         /// 打开或关闭 动画动作列表
@@ -197,37 +198,33 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="isForceOpen">强制打开。不判断AnimActionListPlayer的设定。</param>
         public void OpenCloseAnimActionList(bool isOpen, bool isForceOpen = false)
         {
+            // 状态未变化，不重复触发
+            if (_isOpen == isOpen) return;
+            if (!animator) return;
+
             // 打开列表
             if (isOpen)
             {
-                // 检查是否已经打开。不重复打开。
-                if (!_isOpen)
-                {
-                    // 只有 Operate手动操作类型 或 强制操作 时，才打开关闭。
-                    if (_animActionPlayerCurrent.AnimActionPlayerType != EAnimActionPlayerType.Operate && 
-                        isForceOpen == false) return;
-                    
-                    // 若未淡入，则淡入
-                    if (!_isFadeIn)
-                        FadeAnimActionList(true, isForceOpen);
-                    
-                    animator.SetTrigger(AnimatorTriggerListOpen);
-                    _isOpen = true;
-                }
+                // 只有 Operate手动操作类型 或 强制操作 时，才打开。
+                if (!IsOperateMode && !isForceOpen) return;
+
+                // 若未淡入，则淡入。注意这里不能用 SetTriggerExclusive——
+                // 淡入刚置位的触发器必须留着，两个触发器是叠加生效的。
+                if (!_isFadeIn)
+                    FadeAnimActionList(true, isForceOpen);
+
+                animator.SetTrigger(AnimatorTriggerListOpen);
+                _isOpen = true;
             }
             // 关闭列表
             else
             {
-                // 检查是否已经关闭。不重复关闭。
-                if (_isOpen)
-                {
-                    animator.SetTrigger(AnimatorTriggerListClose);
-                    _isOpen = false;
+                animator.SetTrigger(AnimatorTriggerListClose);
+                _isOpen = false;
 
-                    // 若不是 Operate手动操作类型，则淡出。
-                    if (_animActionPlayerCurrent.AnimActionPlayerType != EAnimActionPlayerType.Operate)
-                        FadeAnimActionList(false);
-                }
+                // 不是 Operate手动操作类型（含没有播放器的情况）时，一并淡出。
+                if (!IsOperateMode)
+                    FadeAnimActionList(false);
             }
         }
         

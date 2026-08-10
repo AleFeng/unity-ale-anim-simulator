@@ -16,7 +16,7 @@ namespace Ale.AnimSimulatorSystem
     /// 因为格子会被反复复用，<b>对角色换装事件的订阅必须与绑定严格配对</b>——
     /// 绑定时订阅、清空时退订，否则被回收的格子仍会响应事件、按早已不属于自己的皮肤刷新显示。</para>
     /// </summary>
-    public class UIAnimActorSkinBox : MonoBehaviour
+    public class UIAnimActorSkinBox : MonoBehaviour, IUiAnimListCell<UIAnimActorSkinBoxContent>
     {
         [Header("UI组件")]
         [Tooltip("文本：皮肤名称")]
@@ -203,8 +203,12 @@ namespace Ale.AnimSimulatorSystem
             // 操作成功时，更新 选择状态
             if (isSuccess)
             {
-                // 更新 选择提示 显示状态
-                SetSelectedTipDisplay(_isSelected);
+                // 更新 选择提示 显示状态。
+                // 这里必须传新值 isSelect：原先传的是 _isSelected（旧值），
+                // 于是 SetSelectedTipDisplay 的判等守卫直接早退，这个分支成了空操作
+                // ——一直靠 AnimActor.OnSkinAddOrRemove 走另一条路兜住，
+                // 而角色引用为空时（上面 isSuccess 仍为 true）标记就永远不更新了。
+                SetSelectedTipDisplay(isSelect);
             }
         }
         

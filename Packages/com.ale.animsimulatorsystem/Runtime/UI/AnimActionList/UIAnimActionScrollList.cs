@@ -15,20 +15,10 @@ namespace Ale.AnimSimulatorSystem
     {
         /// <summary>把一条动画动作数据显示到一个格子上。</summary>
         protected override void BindCell(UIAnimActionListBox cell, UIAnimActionListBoxContent data)
-        {
-            if (!cell) return;
-
-            cell.gameObject.SetActive(true);
-            cell.Bind(data);
-        }
+            => UiAnimListCell.Bind(cell, data);
 
         /// <summary>清空并隐藏一个格子。格子滚出视口被回收时调用。</summary>
         protected override void ClearCell(UIAnimActionListBox cell)
-        {
-            if (!cell) return;
-
-            cell.Clear();
-            cell.gameObject.SetActive(false);
-        }
+            => UiAnimListCell.Clear(cell);
     }
 }

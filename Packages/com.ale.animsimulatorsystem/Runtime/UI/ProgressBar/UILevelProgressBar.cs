@@ -44,16 +44,10 @@ namespace Ale.AnimSimulatorSystem
             // 设置 基类信息
             SetInfo(levelProgressBarConfigNew);
             
-            // 记录 配置
+            // 记录 配置。上面已在入口判过空并 return，这里不必再判一次
+            // ——原先那段重复判空不可达，日志文案还与入口那条一字不差。
             _levelProgressBarConfig = levelProgressBarConfigNew;
-            if (_levelProgressBarConfig == null)
-            {
-                SetLevelNumber(0);
-                SetProgressPercent(0f, true);
-                Debug.LogWarning("[LevelProgressBar] SetInfo: 传入的 LevelProgressBarConfig 为空，请检查调用。");
-                return;
-            }
-            
+
             // 设置 等级数字
             SetLevelNumber(levelNumber);
 

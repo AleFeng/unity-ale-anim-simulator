@@ -29,13 +29,13 @@ namespace Ale.AnimSimulatorSystem
             
             // 初始化 UI分组 字典
             _uiGroupDictionary = new Dictionary<string, FUiGroup>();
+            if (uiGroups == null) return;
             foreach (var uiGroup in uiGroups)
             {
-                // 尝试添加到 字典
-                if (_uiGroupDictionary.TryAdd(uiGroup.uiGroupName, uiGroup))
-                    _uiGroupDictionary[uiGroup.uiGroupName] = uiGroup;
-                else
-                    Debug.LogWarning($"[ProgressBarUI] Init: UI分组'{uiGroup.uiGroupName}'名称重复，请确保 分组名称 唯一。");
+                // 尝试添加到 字典。TryAdd 成功即已写入，原先在成功分支里又赋了一次值（多余），
+                // 重名的告警反倒落在了 else 上——逻辑是对的，但那次重复赋值容易读反。
+                if (!_uiGroupDictionary.TryAdd(uiGroup.uiGroupName, uiGroup))
+                    Debug.LogWarning($"[ProgressBarUI] Init: UI分组'{uiGroup.uiGroupName}'名称重复，请确保 分组名称 唯一。", this);
             }
         }
         

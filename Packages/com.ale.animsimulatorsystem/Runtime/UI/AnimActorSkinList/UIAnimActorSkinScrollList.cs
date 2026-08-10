@@ -12,20 +12,10 @@ namespace Ale.AnimSimulatorSystem
     {
         /// <summary>把一条皮肤数据显示到一个格子上。</summary>
         protected override void BindCell(UIAnimActorSkinBox cell, UIAnimActorSkinBoxContent data)
-        {
-            if (!cell) return;
-
-            cell.gameObject.SetActive(true);
-            cell.Bind(data);
-        }
+            => UiAnimListCell.Bind(cell, data);
 
         /// <summary>清空并隐藏一个格子。格子滚出视口被回收时调用，其中会退订角色换装事件。</summary>
         protected override void ClearCell(UIAnimActorSkinBox cell)
-        {
-            if (!cell) return;
-
-            cell.Clear();
-            cell.gameObject.SetActive(false);
-        }
+            => UiAnimListCell.Clear(cell);
     }
 }

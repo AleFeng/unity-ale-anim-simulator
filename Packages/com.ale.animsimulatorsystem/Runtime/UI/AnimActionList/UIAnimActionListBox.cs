@@ -13,7 +13,7 @@ namespace Ale.AnimSimulatorSystem
     /// 滚入视口时 <see cref="Bind"/>，滚出视口时 <see cref="Clear"/> 并隐藏。
     /// 因此本组件不持有任何跨复用的状态，显示内容完全由传入的数据决定。</para>
     /// </summary>
-    public class UIAnimActionListBox : MonoBehaviour
+    public class UIAnimActionListBox : MonoBehaviour, IUiAnimListCell<UIAnimActionListBoxContent>
     {
         [Header("UI组件")] 
 #if ATK_LOCALIZATION
