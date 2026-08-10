@@ -337,8 +337,9 @@ namespace Ale.AnimSimulatorSystem
         {
             if (isCanOperate)
             {
-                // 仅当 动画动作播放器 的类型为Operate时，才允许操作
-                if (isForceCanOperate || animActionPlayerType == EAnimActionPlayerType.Operate)
+                // 仅当 动画动作播放器 接受玩家点击时，才允许操作。
+                // Operate 与 Random 都接受点击，区别只在「播哪一条」由谁决定；ProgressBar 不接受。
+                if (isForceCanOperate || IsPlayerOperable)
                     _isCanOperate = true;
             }
             else
@@ -363,14 +364,19 @@ namespace Ale.AnimSimulatorSystem
         {
             // 检查 是否允许操作
             if (!_isCanOperate) return false;
-            
+
+            // 随机模式：播哪一条不由玩家挑，当场随机抽一条。
+            // 这类播放器的动作列表从不铺开，_animActionSelected（由列表焦点同步而来）自然也就不该参与。
+            if (animActionPlayerType == EAnimActionPlayerType.Random)
+                return PlayRandomAnimAction(onActionComplete, onActionStart);
+
             // 播放 当前选中的 动画动作
             if (_animActionSelected != null)
             {
                 if (PlayAnimAction(_animActionSelected, onActionComplete, onActionStart))
                     return true;
             }
-            
+
             return false;
         }
     
@@ -846,7 +852,10 @@ namespace Ale.AnimSimulatorSystem
         
         #region 动画动作 播放
         [Header("动作列表")]
-        [Tooltip("动画动作播放器 类型：用于区分不同的 动画动作播放器类别。[Operate玩家操作 / ProgressBar进度条控制]。")]
+        [Tooltip("动画动作播放器 类型：用于区分不同的 动画动作播放器类别。\n" +
+                 "Operate 玩家操作：悬停铺开动作列表，玩家滚动选中一条后点击播放。\n" +
+                 "ProgressBar 进度条控制：不接受玩家点击，由进度条驱动。\n" +
+                 "Random 点击随机：悬停只显示点击提示、不铺开列表，点击时按权重随机抽一条播放。")]
         [SerializeField] private EAnimActionPlayerType animActionPlayerType;
         // 这里原本还有一个序列化的「动画动作 选择类型」字段，但全包无人读取——实际生效的是
         // ActionPlayConfig.animActionSelectType（由进度条配置给出，见 UIActionProgressBar），
@@ -856,9 +865,23 @@ namespace Ale.AnimSimulatorSystem
         
         /// <summary>
         /// 动画动作播放器 类型。
-        /// [Operate玩家操作 / ProgressBar进度条控制]。
+        /// [Operate玩家操作 / ProgressBar进度条控制 / Random点击随机]。
         /// </summary>
         public EAnimActionPlayerType AnimActionPlayerType => animActionPlayerType;
+
+        /// <summary>
+        /// 本播放器是否接受玩家的点击操作。<see cref="EAnimActionPlayerType.Operate"/> 与
+        /// <see cref="EAnimActionPlayerType.Random"/> 都接受，区别只在「播哪一条」由谁决定。
+        /// </summary>
+        public bool IsPlayerOperable =>
+            animActionPlayerType == EAnimActionPlayerType.Operate ||
+            animActionPlayerType == EAnimActionPlayerType.Random;
+
+        /// <summary>
+        /// 本播放器是否需要玩家在 动画动作列表 里挑一条。仅 <see cref="EAnimActionPlayerType.Operate"/> 需要——
+        /// 随机模式点了就播、进度条模式根本不接受点击，两者的列表都不铺开。
+        /// </summary>
+        public bool IsAnimActionSelectable => animActionPlayerType == EAnimActionPlayerType.Operate;
         
         // 当前正在播放的 动画动作
         private AnimAction _animActionCurrent;
@@ -939,19 +962,39 @@ namespace Ale.AnimSimulatorSystem
                 // 随机
                 case EAnimActionSelectType.Random:
                 {
-                    // 仅在 满足条件的动作 中 按随机权重选择（含次数限制）
-                    var candidatesRandom = GetAnimActionsMeetConditions();
-                    var animActionRandom = SelectRandomAnimActionByWeight(candidatesRandom);
-                    // 播放 动画动作
-                    if (animActionRandom != null && PlayAnimAction(animActionRandom, onActionComplete, onActionStart))
-                    {
-                        // 累计 该动作的 随机播放次数
-                        _animActionRandomPlayCountMap.TryGetValue(animActionRandom, out int playedCount);
-                        _animActionRandomPlayCountMap[animActionRandom] = playedCount + 1;
-                    }
+                    PlayRandomAnimAction(onActionComplete, onActionStart);
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// 随机播放一条 动画动作：在 满足条件的动作 中按权重抽样（含次数上限），抽中即播。
+        ///
+        /// <para>两条入口共用：进度条驱动的 <see cref="PlayAnimActionByType"/>（选择类型为 随机 时），
+        /// 以及 <see cref="EAnimActionPlayerType.Random"/> 类型播放器的玩家点击。</para>
+        /// </summary>
+        /// <param name="onActionComplete">动作完成的回调</param>
+        /// <param name="onActionStart">动作开始的回调</param>
+        /// <returns>是否成功播放</returns>
+        private bool PlayRandomAnimAction
+        (
+            Action<AnimActionPlayer> onActionComplete = null,
+            Action<AnimActionPlayer> onActionStart = null
+        )
+        {
+            // 仅在 满足条件的动作 中 按随机权重选择（含次数限制）
+            var candidatesRandom = GetAnimActionsMeetConditions();
+            var animActionRandom = SelectRandomAnimActionByWeight(candidatesRandom);
+            if (animActionRandom == null) return false;
+
+            // 播放 动画动作
+            if (!PlayAnimAction(animActionRandom, onActionComplete, onActionStart)) return false;
+
+            // 累计 该动作的 随机播放次数
+            _animActionRandomPlayCountMap.TryGetValue(animActionRandom, out int playedCount);
+            _animActionRandomPlayCountMap[animActionRandom] = playedCount + 1;
+            return true;
         }
 
         /// <summary>
@@ -1358,6 +1401,8 @@ namespace Ale.AnimSimulatorSystem
     #region 枚举定义
     /// <summary>
     /// 动画动作播放器 类型。
+    ///
+    /// <para><b>新增类型请一律追加在末尾</b>：本枚举按 int 序列化，在中间插入会让既有预制体上配好的类型整体错位。</para>
     /// </summary>
     [Serializable]
     public enum EAnimActionPlayerType
@@ -1365,14 +1410,25 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 操作模式。
         /// 由玩家 手动操作。
+        /// <para>光标悬停时铺开 动画动作列表，玩家滚动列表选中一条，点击播放选中的那条。</para>
         /// </summary>
         Operate,
-        
+
         /// <summary>
         /// 进度条模式。
         /// 由进度条 进行操作。
+        /// <para>不接受玩家的点击，光标悬停时也不显示 动画动作列表。</para>
         /// </summary>
         ProgressBar,
+
+        /// <summary>
+        /// 随机模式。
+        /// 由玩家点击触发，播放哪一条由系统随机决定。
+        /// <para>光标悬停时<b>只淡入点击提示、不铺开列表</b>；点击时从 满足解锁条件的动作 中按
+        /// <c>randomTypeWeight</c> 加权随机抽一条播放（同样受 <c>randomTypePlayLimit</c> 次数上限约束）。
+        /// 适合「这里可以点，但点出什么不由玩家挑」的轻交互。</para>
+        /// </summary>
+        Random,
     }
     
     /// <summary>

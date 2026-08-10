@@ -160,8 +160,8 @@ namespace Ale.AnimSimulatorSystem
             // 状态未变化，不重复触发
             if (_isFadeIn == isFadeIn) return;
 
-            // 只有 Operate手动操作类型 或 强制操作 时，才淡入。淡出不设此限制。
-            if (isFadeIn && !IsOperateMode && !isForceFadeIn) return;
+            // 只有 接受玩家点击的播放器 或 强制操作 时，才淡入。淡出不设此限制。
+            if (isFadeIn && !CanFadeIn && !isForceFadeIn) return;
 
             // 触发对应的触发器，并复位其余三个——四个触发器互斥，留着旧的会让状态机跳错
             SetTriggerExclusive(isFadeIn ? AnimatorTriggerFadeIn : AnimatorTriggerFadeOut);
@@ -170,13 +170,22 @@ namespace Ale.AnimSimulatorSystem
             _isOpen = false;
         }
 
-        /// <summary>
-        /// 当前播放器是否为「手动操作」类型。没有播放器时视为否。
-        /// <para>原先三处直接对 <c>_animActionPlayerCurrent</c> 取 <c>AnimActionPlayerType</c>，
-        /// 而本类的这几个方法都是 <c>public</c>——外部在没有播放器时调用即空引用。</para>
-        /// </summary>
-        private bool IsOperateMode =>
-            _animActionPlayerCurrent && _animActionPlayerCurrent.AnimActionPlayerType == EAnimActionPlayerType.Operate;
+        //
+        // 本界面有两级状态：**淡入**（显示「这里可以点」的提示）与**展开**（铺开动画动作列表让玩家挑）。
+        // 三种播放器类型各取所需，故两级各有各的判定，不能共用一个「是不是 Operate」：
+        //
+        //   Operate      淡入 + 展开   —— 玩家滚动列表选中一条再点
+        //   Random       只淡入        —— 点了就随机播，没什么可挑的，铺开列表反而误导
+        //   ProgressBar  两者皆无      —— 根本不接受点击
+        //
+        // 判定一律先判播放器非空：本类的这几个方法都是 public，外部在没有播放器时调用即空引用。
+        //
+
+        /// <summary>当前播放器是否需要显示「可点击」的提示（即是否接受玩家点击）。没有播放器时视为否。</summary>
+        private bool CanFadeIn => _animActionPlayerCurrent && _animActionPlayerCurrent.IsPlayerOperable;
+
+        /// <summary>当前播放器是否需要铺开 动画动作列表 让玩家挑一条。没有播放器时视为否。</summary>
+        private bool CanExpandList => _animActionPlayerCurrent && _animActionPlayerCurrent.IsAnimActionSelectable;
 
         /// <summary>
         /// 触发一个 Animator 触发器，并把其余三个复位。
@@ -203,20 +212,21 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="isForceOpen">强制打开。不判断AnimActionListPlayer的设定。</param>
         public void OpenCloseAnimActionList(bool isOpen, bool isForceOpen = false)
         {
-            // 状态未变化，不重复触发
-            if (_isOpen == isOpen) return;
             if (!animator) return;
 
             // 打开列表
             if (isOpen)
             {
-                // 只有 Operate手动操作类型 或 强制操作 时，才打开。
-                if (!IsOperateMode && !isForceOpen) return;
-
-                // 若未淡入，则淡入。注意这里不能用 SetTriggerExclusive——
-                // 淡入刚置位的触发器必须留着，两个触发器是叠加生效的。
-                if (!_isFadeIn)
+                // 【第一级：淡入】只看「是否接受玩家点击」。必须走在下面那个 _isOpen 守卫之前——
+                // Random 类型永远不展开、_isOpen 恒为 false，把守卫提到方法开头会把它的淡入一起挡掉。
+                // 注意这里不能用 SetTriggerExclusive——淡入刚置位的触发器必须留着，两个触发器是叠加生效的。
+                if ((CanFadeIn || isForceOpen) && !_isFadeIn)
                     FadeAnimActionList(true, isForceOpen);
+
+                // 【第二级：展开】只有需要玩家挑一条的播放器（或强制打开）才铺开列表
+                if (!CanExpandList && !isForceOpen) return;
+                // 状态未变化，不重复触发
+                if (_isOpen) return;
 
                 animator.SetTrigger(AnimatorTriggerListOpen);
                 _isOpen = true;
@@ -224,11 +234,16 @@ namespace Ale.AnimSimulatorSystem
             // 关闭列表
             else
             {
-                animator.SetTrigger(AnimatorTriggerListClose);
-                _isOpen = false;
+                // 状态未变化，不重复触发关闭动画
+                if (_isOpen)
+                {
+                    animator.SetTrigger(AnimatorTriggerListClose);
+                    _isOpen = false;
+                }
 
-                // 不是 Operate手动操作类型（含没有播放器的情况）时，一并淡出。
-                if (!IsOperateMode)
+                // 不需要展开列表的播放器（Random / ProgressBar / 没有播放器）一并淡出。
+                // 从未淡入过的会被 FadeAnimActionList 自身的状态守卫挡掉，是空操作。
+                if (!CanExpandList)
                     FadeAnimActionList(false);
             }
         }
