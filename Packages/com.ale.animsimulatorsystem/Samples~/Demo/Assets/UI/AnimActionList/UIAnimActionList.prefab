@@ -56,7 +56,6 @@ MonoBehaviour:
   clickTipCanvasGroup: {fileID: 1849645481108626066}
   animActionListCanvasGroup: {fileID: 5377109151842931917}
   animActionList: {fileID: 6033273637169959594}
-  reverseContentOrder: 1
 --- !u!95 &795029617346439167
 Animator:
   serializedVersion: 7
@@ -139,6 +138,8 @@ MonoBehaviour:
   secondaryFilterBar: {fileID: 0}
   sortToolbar: {fileID: 0}
   rowPitchScale: 1.5
+  reverseContentOrder: 0
+  reverseScrollDirection: 1
   focusAnchor: 1
   focusScaleCurve:
     serializedVersion: 2

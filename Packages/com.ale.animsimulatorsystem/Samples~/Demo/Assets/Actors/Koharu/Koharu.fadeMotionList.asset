@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 403ae2dd693bb1d4b924f6b8d206b053, type: 3}
+  m_Name: Koharu.fadeMotionList
+  m_EditorClassIdentifier: 
+  MotionInstanceIds: f000feff700efeff280ffeff
+  CubismFadeMotionObjects:
+  - {fileID: 11400000, guid: 3094b2594445b574e9a938e406c0bb4a, type: 2}
+  - {fileID: 11400000, guid: 589fe88e9d91c1d40a81d565ee2a0f7e, type: 2}
+  - {fileID: 11400000, guid: 193c77826f423e84da11628c5a95e186, type: 2}
