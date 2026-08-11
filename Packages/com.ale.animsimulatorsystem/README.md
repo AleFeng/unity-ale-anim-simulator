@@ -271,7 +271,27 @@ Live2D Cubism SDK for Unity **不是 UPM 包**：官方以 `.unitypackage` 分�
 2. 把 `.unitypackage` 拖入工程，导入到 `Assets/Live2D/Cubism/`。导入完成后**关闭并重新打开工程**（官方要求）。
 3. 在欢迎窗口中启用 `ASS_LIVE2D`。SDK 自带 `Live2D.Cubism` 程序集定义，本插件会自动引用到。
 
-> URP 工程还需按 [官方 URP 导入说明](https://docs.live2d.com/en/cubism-sdk-tutorials/urp-import/) 把渲染管线资产的 Renderer List 指向 `CubismURPRenderer.asset`，否则模型不显示。
+#### URP 工程的三项必需设置
+
+三项缺一不可，且**症状互不相同、都不会报错**，照 [官方 URP 导入说明](https://docs.live2d.com/en/cubism-sdk-tutorials/urp-import/) 逐项配好：
+
+| 设置 | 位置 | 漏掉的症状 |
+|---|---|---|
+| Renderer List 里要有 `CubismURPRenderer.asset`，且**设为 Default** | Universal Render Pipeline Asset | 模型**完全不显示**。注册了多个 Renderer Data 时若它不是 Default，Scene 视图也画不出来 |
+| **HDR Precision = 64 Bits**（或索性关掉 HDR） | 同上，`Quality > HDR` 下 | **除 Live2D 模型外满屏漆黑** —— 背景、Spine 角色等在模型绘制前画的东西全被抹掉 |
+| 需要位于模型**之后**的东西必须走**不透明队列**（`renderQueue < 2500`） | 该物体的材质 | 它会**盖住 Live2D 模型** |
+
+后两项都源自 Cubism 的绘制方式，值得说清楚——踩上了很难自己想明白：
+
+- **为什么 HDR 必须 64 位**：Cubism 把模型画进一张**离屏 RT**，再用 `Blend One OneMinusSrcAlpha`（预乘 alpha）把它 blit 回相机颜色缓冲。这张 RT 的格式**从相机颜色格式派生**，而 URP 在「HDR 开 + 32 位精度」下用的是 `B10G11R11_UFloat`——**没有 alpha 通道**。采样出的 alpha 恒为 1，混合式退化成 `dst = src`，于是**整屏被 RT 覆盖**，空白处就是纯黑。改 64 位（`R16G16B16A16`）后 alpha 通道回来，混合才正常。
+
+- **为什么背景要走不透明队列**：Cubism 的绘制通道注入在 **`BeforeRenderingTransparents`**，即在常规透明队列**之前**。任何 `renderQueue >= 2500` 的东西都在它之后绘制，会盖住模型。把背景改到不透明队列（Geometry，2000）即可排到模型之后。
+
+  > 这条同时给出了一条好用的分层规则：**不透明队列 = 排在 Live2D 模型之后，透明队列 = 排在模型之前**。想在角色前面放特效或前景，保持它在透明队列即可。
+  >
+  > Demo 的背景为此配了专用材质 `M_Backgrounds_Forest_1.mat`（`renderQueue = 2000`）——不能直接改内置的 `Sprite-Unlit-Default`，那是全工程共用的。自己的背景照此办理。
+  >
+  > **Spine 不受这条约束**：它是普通的 `MeshRenderer`，与背景同在透明队列里按 Z 排序，因此仅靠空间坐标就能得到正确的前后关系。
 
 ### 二、Live2D 角色预制体
 

@@ -150,7 +150,9 @@ https://github.com/AleFeng/unity-ale-anim-simulator.git?path=/Packages/com.ale.a
 
 `spine-unity` 依赖 `spine-csharp`，两者都要装；**URP 工程还需装 `urp-shaders`**，否则 Spine 材质在 URP 下不显示。
 
-**Live2D**：从[官方下载页](https://www.live2d.com/en/sdk/download/unity/)下载 Cubism SDK for Unity，把 `.unitypackage` 导入到 `Assets/Live2D/Cubism/`，导入完成后**关闭并重新打开工程**（官方要求）。URP 工程还需按[官方 URP 导入说明](https://docs.live2d.com/en/cubism-sdk-tutorials/urp-import/)把渲染管线资产的 Renderer List 指向 `CubismURPRenderer.asset`。
+**Live2D**：从[官方下载页](https://www.live2d.com/en/sdk/download/unity/)下载 Cubism SDK for Unity，把 `.unitypackage` 导入到 `Assets/Live2D/Cubism/`，导入完成后**关闭并重新打开工程**（官方要求）。
+
+> ⚠️ **URP 工程还有三项必需设置，缺一不可且都不会报错**：渲染管线资产的 Renderer List 里要有 `CubismURPRenderer.asset` 并**设为 Default**（否则模型完全不显示）；**HDR Precision 要设为 64 Bits**（32 位的颜色格式没有 alpha 通道，会导致除模型外**满屏漆黑**）；需要排在模型**之后**的东西（背景等）必须走**不透明队列**（Cubism 的绘制通道在常规透明队列之前，否则会盖住模型）。三项的成因与排查见[详细文档](#-详细文档)的「URP 工程的三项必需设置」。
 
 ### 导入演示 Sample（可选）
 装好后在 Package Manager 里选中本包 → `Samples` → 导入 **Anim Simulator System Demo**（配置资产 `AnimSimulatorConfig` + 管理器预制体 + 多语言表 + UI 示例场景），打开其中的 `AnimSimulatorSystemDemo.unity` 可直接进 Play 体验。
