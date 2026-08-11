@@ -138,8 +138,8 @@ MonoBehaviour:
   secondaryFilterBar: {fileID: 0}
   sortToolbar: {fileID: 0}
   rowPitchScale: 1.5
-  reverseContentOrder: 1
-  reverseScrollDirection: 0
+  reverseContentOrder: 0
+  reverseScrollDirection: 1
   focusAnchor: 1
   focusScaleCurve:
     serializedVersion: 2
