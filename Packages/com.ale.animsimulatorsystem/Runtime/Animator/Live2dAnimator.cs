@@ -25,7 +25,14 @@ namespace Ale.AnimSimulatorSystem
     /// （拖拽 / 旋转 / 按压三种交互）走单独的「采样通道」，见 <see cref="PlayAnimOnRenderer"/>。</item>
     /// </list>
     /// </summary>
+    // 实现 ICubismUpdatable 是为了让采样通道能在 Cubism 的 LateUpdate 调度中拿到确定的时序，
+    // 见 OnLateUpdate。接口类型来自 SDK，故连同基类列表一起按宏门控——宏关闭时仍保留一个
+    // 空的类声明，预制体上的组件引用才不会变成 Missing Script。
+#if ASS_LIVE2D
+    public class Live2dAnimator : AnimatorBase, Live2D.Cubism.Framework.ICubismUpdatable
+#else
     public class Live2dAnimator : AnimatorBase
+#endif
     {
 #if ASS_LIVE2D
         [Header("Live2D设置")]
@@ -217,6 +224,9 @@ namespace Ale.AnimSimulatorSystem
             public bool          isScrub;   // true = 采样通道（由外部驱动进度），false = Cubism 原生通道
             public float         progress;  // 采样通道下的当前进度（0~1）
             public float         speed;
+            // 该轨道采样到哪个模型上。逐帧重采样时没有调用方传渲染器，只能由状态自己记着；
+            // 一个角色由多个 Cubism 模型拼成时，各状态可以指定各自的渲染器，故不能图省事用默认渲染器。
+            public CubismRenderController renderController;
         }
 
         private readonly Dictionary<int, FTrackPlayState> _trackPlayState = new Dictionary<int, FTrackPlayState>();
@@ -260,6 +270,7 @@ namespace Ale.AnimSimulatorSystem
                 speed      = speed,
                 // 反向从末尾起、正向从头起，与 Spine 侧的语义一致
                 progress   = animData.isReverse ? 1f : 0f,
+                renderController = renderController,
             };
 
             if (needScrub)
@@ -412,6 +423,8 @@ namespace Ale.AnimSimulatorSystem
             }
 
             state.progress = Mathf.Clamp01(progress);
+            // 逐帧重采样要用它，这里一并刷新——调用方传进来的渲染器才是权威值
+            state.renderController = renderController;
             _trackPlayState[trackIndex] = state;
             SampleClip(renderController, state);
             return true;
@@ -422,11 +435,70 @@ namespace Ale.AnimSimulatorSystem
         // PlayableGraph 占用，再挂一个 AnimationPlayableOutput 到同一个 Animator 上会互相覆盖。
         private void SampleClip(CubismRenderController renderController, FTrackPlayState state)
         {
-            if (!state.clip) return;
+            if (!state.clip || !renderController) return;
             var model = renderController.Model;
             var target = model ? model.gameObject : renderController.gameObject;
             state.clip.SampleAnimation(target, state.progress * state.clip.length);
         }
+
+        #region 采样通道-逐帧重放
+
+        //
+        // 【为什么必须逐帧重采样】
+        // AnimationClip.SampleAnimation 是<b>一次性写入</b>：它把剪辑在某个时刻的值写进模型参数，
+        // 之后不再管。而 Cubism 每帧都会重写同一批参数——原生通道上的其它轨道由 PlayableGraph
+        // 驱动，CubismFadeController 还会按动作淡入淡出再刷一遍。于是只在「进度发生变化」时采样
+        // 的话，玩家一停手，下一帧参数就被它们盖回去，表现为动画瞬间弹回起始帧。
+        //
+        // Spine 侧不存在这个问题：那边写的是 TrackEntry.TrackTime，是持久状态，Spine 自己的
+        // AnimationState.Apply 每帧都会照着它重新摆姿势。Cubism 没有等价物，只能自己每帧补写。
+        //
+        // 【为什么接 ICubismUpdatable 而不是直接写 LateUpdate】
+        // 采样值必须在 CubismFadeController（执行序 100，负责把动作参数写进模型）<b>之后</b>、
+        // CubismRenderController（10000，据参数建网格）<b>之前</b>落笔，否则要么被淡入淡出覆盖、
+        // 要么这一帧根本没被画进去。普通 LateUpdate 与 Cubism 组件之间的先后是未定义的，
+        // 接进 CubismUpdateController 的调度才能拿到确定的时序。
+        //
+
+        /// <summary>由 <c>CubismUpdateController</c> 读取，决定本组件在 LateUpdate 链上的位置。</summary>
+        public int ExecutionOrder =>
+            // 紧跟在动作淡入淡出之后：采样通道产出的就是「这一帧的动作姿势」，理应和动作走同一个位置，
+            // 后面的姿势 / 表情 / 眨眼 / 物理才能一并基于被拖拽出来的姿势继续演算。
+            Live2D.Cubism.Framework.CubismUpdateExecutionOrder.CubismFadeController + 1;
+
+        /// <summary>编辑模式下不需要跑——采样通道只在运行期由玩家操作驱动。</summary>
+        public bool NeedsUpdateOnEditing => false;
+
+        /// <summary>同物体上是否有 <c>CubismUpdateController</c>。有则由它驱动，没有则回落到自身的 LateUpdate。</summary>
+        public bool HasUpdateController { get; set; }
+
+        protected override void Start()
+        {
+            base.Start();
+            HasUpdateController = GetComponent<Live2D.Cubism.Framework.CubismUpdateController>() != null;
+        }
+
+        /// <summary>把所有处于采样通道的轨道按当前进度重新写一遍。</summary>
+        public void OnLateUpdate()
+        {
+            if (!enabled || _trackPlayState.Count == 0) return;
+
+            foreach (var kv in _trackPlayState)
+            {
+                var state = kv.Value;
+                if (!state.isScrub) continue;
+                SampleClip(state.renderController, state);
+            }
+        }
+
+        // CubismUpdateController 只登记「与 CubismModel 同物体」的 ICubismUpdatable。
+        // 本组件被挂到别处时收不到调度，退回自己的 LateUpdate——时序不如前者确定，但总好过不重放。
+        private void LateUpdate()
+        {
+            if (!HasUpdateController) OnLateUpdate();
+        }
+
+        #endregion
 
         #endregion
 

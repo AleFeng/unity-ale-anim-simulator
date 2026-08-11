@@ -343,6 +343,12 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 1. **动作不要动画「模型整体不透明度」**。若 motion3.json 给模型不透明度打了关键帧（导入后表现为剪辑里一条 `CubismRenderController.Opacity` 曲线），它会与本系统的淡入淡出同帧争写。整体淡入淡出请交给系统，动作里不要碰。
 2. **进度控制与反向播放走单独的采样通道**。Cubism 没有读写播放进度的 API、播放速度也必须 ≥ 0，因此拖拽 / 旋转 / 按压三种交互，以及反向播放、速度为 0 的场合，改由本插件逐帧采样剪辑来驱动；这条通道**不经过 Cubism 自己的动作淡入淡出**（常规的循环 / 正向播放仍走原生通道，淡入淡出正常）。
 
+   > **「逐帧」是必须的，不是可省的优化。** `AnimationClip.SampleAnimation` 只是一次性写入，而 Cubism 每帧都会重写同一批参数（其它轨道的原生播放、以及 `CubismFadeController` 的动作淡入淡出）。只在进度变化时采样的话，玩家一停手姿势就被打回起始帧。为此 `Live2dAnimator` 实现了 `ICubismUpdatable`，把重采样接进 Cubism 的 LateUpdate 调度，执行序取 `CubismFadeController + 1`——在动作淡入淡出之后落笔才不会被覆盖，在 `CubismRenderController` 之前落笔才会被画进这一帧。
+   >
+   > 这也是**同一份配置在两个后端表现不同**的一个来源：Spine 侧写的是 `TrackEntry.TrackTime` 这种持久状态，`AnimationState.Apply` 每帧会照着它重摆姿势，天然就停得住。
+   >
+   > ⚠️ 由此带来一条部署约束：**`Live2dAnimator` 最好与 `CubismModel` 挂在同一个物体上**。`CubismUpdateController` 只登记同物体上的 `ICubismUpdatable`；挂到别处时会回落到组件自身的 `LateUpdate`，与 Cubism 各组件的先后顺序就变成未定义的了。
+
 # 系统配置
 
 背景、角色预制体的 文件夹路径、动画动作播放器、进度条、皮肤列表的UI样式 等。都可以在 AnimSimulatorConfig(动画模拟管理器配置)文件中进行配置。

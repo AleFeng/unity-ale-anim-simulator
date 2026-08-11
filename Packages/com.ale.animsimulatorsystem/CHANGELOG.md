@@ -16,6 +16,13 @@
   - `A_ListOpen` 与 `A_TipOnly` 之间互设转换，光标从一种播放器直接滑到另一种时可就地切换；两者都接受 `TriggerListClose` 与 `TriggerFadeOut`。
   - `_isOpen` 的语义随之由「列表已铺开」放宽为「已进入展开态」，关闭分支因此对两种类型都能正确收回。
 
+- **Live2D 的采样通道停手即弹回起始帧。** 拖拽 / 旋转 / 按压把进度停在中途后，只要玩家不再移动光标，下一帧姿势就被打回去——而 Spine 侧表现正常。
+  - 成因：`AnimationClip.SampleAnimation` 是**一次性写入**，而原实现只在「进度发生变化」时采样一次。Cubism 每帧都会重写同一批参数（其它轨道的 `PlayableGraph` 播放、以及执行序 100 的 `CubismFadeController` 按动作淡入淡出再刷一遍），停手后没有任何东西把采样值补回去。Spine 不受影响是因为它写的是 `TrackEntry.TrackTime` 这种**持久状态**，`AnimationState.Apply` 每帧照着它重摆姿势；Cubism 没有等价物。
+  - 修复：`Live2dAnimator` 实现 `ICubismUpdatable`，在 `OnLateUpdate` 里把所有处于采样通道的轨道按当前进度**逐帧重写**（类注释原本就写的是「逐帧采样」，此前只是没有真正做到）。
+  - 执行序取 `CubismFadeController + 1`（= 101）：必须在动作淡入淡出**之后**落笔才不会被覆盖，又必须在 `CubismRenderController`（10000）**之前**才会被画进这一帧；且排在姿势 / 表情 / 眨眼 / 物理之前，让它们都基于被拖拽出来的姿势继续演算。普通 `LateUpdate` 与 Cubism 组件之间的先后是未定义的，故接进 `CubismUpdateController` 的调度而不是自己写 `LateUpdate`。
+  - `FTrackPlayState` 随之记住该轨道的渲染器——逐帧重写时没有调用方传入，而一个角色由多个 Cubism 模型拼成时各状态可以有各自的渲染器，不能图省事用默认渲染器。
+  - `CubismUpdateController` 只登记与 `CubismModel` **同物体**的 `ICubismUpdatable`；组件被挂到别处时回落到自身的 `LateUpdate`（时序不如前者确定，但总好过不重放）。
+
 - **「背景-测试用」配置了却不加载。** `Test Background Name` / `Test Background Reference` 两个字段以及配套的 `HasTestBackground` / `ReloadTestBackground()` 一直都在，但 `OnEnable` 只判 `HasTestActor`、也只调 `ReloadTestActor()`——背景那套在启动时**零调用点**，只能靠组件右键菜单手动触发。现改为两者各自独立判定与加载：只配角色、只配背景、两个都配，三种情形都成立。
   - 判定门同时放宽为「两者任一」，此前只配背景时连 `StartAnimSimulator()` 都不会执行。
 
