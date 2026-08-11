@@ -1963,11 +1963,11 @@ MonoBehaviour:
       loopIntervalTimeRange: {x: 0, y: 0}
   live2dAnimClips:
   - animName: body
-    clip: {fileID: 7400000, guid: 8111a2bbebfc2014c92395318f2e4277, type: 2}
+    clip: {fileID: 7400000, guid: 21bcf1044967ded4aa62c9a4ab6899b6, type: 2}
   - animName: face01
-    clip: {fileID: 7400000, guid: 5753b0caab03dd2428fcc64267316bbf, type: 2}
+    clip: {fileID: 7400000, guid: 3d546c786b1c5e047866b2cfe61fd8b4, type: 2}
   - animName: face02
-    clip: {fileID: 7400000, guid: c0c94fc29de6457428c1a846499aea52, type: 2}
+    clip: {fileID: 7400000, guid: d6409c28def5e6e4db171a8bae9ff3cd, type: 2}
   live2dTrackLayers: []
   live2dSkins: []
 --- !u!114 &8477270659366046438
