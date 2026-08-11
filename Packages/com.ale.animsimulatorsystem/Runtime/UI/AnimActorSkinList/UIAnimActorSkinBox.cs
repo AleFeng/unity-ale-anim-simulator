@@ -62,15 +62,15 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
 
-            if (_uiAnimActorSkinBoxContent.AnimActor)
+            if (_uiAnimActorSkinBoxContent.animActor)
             {
                 // 监听 角色皮肤添加或移除 事件
-                _uiAnimActorSkinBoxContent.AnimActor.onSkinAddOrRemove += OnSkinAddOrRemove;
+                _uiAnimActorSkinBoxContent.animActor.onSkinAddOrRemove += OnSkinAddOrRemove;
                 // 设置 选择提示 显示状态。
                 // 强制写入：格子是复用来的，_isSelected 保留着上一条数据的状态，
                 // 走增量判断会在「新旧状态恰好相同」时跳过，而此时提示对象的显示状态未必与之一致。
-                SetSelectedTipDisplay(_uiAnimActorSkinBoxContent.AnimActor.CheckIsSelectedSkin(
-                    _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin), true);
+                SetSelectedTipDisplay(_uiAnimActorSkinBoxContent.animActor.CheckIsSelectedSkin(
+                    _uiAnimActorSkinBoxContent.animActorSkinGroup, _uiAnimActorSkinBoxContent.animActorSkin), true);
             }
 
             // 设置 UI皮肤名称
@@ -78,7 +78,7 @@ namespace Ale.AnimSimulatorSystem
             // 设置 UI皮肤图片
             if (imgSkin)
             {
-                imgSkin.sprite = _uiAnimActorSkinBoxContent.AnimActorSkin.skinImage;
+                imgSkin.sprite = _uiAnimActorSkinBoxContent.animActorSkin.skinImage;
             }
         }
 
@@ -107,9 +107,9 @@ namespace Ale.AnimSimulatorSystem
         private void UnsubscribeSkinEvent()
         {
             if (_uiAnimActorSkinBoxContent == null) return;
-            if (!_uiAnimActorSkinBoxContent.AnimActor) return;
+            if (!_uiAnimActorSkinBoxContent.animActor) return;
 
-            _uiAnimActorSkinBoxContent.AnimActor.onSkinAddOrRemove -= OnSkinAddOrRemove;
+            _uiAnimActorSkinBoxContent.animActor.onSkinAddOrRemove -= OnSkinAddOrRemove;
         }
 
         private void OnEnable()  { AnimLocale.OnLocaleChanged += RefreshDisplayName; }
@@ -120,7 +120,7 @@ namespace Ale.AnimSimulatorSystem
         {
             if (!txtSkinName) return;
             var value = _uiAnimActorSkinBoxContent != null
-                ? _uiAnimActorSkinBoxContent.AnimActorSkin.uiDisplaySkinName
+                ? _uiAnimActorSkinBoxContent.animActorSkin.uiDisplaySkinName
                 : null;
             txtSkinName.text = value != null ? value.ResolveText() : string.Empty;
         }
@@ -153,8 +153,8 @@ namespace Ale.AnimSimulatorSystem
         {
             // 仅当 角色皮肤数据 匹配时，更新 选择状态
             if (_uiAnimActorSkinBoxContent != null
-                && _uiAnimActorSkinBoxContent.AnimActorSkinGroup == animActorSkinGroup
-                && _uiAnimActorSkinBoxContent.AnimActorSkin == animActorSkin)
+                && _uiAnimActorSkinBoxContent.animActorSkinGroup == animActorSkinGroup
+                && _uiAnimActorSkinBoxContent.animActorSkin == animActorSkin)
             {
                 // 皮肤的添加或移除，是由AnimActor或其他系统发起，此处仅更新UI显示状态。
                 // 设置 选择提示 显示状态
@@ -176,17 +176,17 @@ namespace Ale.AnimSimulatorSystem
 
             // 添加或移除 角色皮肤
             bool isSuccess = true;
-            if (_uiAnimActorSkinBoxContent.AnimActor)
+            if (_uiAnimActorSkinBoxContent.animActor)
             {
                 if (isSelect)
                 {
-                    isSuccess = _uiAnimActorSkinBoxContent.AnimActor.AddSkin(
-                        _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin);
+                    isSuccess = _uiAnimActorSkinBoxContent.animActor.AddSkin(
+                        _uiAnimActorSkinBoxContent.animActorSkinGroup, _uiAnimActorSkinBoxContent.animActorSkin);
                 }
                 else
                 {
-                    isSuccess = _uiAnimActorSkinBoxContent.AnimActor.RemoveSkin(
-                        _uiAnimActorSkinBoxContent.AnimActorSkinGroup, _uiAnimActorSkinBoxContent.AnimActorSkin);
+                    isSuccess = _uiAnimActorSkinBoxContent.animActor.RemoveSkin(
+                        _uiAnimActorSkinBoxContent.animActorSkinGroup, _uiAnimActorSkinBoxContent.animActorSkin);
                 }
             }
             

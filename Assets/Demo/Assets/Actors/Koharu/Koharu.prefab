@@ -16136,18 +16136,18 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c7a630c056e7894485302f24468744d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Ale.AnimSimulatorSystem::Ale.AnimSimulatorSystem.Live2dAnimator
+  m_EditorClassIdentifier: Ale.AnimSimulatorSystem::Ale.AnimSimulatorSystem.Live2DAnimator
   animFadeDuration: 0.2
   isDisplayOnInit: 0
   stateInitList:
   - idle
   baseSkins: []
-  live2dRenderController: {fileID: 82931019126225805}
-  live2dMotionController: {fileID: 909398931563928436}
-  live2dStateData:
+  live2DRenderController: {fileID: 82931019126225805}
+  live2DMotionController: {fileID: 909398931563928436}
+  live2DStateData:
   - stateName: idle
-    live2dRenderController: {fileID: 0}
-    live2dAnimDatas:
+    live2DRenderController: {fileID: 0}
+    live2DAnimDatas:
     - animName: body
       animTrack: 1
       animTrackSub: 0
@@ -16156,15 +16156,15 @@ MonoBehaviour:
       speed: 1
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 0}
-  live2dAnimClips:
+  live2DAnimClips:
   - animName: body
     clip: {fileID: 7400000, guid: aad128b28bfc4b349b6cdfc5ef3ad929, type: 2}
   - animName: face01
     clip: {fileID: 7400000, guid: bb488895ca41fc548aeb51145e06ed77, type: 2}
   - animName: face02
     clip: {fileID: 7400000, guid: e9e03e175efeadc47b348cda3d48b8f7, type: 2}
-  live2dTrackLayers: []
-  live2dSkins: []
+  live2DTrackLayers: []
+  live2DSkins: []
 --- !u!114 &3788041322275965214
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -14,6 +14,16 @@
   - 预制体上的组件引用按 GUID 记录，**不受影响**；按名引用该类型的自有代码需同步改名。
   - 宏关闭时保留的空类声明也一并改名——两个 `#if` 分支的类名必须与文件名一致，否则关掉 `ASS_LIVE2D` 就会报「类名与文件名不符」，而那恰恰是空类体要保住的场合（让预制体上的组件引用不至于变成 Missing Script）。
 
+- **`Live2DAnimator` 的成员拼写一并统一为 `Live2D`**，与上一条同源：`live2d…` → `live2D…`、`FLive2d…` → `FLive2D…`。`Live2dSkinData` / `FLive2dSkinTexture` 随之更名为 `Live2DSkinData` / `FLive2DSkinTexture`（文件同步更名为 `Live2DSkinData.cs`）。
+  - 涉及的**序列化字段**共 8 个：`live2DRenderController`、`live2DMotionController`、`live2DStateData`、`live2DAnimClips`、`live2DTrackLayers`、`live2DSkins`，以及状态数据项内的 `live2DRenderController`、`live2DAnimDatas`。
+  - **字段名即序列化键**，改名会让已有预制体 / 场景上的这几项数据读不出来（回落为空）。本仓库内的两个 Live2D 角色预制体（`Koharu` / `Natori`）已随本次改动同步迁移；**下游工程需自行迁移**——最省事的办法是给每个字段加一行 `[FormerlySerializedAs("live2dXxx")]`，打开一次预制体并保存后即可移除。
+  - 嵌套结构体与 `Live2DSkinData` 的**类型名不参与序列化**，只有字段名会写进 YAML，故仅重命名类型不会丢数据。
+  - Inspector 上的显示名随之由 `Live 2d Render Controller` 变为 `Live 2D Render Controller`（`ObjectNames.NicifyVariableName` 的结果），使用文档中的字段名一并更新。
+
+- **编辑器侧的 `Live2d` 拼写一并统一。** `AnimSimulatorDefines` 的公开成员 `Live2d` / `PackageLive2d` / `UrlLive2dDownload` / `IsLive2dEnabled()` / `IsLive2dPackageInstalled()` 更名为 `Live2D` / `PackageLive2D` / `UrlLive2DDownload` / `IsLive2DEnabled()` / `IsLive2DPackageInstalled()`；私有的 `NsLive2d` 与 `AnimSimulatorWelcomeWindow` 的 `_live2dEnabled` / `_live2dInstalled` / `DrawLive2dInstallHint` 同理。
+  - **宏名字符串 `"ASS_LIVE2D"` 本身不变**，Player Settings 里已有的宏配置不受影响；改的只是引用它的那个常量的标识符。
+  - 这几个是编辑器专用的辅助成员，包内仅 `AnimSimulatorDefineChecker` 与 `AnimSimulatorWelcomeWindow` 两处引用，已同步；下游若有自有编辑器脚本按名引用需同步改名。
+
 **修复 Random(点击随机) 类型的点击提示动画表现。** 2.3.0 引入该类型时，只让它走到「淡入」这一级就停下了。
 
 ### 修复
@@ -71,6 +81,14 @@
   - 依赖的 `com.ale.toolkit` 最低版本随之由 1.7.5 抬到 **1.7.7**。低于该版本插件仍能编译运行，但动作列表会按配置的正序显示。
   - Demo 的 `UIAnimActionList.prefab` 已把 `UIAnimActionScrollList` 的 `Reverse Content Order` 勾上，观感与此前一致。**自制动作列表 UI 预制体的工程需要照做**，否则升级后动作会从正序显示。
   - 同一批 toolkit 改动还带来 `Reverse Scroll Direction`（反向滚轮，只影响滚轮不影响拖拽），本插件默认不开启。
+
+- **清掉 `Live2DAnimator` 里两处只写不读的内部状态**，都是 2.3.0 改自动分层算法时遗留的，删除不改变任何行为：
+  - `_layersInUse`（已占用的层集合）——「第一个空闲层」式的分配才需要避让别人占了哪些层；改按轨道序数确定性映射后，层号只取决于轨道自身。
+  - `FTrackPlayState.speed`——两条通道都用不上：原生通道把速度直接交给 `CubismMotionController.PlayAnimation`，采样通道的进度完全由玩家操作驱动、与速度无关。
+
+- **`AnimSimulatorManager` 消除两类隐患写法**，均无行为变化：
+  - `InitProgressBarGroup` 的形参由 `ProgressBarConfig[]` 改为 `IReadOnlyList<ProgressBarConfig>`。调用方传的是 `LevelProgressBarConfig[]` / `ActionProgressBarConfig[]`，**数组的协变是不安全的**——经基类型引用往里写会在运行期抛 `ArrayTypeMismatchException`；`IReadOnlyList<out T>` 的协变因只读而安全，签名本身也就如实表明了「本方法不写回」。
+  - 资产槽 `AnimAssetSlot` 的 `Instance` 属性更名为 `InstanceGo`。该类嵌套在 `AnimSimulatorManager` 内，而后者是 `ToolkitMonoSingleton`、自带静态 `Instance`——同名会把外层那个遮住，类内写 `Instance` 拿到的是槽持有的 `GameObject` 而非管理器单例，且编译器不给任何提示。
 
 - **`UIAnimActionList` 触发 Animator 参数前先探测参数是否存在。** Unity 的 `SetTrigger` / `ResetTrigger` 遇到不存在的参数会往控制台刷错误，而 `TriggerTipOnly` 是本版新增的——沿用旧动作列表 UI 预制体的工程没有这个参数。现在探测一次并缓存，缺失时静默退回 2.3.0 的表现（提示圈停在已淡入未展开的形态），并**告警一次**提示更新预制体。Animator 尚未初始化时不缓存探测结果，避免把「参数一个都不存在」错误地记下来。
 

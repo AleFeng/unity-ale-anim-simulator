@@ -68,18 +68,18 @@ namespace Ale.AnimSimulatorSystem.Editor
                     "SpineAnimator 将无法编译。请通过 Package Manager 安装 Spine Unity 运行时，" +
                     "或在欢迎窗口中关闭该宏。\n（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
 
-            if (AnimSimulatorDefines.IsLive2dEnabled() && !AnimSimulatorDefines.IsLive2dPackageInstalled())
+            if (AnimSimulatorDefines.IsLive2DEnabled() && !AnimSimulatorDefines.IsLive2DPackageInstalled())
                 Debug.LogWarning(
-                    $"[Anim Simulator System] Live2D 宏 '{AnimSimulatorDefines.Live2d}' 已启用，但未检测到 " +
-                    $"{AnimSimulatorDefines.PackageLive2d}。\n" +
+                    $"[Anim Simulator System] Live2D 宏 '{AnimSimulatorDefines.Live2D}' 已启用，但未检测到 " +
+                    $"{AnimSimulatorDefines.PackageLive2D}。\n" +
                     "Live2DAnimator 将无法编译。它不是 UPM 包，需从官网下载 .unitypackage 导入，" +
                     "或在欢迎窗口中关闭该宏。\n（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
 
             // 两个后端都没开：插件的动画播放能力整体不可用，值得提示一次。
-            if (!AnimSimulatorDefines.IsSpineEnabled() && !AnimSimulatorDefines.IsLive2dEnabled())
+            if (!AnimSimulatorDefines.IsSpineEnabled() && !AnimSimulatorDefines.IsLive2DEnabled())
                 Debug.LogWarning(
                     "[Anim Simulator System] 尚未启用任何动画后端宏" +
-                    $"（'{AnimSimulatorDefines.Spine}' / '{AnimSimulatorDefines.Live2d}'）。\n" +
+                    $"（'{AnimSimulatorDefines.Spine}' / '{AnimSimulatorDefines.Live2D}'）。\n" +
                     "角色动画将无法播放。请在欢迎窗口中按实际使用的动画运行时启用对应的宏。\n" +
                     "（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
         }

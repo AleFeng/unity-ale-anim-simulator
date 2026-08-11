@@ -31,13 +31,13 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 点击 皮肤组页签 事件
         /// </summary>
-        public Action<UIAnimActorSkinGroupTab> OnClickSkinGroupTab;
+        public Action<UIAnimActorSkinGroupTab> onClickSkinGroupTab;
         
         /// <summary>
         /// 动画角色 皮肤组
         /// </summary>
         public AnimActorSkinGroup AnimActorSkinGroup => _animActorSkinGroup;
-        private AnimActorSkinGroup _animActorSkinGroup = null;
+        private AnimActorSkinGroup _animActorSkinGroup;
         
         private void Awake()
         {
@@ -79,7 +79,7 @@ namespace Ale.AnimSimulatorSystem
         private void OnBtnClickSkinGroupTab()
         {
             // 触发 点击事件
-            OnClickSkinGroupTab?.Invoke(this);
+            onClickSkinGroupTab?.Invoke(this);
         }
         
         /// <summary>

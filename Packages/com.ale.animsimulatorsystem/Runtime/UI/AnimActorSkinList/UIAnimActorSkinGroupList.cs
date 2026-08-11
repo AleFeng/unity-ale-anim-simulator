@@ -51,7 +51,7 @@ namespace Ale.AnimSimulatorSystem
                 {
                     // 实例化 页签
                     var tabInstance = Instantiate(uiAnimActorSkinGroupTabPrefab, uiAnimActorSkinGroupTabRoot);
-                    tabInstance.OnClickSkinGroupTab = OnSelectSkinGroupTab; // 监听 页签点击 事件
+                    tabInstance.onClickSkinGroupTab = OnSelectSkinGroupTab; // 监听 页签点击 事件
                     // 添加到 列表
                     _uiAnimActorSkinGroupTabList.Add(tabInstance);
                 }

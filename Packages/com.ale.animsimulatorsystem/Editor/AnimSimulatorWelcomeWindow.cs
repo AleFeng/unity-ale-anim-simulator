@@ -25,7 +25,7 @@ namespace Ale.AnimSimulatorSystem.Editor
 
         // 内部 UI 状态
         private bool _spineEnabled,  _spineInstalled;
-        private bool _live2dEnabled, _live2dInstalled;
+        private bool _live2DEnabled, _live2DInstalled;
         private bool _autoShow;
         private bool _initialized;
         private bool _pendingRecompile;
@@ -88,8 +88,8 @@ namespace Ale.AnimSimulatorSystem.Editor
 
             _spineEnabled    = AnimSimulatorDefines.IsSpineEnabled();
             _spineInstalled  = AnimSimulatorDefines.IsSpinePackageInstalled();
-            _live2dEnabled   = AnimSimulatorDefines.IsLive2dEnabled();
-            _live2dInstalled = AnimSimulatorDefines.IsLive2dPackageInstalled();
+            _live2DEnabled   = AnimSimulatorDefines.IsLive2DEnabled();
+            _live2DInstalled = AnimSimulatorDefines.IsLive2DPackageInstalled();
             _autoShow        = EditorPrefs.GetBool(AnimSimulatorEditorPrefs.WelcomeAutoShow, true);
         }
 
@@ -229,12 +229,12 @@ namespace Ale.AnimSimulatorSystem.Editor
 
             EditorGUILayout.Space(2);
 
-            DrawMacroToggle("Live2D", AnimSimulatorDefines.Live2d, AnimSimulatorDefines.PackageLive2d,
-                ref _live2dEnabled, _live2dInstalled,
+            DrawMacroToggle("Live2D", AnimSimulatorDefines.Live2D, AnimSimulatorDefines.PackageLive2D,
+                ref _live2DEnabled, _live2DInstalled,
                 Tr("启用后 Live2DAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。"),
                 Tr("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）"),
                 Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2DAnimator 将无法编译。\n\n确定要继续启用吗？"),
-                DrawLive2dInstallHint);
+                DrawLive2DInstallHint);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// （含专有的 Cubism Core 原生库），既无法写进 <c>package.json</c> 的 <c>dependencies</c>，
         /// 也无法由 Package Manager 安装，只能手动下载导入。
         /// </summary>
-        private static void DrawLive2dInstallHint()
+        private static void DrawLive2DInstallHint()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField(
@@ -251,7 +251,7 @@ namespace Ale.AnimSimulatorSystem.Editor
                    "Cubism 5 SDK 自带 Live2D.Cubism 程序集定义，导入后本插件即可自动引用。"),
                 EditorStyles.wordWrappedMiniLabel);
             if (GUILayout.Button(Tr("打开 Live2D 官方下载页"), GUILayout.Height(22)))
-                Application.OpenURL(AnimSimulatorDefines.UrlLive2dDownload);
+                Application.OpenURL(AnimSimulatorDefines.UrlLive2DDownload);
             EditorGUILayout.EndVertical();
         }
 

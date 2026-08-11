@@ -30522,18 +30522,18 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c7a630c056e7894485302f24468744d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Ale.AnimSimulatorSystem::Ale.AnimSimulatorSystem.Live2dAnimator
+  m_EditorClassIdentifier: Ale.AnimSimulatorSystem::Ale.AnimSimulatorSystem.Live2DAnimator
   animFadeDuration: 0.2
   isDisplayOnInit: 0
   stateInitList:
   - idle
   baseSkins: []
-  live2dRenderController: {fileID: 8411269862387172439}
-  live2dMotionController: {fileID: 2699459365835740486}
-  live2dStateData:
+  live2DRenderController: {fileID: 8411269862387172439}
+  live2DMotionController: {fileID: 2699459365835740486}
+  live2DStateData:
   - stateName: idle
-    live2dRenderController: {fileID: 0}
-    live2dAnimDatas:
+    live2DRenderController: {fileID: 0}
+    live2DAnimDatas:
     - animName: mtn_00
       animTrack: 1
       animTrackSub: 0
@@ -30542,7 +30542,7 @@ MonoBehaviour:
       speed: 1
       startDelayTime: 0
       loopIntervalTimeRange: {x: 0, y: 0}
-  live2dAnimClips:
+  live2DAnimClips:
   - animName: mtn_00
     clip: {fileID: 7400000, guid: 08e2e6ff2d3bf0d4da6b6beccad61309, type: 2}
   - animName: mtn_01
@@ -30561,8 +30561,8 @@ MonoBehaviour:
     clip: {fileID: 7400000, guid: afc57188c8f622d47a7e291b9e5e4411, type: 2}
   - animName: mtn_08
     clip: {fileID: 7400000, guid: 8710ab05a81e1f844a066c6406300e9f, type: 2}
-  live2dTrackLayers: []
-  live2dSkins: []
+  live2DTrackLayers: []
+  live2DSkins: []
 --- !u!114 &5521437946767551992
 MonoBehaviour:
   m_ObjectHideFlags: 0

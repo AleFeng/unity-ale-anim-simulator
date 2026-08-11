@@ -18,9 +18,9 @@ namespace Ale.AnimSimulatorSystem
     /// <para><b>与 Spine 的三处根本差异，决定了本类的实现形态：</b></para>
     /// <list type="number">
     /// <item>Cubism <b>不能按名找动作</b>（motion3.json 导入成一个个散落的 <c>AnimationClip</c>），
-    /// 故需要一张 <see cref="live2dAnimClips"/> 查找表把「动画名 → 剪辑」对上；</item>
+    /// 故需要一张 <see cref="live2DAnimClips"/> 查找表把「动画名 → 剪辑」对上；</item>
     /// <item>Cubism 的<b>层（layer）数量很少</b>且在 <c>CubismMotionController</c> 上配置，
-    /// 而本系统的轨道号是 <c>主轨道*10+子轨道</c>（值域 0..9990），二者必须显式映射，见 <see cref="live2dTrackLayers"/>；</item>
+    /// 而本系统的轨道号是 <c>主轨道*10+子轨道</c>（值域 0..9990），二者必须显式映射，见 <see cref="live2DTrackLayers"/>；</item>
     /// <item>Cubism <b>没有读写播放进度的 API</b>，速度也必须 ≥ 0。故反向播放与进度擦洗
     /// （拖拽 / 旋转 / 按压三种交互）走单独的「采样通道」，见 <see cref="PlayAnimOnRenderer"/>。</item>
     /// </list>
@@ -39,42 +39,42 @@ namespace Ale.AnimSimulatorSystem
 #if ASS_LIVE2D
         [Header("Live2D设置")]
         [Tooltip("Cubism 渲染控制器：本系统以它作为「渲染器」，淡入淡出即补间它的 Opacity。")]
-        [SerializeField] private CubismRenderController live2dRenderController;
+        [SerializeField] private CubismRenderController live2DRenderController;
         [Tooltip("Cubism 动作控制器：常规播放走它，可享受 motion3.json 自带的淡入淡出。")]
-        [SerializeField] private CubismMotionController live2dMotionController;
+        [SerializeField] private CubismMotionController live2DMotionController;
         [Tooltip("Live2D 状态数据列表")]
-        [SerializeField] private FLive2dStateData[] live2dStateData;
+        [SerializeField] private FLive2DStateData[] live2DStateData;
 
         [Header("Live2D 动作查找表")]
         [Tooltip("动画名 → 动作剪辑。Cubism 没有按名查找动作的 API，故需在此显式登记。\n" +
                  "留空的动画名会用剪辑自身的资产名兜底。")]
-        [SerializeField] private FLive2dAnimClip[] live2dAnimClips;
+        [SerializeField] private FLive2DAnimClip[] live2DAnimClips;
 
         [Header("Live2D 轨道映射")]
         [Tooltip("轨道 → Cubism 层。层号即覆盖优先级（层号大的后应用、盖住层号小的）。\n" +
                  "未显式映射的轨道按 轨道序数 自动分层并钳制在 LayerCount 内——保序、且与播放顺序无关。")]
-        [SerializeField] private FLive2dTrackLayer[] live2dTrackLayers;
+        [SerializeField] private FLive2DTrackLayer[] live2DTrackLayers;
         // 这里原本还有一个「默认层索引」字段，用途是「自动分配把层用尽时的兜底层」。
         // 自动分层改为按轨道序数钳取之后，任何轨道都必得到一个有效层号，不再存在「用尽」这回事，
         // 该字段也就没有了任何作用，故删除——留着只会让人在 Inspector 上配了却不起作用。
 
         [Header("Live2D 皮肤")]
         [Tooltip("皮肤定义列表：皮肤名 → 要显示的部件 ID 集合。")]
-        [SerializeField] private Live2dSkinData[] live2dSkins;
+        [SerializeField] private Live2DSkinData[] live2DSkins;
 
 #if UNITY_EDITOR
         private void Reset()
         {
-            if (!live2dRenderController)  live2dRenderController  = GetComponentInChildren<CubismRenderController>();
-            if (!live2dMotionController)  live2dMotionController  = GetComponentInChildren<CubismMotionController>();
+            if (!live2DRenderController)  live2DRenderController  = GetComponentInChildren<CubismRenderController>();
+            if (!live2DMotionController)  live2DMotionController  = GetComponentInChildren<CubismMotionController>();
         }
 
         private void OnValidate()
         {
             // 层索引越界在运行前就报出来：越界的动作会被静默钳到别的层上，表现为「动画互相覆盖」，极难排查。
-            if (!live2dMotionController || live2dTrackLayers == null) return;
-            int layerCount = Mathf.Max(1, live2dMotionController.LayerCount);
-            foreach (var m in live2dTrackLayers)
+            if (!live2DMotionController || live2DTrackLayers == null) return;
+            int layerCount = Mathf.Max(1, live2DMotionController.LayerCount);
+            foreach (var m in live2DTrackLayers)
             {
                 if (m.layerIndex >= 0 && m.layerIndex < layerCount) continue;
                 AnimSimLog.Warn(this, $"轨道映射的层索引 {m.layerIndex} 越界：" +
@@ -87,18 +87,18 @@ namespace Ale.AnimSimulatorSystem
         #region 后端契约实现-基础
 
         /// <inheritdoc/>
-        protected override Component ResolveDefaultRenderer() => live2dRenderController;
+        protected override Component ResolveDefaultRenderer() => live2DRenderController;
 
         /// <inheritdoc/>
         protected override IEnumerable<FAnimStateData> EnumerateStateDatas()
         {
-            if (live2dStateData == null) yield break;
-            foreach (var data in live2dStateData)
+            if (live2DStateData == null) yield break;
+            foreach (var data in live2DStateData)
                 yield return new FAnimStateData
                 {
                     stateName = data.stateName,
-                    renderer  = data.live2dRenderController,
-                    animDatas = data.live2dAnimDatas,
+                    renderer  = data.live2DRenderController,
+                    animDatas = data.live2DAnimDatas,
                 };
         }
 
@@ -110,7 +110,7 @@ namespace Ale.AnimSimulatorSystem
 
         #region 动作查找表
 
-        // 动画名 → 剪辑。Awake 时由 live2dAnimClips 建表。
+        // 动画名 → 剪辑。Awake 时由 live2DAnimClips 建表。
         private readonly Dictionary<string, AnimationClip> _clipByName = new Dictionary<string, AnimationClip>();
         private bool _clipTableBuilt;
 
@@ -119,8 +119,8 @@ namespace Ale.AnimSimulatorSystem
             if (_clipTableBuilt) return;
             _clipTableBuilt = true;
 
-            if (live2dAnimClips == null) return;
-            foreach (var item in live2dAnimClips)
+            if (live2DAnimClips == null) return;
+            foreach (var item in live2DAnimClips)
             {
                 if (!item.clip) continue;
                 // 动画名留空时用剪辑自身的资产名兜底，省去手填
@@ -147,20 +147,20 @@ namespace Ale.AnimSimulatorSystem
         #region 轨道 → 层 映射
 
         private readonly Dictionary<int, int> _trackToLayer = new Dictionary<int, int>();
-        // 已被占用的层。自动分配必须避开它们——包括那些配置了但还没被访问到的显式映射，
-        // 否则先来的自动分配会抢走某条轨道预定的层，两条动作被塞进同一层互相顶掉。
-        private readonly HashSet<int> _layersInUse = new HashSet<int>();
+        // 这里原本还有一个「已占用的层」集合，供「第一个空闲层」式的自动分配避让用。
+        // 自动分层改为按轨道序数确定性映射之后，分配结果只取决于轨道自身，不再需要知道别人占了哪些层，
+        // 该集合也就只写不读了，故删除。
         private bool _layerTableBuilt;
         private bool _layerOverflowWarned;
 
-        // 一次性把显式映射灌进表里，并登记它们占用的层
+        // 一次性把显式映射灌进表里
         private void BuildLayerTable()
         {
             if (_layerTableBuilt) return;
             _layerTableBuilt = true;
 
-            if (live2dTrackLayers == null) return;
-            foreach (var m in live2dTrackLayers)
+            if (live2DTrackLayers == null) return;
+            foreach (var m in live2DTrackLayers)
             {
                 if (_trackToLayer.ContainsKey(m.TrackIndex))
                 {
@@ -169,7 +169,6 @@ namespace Ale.AnimSimulatorSystem
                     continue;
                 }
                 _trackToLayer[m.TrackIndex] = m.layerIndex;
-                _layersInUse.Add(m.layerIndex);
             }
         }
 
@@ -191,7 +190,7 @@ namespace Ale.AnimSimulatorSystem
             BuildLayerTable();
             if (_trackToLayer.TryGetValue(trackIndex, out var layer)) return layer;
 
-            int maxLayer = live2dMotionController ? Mathf.Max(0, live2dMotionController.LayerCount - 1) : 0;
+            int maxLayer = live2DMotionController ? Mathf.Max(0, live2DMotionController.LayerCount - 1) : 0;
 
             // 按轨道序数分层：序数保序，钳取后仍单调不降
             int ordinal = AnimTrackOrdinal.OrdinalOfTrack(trackIndex);
@@ -203,13 +202,12 @@ namespace Ale.AnimSimulatorSystem
                 _layerOverflowWarned = true;
                 AnimSimLog.Warn(this,
                     $"轨道 {trackIndex}（序数 {ordinal}）没有显式的层映射，序数超出层数范围" +
-                    $"（LayerCount = {(live2dMotionController ? live2dMotionController.LayerCount : 0)}），" +
+                    $"（LayerCount = {(live2DMotionController ? live2DMotionController.LayerCount : 0)}），" +
                     $"被钳到最高层 {layer}。同层的动作会互相覆盖——" +
                     "请在「轨道映射」里显式指定，或调大 CubismMotionController 的 Layer Count。" +
                     $" GameObject={gameObject.name}");
             }
 
-            _layersInUse.Add(layer);
             _trackToLayer[trackIndex] = layer;
             return layer;
         }
@@ -225,7 +223,8 @@ namespace Ale.AnimSimulatorSystem
             public AnimationClip clip;
             public bool          isScrub;   // true = 采样通道（由外部驱动进度），false = Cubism 原生通道
             public float         progress;  // 采样通道下的当前进度（0~1）
-            public float         speed;
+            // 这里原本还记着播放速度，但两条通道都用不上它：原生通道把速度直接交给 CubismMotionController，
+            // 采样通道的进度完全由玩家操作驱动、与速度无关。只写不读，故删除。
             // 该轨道采样到哪个模型上。逐帧重采样时没有调用方传渲染器，只能由状态自己记着；
             // 一个角色由多个 Cubism 模型拼成时，各状态可以指定各自的渲染器，故不能图省事用默认渲染器。
             public CubismRenderController renderController;
@@ -269,7 +268,6 @@ namespace Ale.AnimSimulatorSystem
                 layerIndex = layerIndex,
                 clip       = clip,
                 isScrub    = needScrub,
-                speed      = speed,
                 // 反向从末尾起、正向从头起，与 Spine 侧的语义一致
                 progress   = animData.isReverse ? 1f : 0f,
                 renderController = renderController,
@@ -284,7 +282,7 @@ namespace Ale.AnimSimulatorSystem
                 return true;
             }
 
-            if (!live2dMotionController)
+            if (!live2DMotionController)
             {
                 AnimSimLog.Warn(this, $"未设置 CubismMotionController，" +
                                       $"无法播放 '{animName}'。GameObject={gameObject.name}");
@@ -295,7 +293,7 @@ namespace Ale.AnimSimulatorSystem
             ApplyBlendWeight(layerIndex, animData.BlendWeight);
 
             // PriorityForce：本系统自己管轨道与覆盖关系，不希望被 Cubism 的优先级二次拦截
-            live2dMotionController.PlayAnimation(clip, layerIndex,
+            live2DMotionController.PlayAnimation(clip, layerIndex,
                 CubismMotionPriority.PriorityForce, animData.isLoop, speed);
             _trackPlayState[trackIndex] = stateNew;
             return true;
@@ -315,7 +313,7 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void ApplyBlendWeight(int layerIndex, float blendWeight)
         {
-            if (!live2dMotionController) return;
+            if (!live2DMotionController) return;
 
             if (layerIndex <= 0)
             {
@@ -331,7 +329,7 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
 
-            live2dMotionController.SetLayerWeight(layerIndex, Mathf.Clamp01(blendWeight));
+            live2DMotionController.SetLayerWeight(layerIndex, Mathf.Clamp01(blendWeight));
         }
 
         // 0 号层无法设权重的告警只发一次，避免逐次播放刷屏
@@ -354,16 +352,16 @@ namespace Ale.AnimSimulatorSystem
             if (resumeAnimData != null)
             {
                 var clip = FindClip(resumeAnimData.ResolveAnimName());
-                if (clip && live2dMotionController)
+                if (clip && live2DMotionController)
                 {
                     // 层权重是层上的持久设置，被恢复那条的权重未必与刚停掉那条相同，须重设
                     ApplyBlendWeight(state.layerIndex, resumeAnimData.BlendWeight);
-                    live2dMotionController.PlayAnimation(clip, state.layerIndex,
+                    live2DMotionController.PlayAnimation(clip, state.layerIndex,
                         CubismMotionPriority.PriorityForce, true, Mathf.Max(0.001f, Mathf.Abs(resumeAnimData.speed)));
                     _trackPlayState[trackIndex] = new FTrackPlayState
                     {
                         layerIndex = state.layerIndex, clip = clip,
-                        isScrub = false, speed = Mathf.Abs(resumeAnimData.speed), progress = 0f,
+                        isScrub = false, progress = 0f,
                     };
                 }
             }
@@ -373,15 +371,15 @@ namespace Ale.AnimSimulatorSystem
         // 实际行为就是「停掉该层的剪辑」，故此处固定传 0。
         private void StopNativeOnLayer(int layerIndex)
         {
-            if (!live2dMotionController) return;
-            if (layerIndex < 0 || layerIndex >= live2dMotionController.LayerCount) return;
-            live2dMotionController.StopAnimation(0, layerIndex);
+            if (!live2DMotionController) return;
+            if (layerIndex < 0 || layerIndex >= live2DMotionController.LayerCount) return;
+            live2DMotionController.StopAnimation(0, layerIndex);
         }
 
         /// <inheritdoc/>
         protected override void ClearRendererAnim(Component rendererParam)
         {
-            if (live2dMotionController) live2dMotionController.StopAllAnimation();
+            if (live2DMotionController) live2DMotionController.StopAllAnimation();
             _trackPlayState.Clear();
         }
 
@@ -535,7 +533,7 @@ namespace Ale.AnimSimulatorSystem
         // 可绘制对象 ID → 渲染器（贴图替换用）
         private readonly Dictionary<string, CubismRenderer> _rendererByDrawableId = new Dictionary<string, CubismRenderer>();
         // 皮肤名 → 皮肤定义
-        private readonly Dictionary<string, Live2dSkinData> _skinByName = new Dictionary<string, Live2dSkinData>();
+        private readonly Dictionary<string, Live2DSkinData> _skinByName = new Dictionary<string, Live2DSkinData>();
         // 被任一皮肤管辖的部件 ID 全集。不在此集合内的部件不受换装影响。
         private readonly HashSet<string> _managedPartIds = new HashSet<string>();
         // 可绘制对象 ID → 原始贴图（用于取消替换时还原）
@@ -550,7 +548,7 @@ namespace Ale.AnimSimulatorSystem
             _managedPartIds.Clear();
             _originalTextures.Clear();
 
-            var model = live2dRenderController ? live2dRenderController.Model : null;
+            var model = live2DRenderController ? live2DRenderController.Model : null;
             if (model)
             {
                 var parts = model.Parts;
@@ -559,9 +557,9 @@ namespace Ale.AnimSimulatorSystem
                         if (part) _partById[part.Id] = part;
             }
 
-            if (live2dRenderController && live2dRenderController.Renderers != null)
+            if (live2DRenderController && live2DRenderController.Renderers != null)
             {
-                foreach (var r in live2dRenderController.Renderers)
+                foreach (var r in live2DRenderController.Renderers)
                 {
                     if (!r || !r.Drawable) continue;
                     _rendererByDrawableId[r.Drawable.Id] = r;
@@ -569,8 +567,8 @@ namespace Ale.AnimSimulatorSystem
                 }
             }
 
-            if (live2dSkins == null) return;
-            foreach (var skin in live2dSkins)
+            if (live2DSkins == null) return;
+            foreach (var skin in live2DSkins)
             {
                 if (skin == null || string.IsNullOrEmpty(skin.skinName)) continue;
                 if (_skinByName.ContainsKey(skin.skinName))
@@ -636,9 +634,9 @@ namespace Ale.AnimSimulatorSystem
         /// <remarks>直接读 Inspector 上配置的皮肤定义，不依赖运行期状态。</remarks>
         public override IReadOnlyList<string> EditorCollectSkinNames()
         {
-            if (live2dSkins == null) return null;
-            var names = new List<string>(live2dSkins.Length);
-            foreach (var skin in live2dSkins)
+            if (live2DSkins == null) return null;
+            var names = new List<string>(live2DSkins.Length);
+            foreach (var skin in live2DSkins)
                 if (skin != null && !string.IsNullOrEmpty(skin.skinName)) names.Add(skin.skinName);
             return names;
         }
@@ -669,19 +667,19 @@ namespace Ale.AnimSimulatorSystem
         /// 状态名 → 该状态下要播放的一组动画，以及可选的专用渲染器。
         /// </summary>
         [Serializable]
-        public struct FLive2dStateData
+        public struct FLive2DStateData
         {
             [Tooltip("状态名称")]
             public string stateName;
             [Tooltip("Cubism 渲染控制器（可选）：该状态使用另一个模型时填写，留空则用默认渲染器。")]
-            public CubismRenderController live2dRenderController;
+            public CubismRenderController live2DRenderController;
             [Tooltip("Live2D 动画数据 列表")]
-            public AnimData[] live2dAnimDatas;
+            public AnimData[] live2DAnimDatas;
         }
 
         /// <summary>动作查找表的一项：动画名 → 动作剪辑。</summary>
         [Serializable]
-        public struct FLive2dAnimClip
+        public struct FLive2DAnimClip
         {
             [Tooltip("动画名称：与 Spine 侧使用相同的命名规则。留空则用剪辑的资产名。")]
             public string animName;
@@ -691,7 +689,7 @@ namespace Ale.AnimSimulatorSystem
 
         /// <summary>轨道映射的一项：本系统的轨道 → Cubism 的层索引。</summary>
         [Serializable]
-        public struct FLive2dTrackLayer
+        public struct FLive2DTrackLayer
         {
             [Tooltip("动画轨道")]
             public EAnimTrack animTrack;

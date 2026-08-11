@@ -912,9 +912,13 @@ namespace Ale.AnimSimulatorSystem
         /// 按一组配置实例化进度条。
         /// </summary>
         /// <param name="progressBarConfigs">进度条配置数组。为 <c>null</c> 时直接返回
-        /// ——新建的 AnimSimulatorConfig 里这些数组默认就是 <c>null</c> 而非空数组。</param>
+        /// ——新建的 AnimSimulatorConfig 里这些数组默认就是 <c>null</c> 而非空数组。
+        /// 取 <see cref="IReadOnlyList{T}"/> 而非 <c>ProgressBarConfig[]</c>：调用方传进来的是
+        /// <c>LevelProgressBarConfig[]</c> / <c>ActionProgressBarConfig[]</c> 这样的派生类数组，
+        /// 数组的协变是<b>不安全</b>的（经基类型引用写入会在运行期抛 <c>ArrayTypeMismatchException</c>），
+        /// 而 <c>IReadOnlyList&lt;out T&gt;</c> 的协变因只读而安全，同时也如实表明本方法不会写回。</param>
         /// <param name="label">日志用的中文名。</param>
-        private void InitProgressBarGroup(ProgressBarConfig[] progressBarConfigs, string label)
+        private void InitProgressBarGroup(IReadOnlyList<ProgressBarConfig> progressBarConfigs, string label)
         {
             if (progressBarConfigs == null) return;
 
@@ -1166,8 +1170,11 @@ namespace Ale.AnimSimulatorSystem
 
             /// <summary>当前实例所用的资产地址；无实例时为 <c>null</c>。卸载时按同一地址释放。</summary>
             public string Address { get; private set; }
+            // 名字不叫 Instance：本类嵌套在 AnimSimulatorManager 里，而后者是 ToolkitMonoSingleton，
+            // 自带一个静态的 Instance。同名会把外层那个遮住——本类内部写 Instance 拿到的是这个
+            // GameObject，而写的人多半以为拿到的是管理器单例，且编译器不会有任何提示。
             /// <summary>当前实例。</summary>
-            public GameObject Instance { get; private set; }
+            public GameObject InstanceGo { get; private set; }
             /// <summary>当前实例上的动画演员组件；实例没挂该组件时为 <c>null</c>。</summary>
             public AnimActor Actor { get; private set; }
 
@@ -1217,11 +1224,11 @@ namespace Ale.AnimSimulatorSystem
             /// <summary>卸载：销毁实例并释放资产句柄。两者是两件事，缺一不可。</summary>
             public void Unload()
             {
-                if (Instance)
+                if (InstanceGo)
                 {
                     // 本类不是 MonoBehaviour，Destroy 不在继承链上，需显式限定
-                    UnityEngine.Object.Destroy(Instance);
-                    Instance = null;
+                    UnityEngine.Object.Destroy(InstanceGo);
+                    InstanceGo = null;
                     Actor = null;
                     _onUnloaded?.Invoke();
                 }
@@ -1243,9 +1250,9 @@ namespace Ale.AnimSimulatorSystem
                     if (fadeIn) Actor.FadeIn();
                     else Actor.FadeOut();
                 }
-                else if (Instance)
+                else if (InstanceGo)
                 {
-                    Instance.SetActive(fadeIn);
+                    InstanceGo.SetActive(fadeIn);
                 }
             }
 
@@ -1258,10 +1265,10 @@ namespace Ale.AnimSimulatorSystem
                     return;
                 }
 
-                Instance = instance;
+                InstanceGo = instance;
                 // 父节点已在实例化时设好，此处无需再挂。
                 // 从实例上 获取 AnimActor组件
-                Actor = Instance.GetComponent<AnimActor>();
+                Actor = InstanceGo.GetComponent<AnimActor>();
                 if (!Actor) return;
 
                 // TODO:加载存档数据。

@@ -299,14 +299,14 @@ Live2D 角色预制体的搭法与 Spine 一致，只是组件不同：
 
 - 模型根物体上，除了 Cubism 导入时自带的组件外，还需要 **`CubismFadeController`**（指定模型的 `.fadeMotionList` 资产）与 **`CubismMotionController`**（设置 Layer Count）——它们是 Cubism 播放动作的前提。
 - 挂载 **`Live2DAnimator`**，并配置：
-  - **Live2d Render Controller**：模型的 `CubismRenderController`。本系统以它作为「渲染器」，淡入淡出即补间它的 Opacity。
-  - **Live2d Motion Controller**：上面添加的 `CubismMotionController`。
-  - **Live2d State Data**：状态名 → 该状态要播的一组动画。与 Spine 的状态数据列表一一对应。
+  - **Live2D Render Controller**：模型的 `CubismRenderController`。本系统以它作为「渲染器」，淡入淡出即补间它的 Opacity。
+  - **Live2D Motion Controller**：上面添加的 `CubismMotionController`。
+  - **Live2D State Data**：状态名 → 该状态要播的一组动画。与 Spine 的状态数据列表一一对应。
 - 根物体上再挂 **`AnimActor`**，把 `Live2DAnimator` 拖到它的 Animator 栏。之后的皮肤组、动画动作播放器配置与 Spine 完全相同。
 
 ### 三、动作查找表（必填）
 
-Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会生成一个个散落的 `AnimationClip`，彼此之间没有索引。因此需要在 `Live2DAnimator` 的 **Live2d Anim Clips(动作查找表)** 里，把动画名与动作剪辑一一对应起来。
+Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会生成一个个散落的 `AnimationClip`，彼此之间没有索引。因此需要在 `Live2DAnimator` 的 **Live2D Anim Clips(动作查找表)** 里，把动画名与动作剪辑一一对应起来。
 
 - **Anim Name**：动画名。动作配置里填的就是这个名字。
 - **Clip**：motion3.json 导入后生成的 `AnimationClip`。
@@ -319,7 +319,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 **层号即覆盖优先级**：Cubism 的层混合器按层号先后应用，层号大的盖住层号小的。这正是 [轨道与混合权重](#轨道与混合权重) 里「枚举值大的轨道覆盖枚举值小的」在本后端的落点。
 
-在 `Live2DAnimator` 的 **Live2d Track Layers(轨道映射)** 中显式指定「哪条轨道走哪一层」：
+在 `Live2DAnimator` 的 **Live2D Track Layers(轨道映射)** 中显式指定「哪条轨道走哪一层」：
 
 - 未显式指定的轨道，自 2.3.0 起**按轨道在 `EAnimTrack` 中的序数自动分层**（钳制在 Layer Count 内）。序数保序，故「高轨道的层号永远不低于低轨道」恒成立；且与播放顺序无关，同一份配置每次都算出同一个层号。
 - 层数不够时，序数超出范围的高轨道会被钳到最后一层、互相覆盖，首次发生时**告警一次**——请显式指定映射，或调大 Layer Count。
@@ -330,7 +330,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 ### 五、Live2D 皮肤
 
-**Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2DAnimator` 的 **Live2d Skins** 中定义：
+**Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2DAnimator` 的 **Live2D Skins** 中定义：
 
 - **Skin Name**：皮肤名。与 Spine 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对两个后端都适用。
 - **Part Ids**：该皮肤要显示的部件 ID 列表（即 Cubism Editor 中的部件 ID）。

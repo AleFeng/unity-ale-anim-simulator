@@ -47,7 +47,7 @@ namespace Ale.AnimSimulatorSystem
             RefreshDisplayName();
             // 设置 动作图标图片
             if (imageActionIcon)
-                imageActionIcon.sprite = _uiAnimActionListBoxContent.ActionIcon;
+                imageActionIcon.sprite = _uiAnimActionListBoxContent.actionIcon;
         }
 
         private void OnEnable()  { AnimLocale.OnLocaleChanged += RefreshDisplayName; }
@@ -57,7 +57,7 @@ namespace Ale.AnimSimulatorSystem
         private void RefreshDisplayName()
         {
             if (!textActionName) return;
-            var value = _uiAnimActionListBoxContent != null ? _uiAnimActionListBoxContent.UIDisplayActionName : null;
+            var value = _uiAnimActionListBoxContent != null ? _uiAnimActionListBoxContent.uiDisplayActionName : null;
             textActionName.text = value != null ? value.ResolveText() : string.Empty;
         }
 

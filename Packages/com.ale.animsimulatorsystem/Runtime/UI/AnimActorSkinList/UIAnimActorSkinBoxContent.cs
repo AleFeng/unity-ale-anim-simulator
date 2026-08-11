@@ -10,17 +10,17 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 动画角色
         /// </summary>
-        public AnimActor AnimActor;
+        public AnimActor animActor;
 
         /// <summary>
         /// 动画角色的 皮肤组
         /// </summary>
-        public AnimActorSkinGroup AnimActorSkinGroup;
+        public AnimActorSkinGroup animActorSkinGroup;
 
         /// <summary>
         /// 动画角色的 皮肤数据
         /// </summary>
-        public AnimActorSkin AnimActorSkin;
+        public AnimActorSkin animActorSkin;
 
         /// <summary>
         /// 构造函数
@@ -30,9 +30,9 @@ namespace Ale.AnimSimulatorSystem
         /// <param name="animActorSkin">动画角色的 皮肤数据</param>
         public UIAnimActorSkinBoxContent(AnimActor animActor, AnimActorSkinGroup animActorSkinGroup, AnimActorSkin animActorSkin)
         {
-            AnimActor = animActor;
-            AnimActorSkinGroup = animActorSkinGroup;
-            AnimActorSkin = animActorSkin;
+            this.animActor = animActor;
+            this.animActorSkinGroup = animActorSkinGroup;
+            this.animActorSkin = animActorSkin;
         }
     }
 }

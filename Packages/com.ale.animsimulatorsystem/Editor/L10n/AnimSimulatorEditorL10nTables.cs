@@ -16,9 +16,9 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// 插件支持（编译宏）/ 文档未找到）已由 toolkit 自己的译表登记，本包不重复。</para>
     /// </summary>
     [InitializeOnLoad]
-    internal static partial class AnimSimulatorEditorL10nTables
+    internal static partial class AnimSimulatorEditorL10NTables
     {
-        static AnimSimulatorEditorL10nTables()
+        static AnimSimulatorEditorL10NTables()
         {
             RegisterWelcome();
         }

@@ -18,7 +18,7 @@ namespace Ale.AnimSimulatorSystem
     /// 这样 <see cref="AnimActor"/> 上的一份皮肤组配置对两个后端都适用。</para>
     /// </summary>
     [Serializable]
-    public class Live2dSkinData
+    public class Live2DSkinData
     {
         [Tooltip("皮肤名称：与 Spine 侧使用相同的命名规则。有文件夹路径时，一般使用 '/' 作为分隔符。")]
         public string skinName;
@@ -27,7 +27,7 @@ namespace Ale.AnimSimulatorSystem
         public string[] partIds;
 
         [Tooltip("贴图替换（可选）：把指定可绘制对象的贴图换成另一张。留空则不做替换。")]
-        public FLive2dSkinTexture[] textures;
+        public FLive2DSkinTexture[] textures;
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ namespace Ale.AnimSimulatorSystem
     /// 用于「同一套部件、不同花色」的场合，避免为每个花色都做一份部件。
     /// </summary>
     [Serializable]
-    public struct FLive2dSkinTexture
+    public struct FLive2DSkinTexture
     {
         [Tooltip("可绘制对象 ID（CubismDrawable.Id）")]
         public string drawableId;

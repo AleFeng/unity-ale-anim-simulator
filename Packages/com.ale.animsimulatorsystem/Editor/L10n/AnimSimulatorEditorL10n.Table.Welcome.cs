@@ -6,7 +6,7 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// <see cref="AnimSimulatorWelcomeWindow"/> 的英 / 日译表。中文为源语言，故此处只登记英、日两栏；
     /// 未登记的条目在对应语言下自动回退中文。
     /// </summary>
-    internal static partial class AnimSimulatorEditorL10nTables
+    internal static partial class AnimSimulatorEditorL10NTables
     {
         static partial void RegisterWelcome()
         {

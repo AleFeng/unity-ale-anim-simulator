@@ -20,7 +20,7 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// <summary>Spine 支持宏。启用后 <c>SpineAnimator</c> 参与编译，可播放 Spine 动画与换装。</summary>
         public const string Spine = "ASS_SPINE";
         /// <summary>Live2D 支持宏。启用后 <c>Live2DAnimator</c> 参与编译，可播放 Cubism 动作与换装。</summary>
-        public const string Live2d = "ASS_LIVE2D";
+        public const string Live2D = "ASS_LIVE2D";
 
         // ── 依赖的动画运行时 ───────────────────────────────────────────────────────
         /// <summary>Spine Unity 运行时的 UPM 包名（git URL 分发，不在 UPM 注册表）。</summary>
@@ -29,15 +29,15 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// Live2D Cubism SDK for Unity。<b>它不是 UPM 包</b>——官方以 <c>.unitypackage</c> 分发
         /// （含专有的 Cubism Core 原生库），导入后落在 <c>Assets/Live2D/Cubism/</c>。
         /// </summary>
-        public const string PackageLive2d = "Live2D Cubism SDK for Unity";
+        public const string PackageLive2D = "Live2D Cubism SDK for Unity";
 
         /// <summary>Live2D Cubism SDK for Unity 官方下载页。</summary>
-        public const string UrlLive2dDownload = "https://www.live2d.com/en/sdk/download/unity/";
+        public const string UrlLive2DDownload = "https://www.live2d.com/en/sdk/download/unity/";
 
         // ── 探测用命名空间 ──────────────────────────────────────────────────────────
         // Spine 与 Cubism 的程序集都独立于本插件的宏编译，故命名空间存在即代表运行时已安装。
         private const string NsSpine  = "Spine.Unity";
-        private const string NsLive2d = "Live2D.Cubism";
+        private const string NsLive2D = "Live2D.Cubism";
 
         /// <summary>
         /// 旧宏名 → 新宏名 迁移映射。2.0.0 从 Fs 框架迁到 Ale Toolkit 时把 <c>HAS_SPINE</c> 改名为
@@ -54,14 +54,14 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// <summary>当前是否启用了 <see cref="Spine"/> 宏。</summary>
         public static bool IsSpineEnabled() => ToolkitDefines.IsDefineEnabled(Spine);
 
-        /// <summary>当前是否启用了 <see cref="Live2d"/> 宏。</summary>
-        public static bool IsLive2dEnabled() => ToolkitDefines.IsDefineEnabled(Live2d);
+        /// <summary>当前是否启用了 <see cref="Live2D"/> 宏。</summary>
+        public static bool IsLive2DEnabled() => ToolkitDefines.IsDefineEnabled(Live2D);
 
         // ── 运行时安装状态 ─────────────────────────────────────────────────────────
         /// <summary>Spine Unity 运行时（<c>Spine.Unity</c> 命名空间）是否可用。</summary>
         public static bool IsSpinePackageInstalled() => DefineUtils.HasNamespace(NsSpine);
 
         /// <summary>Live2D Cubism SDK（<c>Live2D.Cubism</c> 命名空间）是否可用。</summary>
-        public static bool IsLive2dPackageInstalled() => DefineUtils.HasNamespace(NsLive2d);
+        public static bool IsLive2DPackageInstalled() => DefineUtils.HasNamespace(NsLive2D);
     }
 }

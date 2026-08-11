@@ -11,12 +11,12 @@ namespace Ale.AnimSimulatorSystem
     public class UIAnimActionListBoxContent
     {
         /// <summary>UI中显示的动作名称。直接引用动作上那一份，不复制。</summary>
-        public readonly TextValue UIDisplayActionName;
+        public readonly TextValue uiDisplayActionName;
 
         /// <summary>
         /// 动画动作 图标
         /// </summary>
-        public readonly Sprite ActionIcon;
+        public readonly Sprite actionIcon;
 
         /// <summary>
         /// 动画动作
@@ -34,9 +34,9 @@ namespace Ale.AnimSimulatorSystem
             _animAction = animAction;
 
             // 设置 动画动作 名称
-            UIDisplayActionName = animAction.uiDisplayActionName;
+            uiDisplayActionName = animAction.uiDisplayActionName;
             // 设置 动画动作 图标
-            ActionIcon = _animAction.actionIcon;
+            actionIcon = _animAction.actionIcon;
         }
     }
 }
