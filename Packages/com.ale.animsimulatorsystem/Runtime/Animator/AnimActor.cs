@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
 using UnityEngine;
@@ -13,7 +13,7 @@ namespace Ale.AnimSimulatorSystem
     public class AnimActor : MonoBehaviour
     {
         [Header("动画设置")]
-        // 面向基类编程：挂 SpineAnimator 还是 Live2dAnimator 由角色预制体决定，本类对后端无感。
+        // 面向基类编程：挂 SpineAnimator 还是 Live2DAnimator 由角色预制体决定，本类对后端无感。
         // FormerlySerializedAs 保住旧字段名 spineAnimator 上已配置的引用。
         [FormerlySerializedAs("spineAnimator")]
         [Tooltip("动画控制器：Spine Animator 或 Live2D Animator。留空时自动从自身或子物体查找。")]
@@ -153,69 +153,9 @@ namespace Ale.AnimSimulatorSystem
             gameObject.SetActive(false);
         }
         #endregion
-        
-        #region 存档与加载
-        /// <summary>
-        /// 加载 数据
-        /// </summary>
-        /// <param name="animActorSaveData">存档数据</param>
-        public void LoadData(AnimActorSaveData animActorSaveData)
-        {
-            // 加载 皮肤组:已选择皮肤 映射表
-            foreach (var skinGroupToSelectedSkinNameList in animActorSaveData.skinGroupToSelectedSkinMap)
-            {
-                // 查找 皮肤组
-                var skinGroupName = skinGroupToSelectedSkinNameList.Key;
-                var animActorSkinGroup = Array.Find(animActorSkinGroups, 
-                    group => group.skinGroupName == skinGroupName);
-                if (animActorSkinGroup == null) continue;
-                
-                // 初始化 皮肤组:已选择皮肤 队列
-                _skinGroupToSelectedSkinListMap[animActorSkinGroup] = new List<AnimActorSkin>();
-                // 加载 已选择皮肤 列表
-                var selectedSkinNameList = skinGroupToSelectedSkinNameList.Value;
-                foreach (var selectedSkinName in selectedSkinNameList)
-                {
-                    // 查找 角色皮肤
-                    var animActorSkin = Array.Find(animActorSkinGroup.animActorSkins, 
-                        skin => skin.skinName == selectedSkinName);
-                    if (animActorSkin == null) continue;
-                    
-                    // 添加到 已选择皮肤 队列
-                    _skinGroupToSelectedSkinListMap[animActorSkinGroup].Add(animActorSkin);
-                    
-                    // 添加 皮肤。等待初始化后 刷新。
-                    AddSkin(animActorSkinGroup, animActorSkin, false);
-                }
-            }
-        }
-        
-        /// <summary>
-        /// 保存 数据
-        /// </summary>
-        public AnimActorSaveData SaveData()
-        {
-            AnimActorSaveData animActorSaveData = new AnimActorSaveData();
-            
-            // 保存 皮肤组:已选择皮肤名称 列表 映射表
-            Dictionary<string, string[]> skinGroupToSelectedSkinListNameMap = new Dictionary<string, string[]>();
-            foreach (var skinGroupToSelectedSkin in _skinGroupToSelectedSkinListMap)
-            {
-                // 皮肤组 名称
-                var animActorSkinGroupName = skinGroupToSelectedSkin.Key;
-                // 记录 皮肤组:已选择皮肤名称 列表
-                var selectedSkinNameList = skinGroupToSelectedSkin.Value;
-                skinGroupToSelectedSkinListNameMap[animActorSkinGroupName.skinGroupName] = 
-                    Array.ConvertAll(selectedSkinNameList.ToArray(), skin => skin.skinName);
-            }
-            animActorSaveData.skinGroupToSelectedSkinMap = skinGroupToSelectedSkinListNameMap;
 
-            return animActorSaveData;
-        }
-        #endregion
-
-        #region 皮肤管理
-        [Header("皮肤设置")]
+        #region 皮肤组管理
+        [Header("皮肤组")]
         // 基础皮肤列表已移到 AnimatorBase（动画组件的 Inspector 上），本组件只管皮肤组。
         [Tooltip("皮肤组 列表：用于定义角色 可切换的皮肤组。")]
         [SerializeField] private AnimActorSkinGroup[] animActorSkinGroups;
@@ -379,6 +319,66 @@ namespace Ale.AnimSimulatorSystem
             return true;
         }
         #endregion
+        
+        #region 存档与加载
+        /// <summary>
+        /// 加载 数据
+        /// </summary>
+        /// <param name="animActorSaveData">存档数据</param>
+        public void LoadData(AnimActorSaveData animActorSaveData)
+        {
+            // 加载 皮肤组:已选择皮肤 映射表
+            foreach (var skinGroupToSelectedSkinNameList in animActorSaveData.skinGroupToSelectedSkinMap)
+            {
+                // 查找 皮肤组
+                var skinGroupName = skinGroupToSelectedSkinNameList.Key;
+                var animActorSkinGroup = Array.Find(animActorSkinGroups, 
+                    group => group.skinGroupName == skinGroupName);
+                if (animActorSkinGroup == null) continue;
+                
+                // 初始化 皮肤组:已选择皮肤 队列
+                _skinGroupToSelectedSkinListMap[animActorSkinGroup] = new List<AnimActorSkin>();
+                // 加载 已选择皮肤 列表
+                var selectedSkinNameList = skinGroupToSelectedSkinNameList.Value;
+                foreach (var selectedSkinName in selectedSkinNameList)
+                {
+                    // 查找 角色皮肤
+                    var animActorSkin = Array.Find(animActorSkinGroup.animActorSkins, 
+                        skin => skin.skinName == selectedSkinName);
+                    if (animActorSkin == null) continue;
+                    
+                    // 添加到 已选择皮肤 队列
+                    _skinGroupToSelectedSkinListMap[animActorSkinGroup].Add(animActorSkin);
+                    
+                    // 添加 皮肤。等待初始化后 刷新。
+                    AddSkin(animActorSkinGroup, animActorSkin, false);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 保存 数据
+        /// </summary>
+        public AnimActorSaveData SaveData()
+        {
+            AnimActorSaveData animActorSaveData = new AnimActorSaveData();
+            
+            // 保存 皮肤组:已选择皮肤名称 列表 映射表
+            Dictionary<string, string[]> skinGroupToSelectedSkinListNameMap = new Dictionary<string, string[]>();
+            foreach (var skinGroupToSelectedSkin in _skinGroupToSelectedSkinListMap)
+            {
+                // 皮肤组 名称
+                var animActorSkinGroupName = skinGroupToSelectedSkin.Key;
+                // 记录 皮肤组:已选择皮肤名称 列表
+                var selectedSkinNameList = skinGroupToSelectedSkin.Value;
+                skinGroupToSelectedSkinListNameMap[animActorSkinGroupName.skinGroupName] = 
+                    Array.ConvertAll(selectedSkinNameList.ToArray(), skin => skin.skinName);
+            }
+            animActorSaveData.skinGroupToSelectedSkinMap = skinGroupToSelectedSkinListNameMap;
+
+            return animActorSaveData;
+        }
+        #endregion
     }
     
     #region 类定义-角色皮肤
@@ -429,107 +429,6 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         public Dictionary<string, string[]> skinGroupToSelectedSkinMap =
             new Dictionary<string, string[]>();
-    }
-    #endregion
-
-    #region 枚举定义-动画轨道
-    /// <summary>
-    /// 动画轨道。
-    /// 定义了常见的动画轨道类型，例如身体、头部、面部等。便于在 配置时进行 分类与管理。
-    /// 分配到不同的 动画轨道 上的动画，可以同时进行播放。
-    /// 需要 指定位置的动画 被 其他动画 覆盖时，则将这些动画 分配到 相同的动画轨道上。
-    /// </summary>
-    [Serializable]
-    public enum EAnimTrack
-    {
-        /// <summary>
-        /// 无。未指定动画轨道，或不需要区分动画轨道的情况。
-        /// </summary>
-        None = 0,
-
-        /// <summary>
-        /// 身体。整体的基础动画，例如 站立、走路、跑步等 循环播放的动画。
-        /// </summary>
-        Body,
-        /// <summary>
-        /// 头部。例如 点头、摇头等动画。
-        /// </summary>
-        Head,
-        /// <summary>
-        /// 面部。例如 面部表情的切换等动画。
-        /// </summary>
-        Face,
-        /// <summary>
-        /// 眼睛。例如 眨眼、看向不同方向等动画。
-        /// </summary>
-        Eyes,
-        /// <summary>
-        /// 嘴巴。例如 说话时的 张合动画。
-        /// </summary>
-        Mouth,
-        /// <summary>
-        /// 眉毛。例如 眉毛的上扬、下垂等动画。
-        /// </summary>
-        Brows,
-        /// <summary>
-        /// 鼻子。例如 鼻子的缩放、晃动等动画。
-        /// </summary>
-        Nose,
-        /// <summary>
-        /// 耳朵。例如 兽人的大耳朵 随机间隔的 摆动动画。
-        /// </summary>
-        Ears,
-        /// <summary>
-        /// 头发。例如 头发飘动、被风吹起等 动画。
-        /// </summary>
-        Hair,
-        /// <summary>
-        /// 手臂。例如 手臂的挥动、摆动等动画。
-        /// </summary>
-        Arms,
-        /// <summary>
-        /// 腿部。例如 站立、走路、跑步等 动画。
-        /// </summary>
-        Legs,
-        /// <summary>
-        /// 胸部。例如 胸部的起伏、晃动等动画。
-        /// </summary>
-        Breast,
-        /// <summary>
-        /// 腰部。例如 腰部的扭动、摆动等动画。
-        /// </summary>
-        Waist,
-        /// <summary>
-        /// 腹部。例如 腹部的起伏、晃动等动画。
-        /// </summary>
-        Belly,
-        /// <summary>
-        /// 臀部。例如 臀部的晃动、摆动等动画。
-        /// </summary>
-        Buttock,
-        /// <summary>
-        /// 背部。例如 翅膀、披风等，随机间隔的摆动动画。
-        /// </summary>
-        Back,
-        /// <summary>
-        /// 尾巴。例如 尾巴的摆动、卷曲等动画。
-        /// </summary>
-        Tail,
-        /// <summary>
-        /// 配件。例如 发饰、帽子、耳坠 等，随机间隔的摆动动画。
-        /// </summary>
-        Parts,
-        
-        /// <summary>
-        /// 动作。一般用于整体、复杂的复合动作，可能会覆盖到 之前分配的 其他轨道的动画。
-        /// 例如，惊吓、攻击等动作，可能会覆盖到 之前分配在 身体、头部、面部等轨道的动画。
-        /// </summary>
-        Action = 900,
-        
-        /// <summary>
-        /// 其他。不易分类 或 无需区分的动画。
-        /// </summary>
-        Other = 999,
     }
     #endregion
 }

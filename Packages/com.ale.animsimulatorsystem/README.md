@@ -1,4 +1,4 @@
-# AnimSimulatorSystem 动画模拟器系统-使用文档
+﻿# AnimSimulatorSystem 动画模拟器系统-使用文档
 
 - 返回 [说明文档](../../README.md)
 
@@ -143,14 +143,14 @@
 - 挂载 AnimActor组件。
   - 双击刚制作好的 角色预制体，打开 预制体编辑模式。
   - 在 Hierarchy面板中 选中 角色预制体的 根物体，在 Inspector面板中 点击 [Add Component]按钮，添加 AnimActor组件。
-  - 将角色的动画控制器（Spine 角色是 **SpineAnimator**，Live2D 角色是 **Live2dAnimator**），拖拽到 AnimActor组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（Spine 角色是 **SpineAnimator**，Live2D 角色是 **Live2DAnimator**），拖拽到 AnimActor组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](Docs~/image-63.png)
 
 - 放置 AnimActionPlayer(动画动作播放器)。
   - 将 Demo 中的 `Assets\UI\AnimActionPlayer\AnimActionPlayer.prefab` 预制体（导入 Sample 后位于 `Assets\Samples\Anim Simulator System\<版本号>\...` 下），拖拽放置到 角色预制体中。
   - 也可以自己手动创建空物体，并挂载 AnimActionPlayer组件 与 SphereCollider组件 来完成。只是通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
-  - 将角色的动画控制器（SpineAnimator 或 Live2dAnimator），拖拽到 AnimActionPlayer组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（SpineAnimator 或 Live2DAnimator），拖拽到 AnimActionPlayer组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](Docs~/image-65.png)
 
@@ -186,7 +186,7 @@
 
 # 动画后端
 
-插件支持 **Spine** 与 **Live2D** 两个动画后端，**可在同一工程内同时启用**。一个工程里两种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator` 还是 `Live2dAnimator` 决定。
+插件支持 **Spine** 与 **Live2D** 两个动画后端，**可在同一工程内同时启用**。一个工程里两种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator` 还是 `Live2DAnimator` 决定。
 
 上层的 AnimActor 与 AnimActionPlayer 只与动画控制器的公共基类 `AnimatorBase` 打交道，对具体后端无感。**动画与皮肤都用字符串名指定，两个后端使用相同的命名规则**，因此同一份动作 / 皮肤组配置对两边都成立。
 
@@ -298,15 +298,15 @@ Live2D Cubism SDK for Unity **不是 UPM 包**：官方以 `.unitypackage` 分�
 Live2D 角色预制体的搭法与 Spine 一致，只是组件不同：
 
 - 模型根物体上，除了 Cubism 导入时自带的组件外，还需要 **`CubismFadeController`**（指定模型的 `.fadeMotionList` 资产）与 **`CubismMotionController`**（设置 Layer Count）——它们是 Cubism 播放动作的前提。
-- 挂载 **`Live2dAnimator`**，并配置：
+- 挂载 **`Live2DAnimator`**，并配置：
   - **Live2d Render Controller**：模型的 `CubismRenderController`。本系统以它作为「渲染器」，淡入淡出即补间它的 Opacity。
   - **Live2d Motion Controller**：上面添加的 `CubismMotionController`。
   - **Live2d State Data**：状态名 → 该状态要播的一组动画。与 Spine 的状态数据列表一一对应。
-- 根物体上再挂 **`AnimActor`**，把 `Live2dAnimator` 拖到它的 Animator 栏。之后的皮肤组、动画动作播放器配置与 Spine 完全相同。
+- 根物体上再挂 **`AnimActor`**，把 `Live2DAnimator` 拖到它的 Animator 栏。之后的皮肤组、动画动作播放器配置与 Spine 完全相同。
 
 ### 三、动作查找表（必填）
 
-Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会生成一个个散落的 `AnimationClip`，彼此之间没有索引。因此需要在 `Live2dAnimator` 的 **Live2d Anim Clips(动作查找表)** 里，把动画名与动作剪辑一一对应起来。
+Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会生成一个个散落的 `AnimationClip`，彼此之间没有索引。因此需要在 `Live2DAnimator` 的 **Live2d Anim Clips(动作查找表)** 里，把动画名与动作剪辑一一对应起来。
 
 - **Anim Name**：动画名。动作配置里填的就是这个名字。
 - **Clip**：motion3.json 导入后生成的 `AnimationClip`。
@@ -319,7 +319,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 **层号即覆盖优先级**：Cubism 的层混合器按层号先后应用，层号大的盖住层号小的。这正是 [轨道与混合权重](#轨道与混合权重) 里「枚举值大的轨道覆盖枚举值小的」在本后端的落点。
 
-在 `Live2dAnimator` 的 **Live2d Track Layers(轨道映射)** 中显式指定「哪条轨道走哪一层」：
+在 `Live2DAnimator` 的 **Live2d Track Layers(轨道映射)** 中显式指定「哪条轨道走哪一层」：
 
 - 未显式指定的轨道，自 2.3.0 起**按轨道在 `EAnimTrack` 中的序数自动分层**（钳制在 Layer Count 内）。序数保序，故「高轨道的层号永远不低于低轨道」恒成立；且与播放顺序无关，同一份配置每次都算出同一个层号。
 - 层数不够时，序数超出范围的高轨道会被钳到最后一层、互相覆盖，首次发生时**告警一次**——请显式指定映射，或调大 Layer Count。
@@ -330,7 +330,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 ### 五、Live2D 皮肤
 
-**Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2dAnimator` 的 **Live2d Skins** 中定义：
+**Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2DAnimator` 的 **Live2d Skins** 中定义：
 
 - **Skin Name**：皮肤名。与 Spine 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对两个后端都适用。
 - **Part Ids**：该皮肤要显示的部件 ID 列表（即 Cubism Editor 中的部件 ID）。
@@ -343,11 +343,11 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 1. **动作不要动画「模型整体不透明度」**。若 motion3.json 给模型不透明度打了关键帧（导入后表现为剪辑里一条 `CubismRenderController.Opacity` 曲线），它会与本系统的淡入淡出同帧争写。整体淡入淡出请交给系统，动作里不要碰。
 2. **进度控制与反向播放走单独的采样通道**。Cubism 没有读写播放进度的 API、播放速度也必须 ≥ 0，因此拖拽 / 旋转 / 按压三种交互，以及反向播放、速度为 0 的场合，改由本插件逐帧采样剪辑来驱动；这条通道**不经过 Cubism 自己的动作淡入淡出**（常规的循环 / 正向播放仍走原生通道，淡入淡出正常）。
 
-   > **「逐帧」是必须的，不是可省的优化。** `AnimationClip.SampleAnimation` 只是一次性写入，而 Cubism 每帧都会重写同一批参数（其它轨道的原生播放、以及 `CubismFadeController` 的动作淡入淡出）。只在进度变化时采样的话，玩家一停手姿势就被打回起始帧。为此 `Live2dAnimator` 实现了 `ICubismUpdatable`，把重采样接进 Cubism 的 LateUpdate 调度，执行序取 `CubismFadeController + 1`——在动作淡入淡出之后落笔才不会被覆盖，在 `CubismRenderController` 之前落笔才会被画进这一帧。
+   > **「逐帧」是必须的，不是可省的优化。** `AnimationClip.SampleAnimation` 只是一次性写入，而 Cubism 每帧都会重写同一批参数（其它轨道的原生播放、以及 `CubismFadeController` 的动作淡入淡出）。只在进度变化时采样的话，玩家一停手姿势就被打回起始帧。为此 `Live2DAnimator` 实现了 `ICubismUpdatable`，把重采样接进 Cubism 的 LateUpdate 调度，执行序取 `CubismFadeController + 1`——在动作淡入淡出之后落笔才不会被覆盖，在 `CubismRenderController` 之前落笔才会被画进这一帧。
    >
    > 这也是**同一份配置在两个后端表现不同**的一个来源：Spine 侧写的是 `TrackEntry.TrackTime` 这种持久状态，`AnimationState.Apply` 每帧会照着它重摆姿势，天然就停得住。
    >
-   > ⚠️ 由此带来一条部署约束：**`Live2dAnimator` 最好与 `CubismModel` 挂在同一个物体上**。`CubismUpdateController` 只登记同物体上的 `ICubismUpdatable`；挂到别处时会回落到组件自身的 `LateUpdate`，与 Cubism 各组件的先后顺序就变成未定义的了。
+   > ⚠️ 由此带来一条部署约束：**`Live2DAnimator` 最好与 `CubismModel` 挂在同一个物体上**。`CubismUpdateController` 只登记同物体上的 `ICubismUpdatable`；挂到别处时会回落到组件自身的 `LateUpdate`，与 Cubism 各组件的先后顺序就变成未定义的了。
 
 # 系统配置
 
@@ -562,9 +562,9 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 - 角色预制体的根物体，需要挂载 AnimActor组件。
   - AnimActor组件 是角色预制体的核心组件，负责管理角色的动画状态、皮肤等动画相关的功能。
-  - Animator：动画控制器。指向角色的 **SpineAnimator** 或 **Live2dAnimator**。AnimActor 只与动画控制器的公共基类打交道，因此**同一份角色配置对两个后端都成立**，换后端只需换这个组件。
+  - Animator：动画控制器。指向角色的 **SpineAnimator** 或 **Live2DAnimator**。AnimActor 只与动画控制器的公共基类打交道，因此**同一份角色配置对两个后端都成立**，换后端只需换这个组件。
   - State Init List：状态初始化列表。状态的切换，通常会伴随 动画的切换。状态列表与对应的动画组，在 Spine Animator 或 Live2D Animator 组件中进行配置。
-  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。填写时会**自动列出该角色可用的皮肤名下拉**（Spine 取骨架里的皮肤，Live2D 取 Live2dAnimator 上配置的皮肤）。
+  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。填写时会**自动列出该角色可用的皮肤名下拉**（Spine 取骨架里的皮肤，Live2D 取 Live2DAnimator 上配置的皮肤）。
 
 ### 皮肤组
 
@@ -588,7 +588,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - 可以将 AnimActionPlayer预制体，直接拖拽放置到 角色预制体中。也可以自己手动创建空物体，并挂载 AnimActionPlayer组件(SphereCollider组件通常会自动添加)来完成。通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
   - Action Player Name：动画动作播放器名称。这个名称 仅用于配置文件之间的识别与指定。
   - Comment：备注。对于这个动画动作播放器的备注说明，便于策划进行识别与区分。
-  - Animator：动画控制器。指向角色的 SpineAnimator 或 Live2dAnimator，负责动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
+  - Animator：动画控制器。指向角色的 SpineAnimator 或 Live2DAnimator，负责动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
   - Anim Track Default：动画轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画轨道，就会使用这个默认的动画轨道。
   - Anim Track Sub Default：动画子轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画子轨道，就会使用这个默认的动画子轨道。
   - Anim Track Blend Weight：轨道混合权重（0~1，默认 1.0）。这个播放器的动作**压在更低轨道之上的强度**。详见下面的 [轨道与混合权重](#轨道与混合权重)。
@@ -648,7 +648,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - Action Direction Y：动作的交互方向 Y轴。对交互方向的Y轴进行旋转，调整交互的方向。
   - Action Direction Z：动作的交互方向 Z轴。对交互方向的Z轴进行旋转，调整交互的方向。
   - Anim Name：动画名称。这个动作要播放的动画，用**动画制作时起的名字**来指定，例如“dress-up”。Spine 与 Live2D **使用相同的命名规则**——同一份动作配置对两个后端都成立。
-    - Spine 侧按名在骨架数据中查找；Live2D 侧按名在 Live2dAnimator 的「动作查找表」中查找（Cubism 没有按名找动作的 API，需先在那张表里把动画名与动作剪辑对应起来）。
+    - Spine 侧按名在骨架数据中查找；Live2D 侧按名在 Live2DAnimator 的「动作查找表」中查找（Cubism 没有按名找动作的 API，需先在那张表里把动画名与动作剪辑对应起来）。
   - Damping Time：阻尼时间。用于平滑过渡动画的进度变化，单位是秒。一般设置成0.05秒左右，能够让动画进度的变化更自然一些。增大这个值，可以让动画的反应更迟钝，更有重量感。
   - Is Loop：是否循环。这个动画动作 是否需要循环播放。例如，从Idle动画切换到Walk动画，两个动画均为循环动画，那么这个动画动作就需要设置成 循环。
   - Is Reverse：是否反向。这个动画动作 是否需要反向播放。
@@ -771,8 +771,20 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 |---|---|---|
 | `Scroll Sensitivity` | ScrollRect | **一档滚轮走多远**（像素）。设为**行距**（示例 60；改了 `Row Pitch Scale` 就要同步改这里），一档正好一条动作；否则会停在两条之间 |
 | `Scroll Tween Duration` | UIAnimActionScrollList | **一档走完用多久**（秒）。默认 0.1；设为 0 则恢复瞬间跳变 |
+| `Reverse Scroll Direction` | UIAnimActionScrollList | **滚轮方向反过来**（`com.ale.toolkit` ≥ 1.7.7）。默认关。只影响滚轮，**不影响拖拽**——拖拽是「抓着内容走」，方向天然正确 |
 
 `Movement Type` 建议 `Clamped`，滚到两端不回弹过冲。
+
+**「排布方向」与「滚轮方向」是两件事，别混。** 前者决定条目怎么排，后者决定滚轮往哪转：
+
+| 字段 | 管什么 | Demo 的取值 |
+|---|---|---|
+| `Reverse Content Order` | 第 0 条排在最上还是最下 | **勾选**（第 0 条在最下方，从下往上翻） |
+| `Reverse Scroll Direction` | 滚轮方向是否取反 | 不勾选 |
+
+> `Reverse Content Order` 自 2.3.1 起接管了动作列表的倒序显示。此前是本插件把数据数组整个翻过来实现的，于是「第几条」在数据层与配置层含义相反；改用呈现层开关后**数据索引不变**，`FocusedIndex` 拿到的就是配置里的自然序号。
+>
+> ⚠️ **自制动作列表 UI 预制体的工程升级到 2.3.1 后需要手动勾上 `Reverse Content Order`**，否则动作会从正序显示。
 
 ⚠️ **`Scroll Sensitivity` 在运行期会被列表取走并置 0**，这是有意的，不是 bug。原因是 `ScrollRect` 与 `UIAnimActionScrollList` 挂在同一个 GameObject 上，而 `ExecuteEvents` 会把滚轮事件派发给该物体上**全部** `IScrollHandler`——两者都会收到。不把 `ScrollRect` 的灵敏度清零，就会先被它瞬间挪一档、再被补间从头拉回，白抖一帧。清零后位移完全由列表给出，行为唯一。
 
@@ -809,6 +821,8 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | 一档滚轮跳过好几条，或总停在两条之间 | ④ Scroll Sensitivity 与行距不一致 | 令其等于 Cell Prefab 高度 × Row Pitch Scale |
 | 焦点条目明显偏下，对不准视口中线 | ① toolkit < 1.7.5，格子轴心在顶端、放大只向下长开 | 量一下偏移是否恰为 (缩放 − 1) × 行距 / 2 |
 | 想调条目疏密，却只能改格子预制体高度 | ① toolkit < 1.7.5，没有 Row Pitch Scale | 升级 toolkit 后改倍率，不要动预制体高度 |
+| 升级到 2.3.1 后动作变成正序显示了 | ④ UI 预制体上没勾 `Reverse Content Order`（该职责已从插件代码移到列表上） | 在 `UIAnimActionScrollList` 上勾选它 |
+| 滚轮方向不对，但拖拽是对的 | ④ `Reverse Scroll Direction` 勾反了 | 它只作用于滚轮，拖拽不受其影响 |
 | 滚轮切换条目是瞬间跳变的 | ④ Scroll Tween Duration 为 0，或 toolkit < 1.7.2 | 把它设为 0.1 左右 |
 | 滚轮位移过慢 / 拖沓 | ④ Scroll Tween Duration 过大 | 0.1 秒是较跟手的取值，超过 0.2 会明显发黏 |
 | 运行时看到 Scroll Sensitivity 变成 0 | 正常现象，列表按 ④ 接管了滚轮 | 看预制体上的值是否仍是行高 |
@@ -857,5 +871,5 @@ if (hits.Count > 0)
 ## 背景预制体
 
 背景预制体 需要放置在 系统配置中 [资源文件路径](#资源文件路径) 中指定的背景文件夹路径下，才可以在动画模拟器系统中进行配置与使用。\
-背景预制体 与 角色预制体的 配置方式 其实是相同的，都是由 Spine 或 Live2D 动画资源导入到Unity中，制作成预制体，并挂载 AnimActor组件 与对应的动画控制器（SpineAnimator 或 Live2dAnimator）来完成。\
+背景预制体 与 角色预制体的 配置方式 其实是相同的，都是由 Spine 或 Live2D 动画资源导入到Unity中，制作成预制体，并挂载 AnimActor组件 与对应的动画控制器（SpineAnimator 或 Live2DAnimator）来完成。\
 做出区分是为了方便 分类整理，以及在系统配置中，能够区分背景与角色的文件夹路径，来进行不同的资源管理。

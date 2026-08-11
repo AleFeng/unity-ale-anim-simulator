@@ -1,4 +1,4 @@
-using Ale.Toolkit.Editor;
+﻿using Ale.Toolkit.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -72,7 +72,7 @@ namespace Ale.AnimSimulatorSystem.Editor
                 Debug.LogWarning(
                     $"[Anim Simulator System] Live2D 宏 '{AnimSimulatorDefines.Live2d}' 已启用，但未检测到 " +
                     $"{AnimSimulatorDefines.PackageLive2d}。\n" +
-                    "Live2dAnimator 将无法编译。它不是 UPM 包，需从官网下载 .unitypackage 导入，" +
+                    "Live2DAnimator 将无法编译。它不是 UPM 包，需从官网下载 .unitypackage 导入，" +
                     "或在欢迎窗口中关闭该宏。\n（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
 
             // 两个后端都没开：插件的动画播放能力整体不可用，值得提示一次。

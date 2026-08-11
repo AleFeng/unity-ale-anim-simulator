@@ -29,9 +29,11 @@ namespace Ale.AnimSimulatorSystem
     // 见 OnLateUpdate。接口类型来自 SDK，故连同基类列表一起按宏门控——宏关闭时仍保留一个
     // 空的类声明，预制体上的组件引用才不会变成 Missing Script。
 #if ASS_LIVE2D
-    public class Live2dAnimator : AnimatorBase, Live2D.Cubism.Framework.ICubismUpdatable
+    public class Live2DAnimator : AnimatorBase, Live2D.Cubism.Framework.ICubismUpdatable
 #else
-    public class Live2dAnimator : AnimatorBase
+    // 类名两个分支必须一致、且与文件名 Live2DAnimator.cs 相同，否则关掉宏时 Unity 会报
+    // 「类名与文件名不符」——那正是本分支要保住的场合（空类体让预制体上的组件引用不变成 Missing Script）。
+    public class Live2DAnimator : AnimatorBase
 #endif
     {
 #if ASS_LIVE2D

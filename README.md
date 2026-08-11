@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img alt="GitHub Release" src="https://img.shields.io/github/v/release/AleFeng/unity-ale-anim-simulator?color=blue">
   <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/AleFeng/unity-ale-anim-simulator/total?color=green">
   <img alt="Unity Version" src="https://img.shields.io/badge/Unity-2022.3%2B-black?logo=unity">
@@ -61,7 +61,7 @@ Spine 与 Live2D 只负责把动画**播出来**，而「玩家摸一下角色�
 ### 项目特性
 | 特性 | 描述 |
 | --- | --- |
-| 双后端并存 | **Spine 与 Live2D 可在同一工程内同时启用**，用哪个由角色预制体上挂 `SpineAnimator` 还是 `Live2dAnimator` 决定。后端无关的机制（状态机、轨道播放栈、计时、皮肤名册、淡入淡出）都在抽象基类 `AnimatorBase` 里，上层的 `AnimActor` / `AnimActionPlayer` 对具体后端无感。 |
+| 双后端并存 | **Spine 与 Live2D 可在同一工程内同时启用**，用哪个由角色预制体上挂 `SpineAnimator` 还是 `Live2DAnimator` 决定。后端无关的机制（状态机、轨道播放栈、计时、皮肤名册、淡入淡出）都在抽象基类 `AnimatorBase` 里，上层的 `AnimActor` / `AnimActionPlayer` 对具体后端无感。 |
 | 四种光标操作 | **点击 / 拖拽 / 旋转 / 按压**。后三种把光标的位移、角度、按压时长换算成动画播放进度（可配交互范围、方向、阻尼、旋转角度范围、按压涨落速度）。 |
 | 三类动作播放器 | `Operate`（悬停铺开列表，玩家滚动挑一条）/ `Random`（**只淡入点击提示，点击时按权重随机抽一条**）/ `ProgressBar`（不接受点击，由进度条驱动）。 |
 | 多轨道与混合权重 | 轨道号 = `主轨道 × 10 + 子轨道`，**`EAnimTrack` 枚举值大的轨道覆盖枚举值小的**；`Anim Track Blend Weight`（0~1，默认 1.0）决定覆盖强度。Spine 落到 `TrackEntry.Alpha`，Live2D 落到 `CubismMotionController.SetLayerWeight`。 |
@@ -78,7 +78,7 @@ Spine 与 Live2D 只负责把动画**播出来**，而「玩家摸一下角色�
 | 后端 | 组件 | 需要的运行时 | 安装方式 | 该后端的差异点 |
 | --- | --- | --- | --- | --- |
 | **Spine** | `SpineAnimator` | `com.esotericsoftware.spine.spine-unity`（+ `spine-csharp`） | git URL，经 Package Manager 安装 | 动画**按名直接在骨架数据里查**，无需查找表；轨道数不受限制；皮肤是骨架数据里的一等公民、可下拉选取并叠加；进度控制原生支持（直接读写 `TrackEntry.TrackTime`）。 |
-| **Live2D** | `Live2dAnimator` | Cubism SDK for Unity（≥ Cubism 5 SDK R1 beta2） | **不是 UPM 包**，从[官网](https://www.live2d.com/en/sdk/download/unity/)下载 `.unitypackage` 导入到 `Assets/Live2D/Cubism/` | 动作需**登记进查找表**（Cubism 没有按名找动作的 API）；轨道需映射到 Cubism 的**层**；「皮肤」是配置出来的部件 ID 映射；进度控制与反向播放走**逐帧采样通道**。 |
+| **Live2D** | `Live2DAnimator` | Cubism SDK for Unity（≥ Cubism 5 SDK R1 beta2） | **不是 UPM 包**，从[官网](https://www.live2d.com/en/sdk/download/unity/)下载 `.unitypackage` 导入到 `Assets/Live2D/Cubism/` | 动作需**登记进查找表**（Cubism 没有按名找动作的 API）；轨道需映射到 Cubism 的**层**；「皮肤」是配置出来的部件 ID 映射；进度控制与反向播放走**逐帧采样通道**。 |
 
 > **Live2D 为什么不能走 UPM**：官方以 `.unitypackage` 分发，其中包含专有的 Cubism Core 原生库；开源的 `Live2D/CubismUnityComponents` 仓库既没有 `package.json`、也不含 Core。因此它无法写进 `package.json` 的 `dependencies`，只能手动导入。好在 Cubism 5 SDK 自带 `Live2D.Cubism` 程序集定义，导入后本插件即可自动引用。
 
@@ -187,7 +187,7 @@ Project 面板右键 > Create > Ale > AnimSimulator System > AnimSimulator Confi
 ### 3. 制作角色预制体
 按 Spine / Live2D 官方流程把动画资源导入 Unity 并做成预制体，然后：
 
-- 在模型物体上挂 **`SpineAnimator`** 或 **`Live2dAnimator`**，配好它的状态数据列表（状态名 → 该状态要播的一组动画）。Live2D 还需额外填「动作查找表」。
+- 在模型物体上挂 **`SpineAnimator`** 或 **`Live2DAnimator`**，配好它的状态数据列表（状态名 → 该状态要播的一组动画）。Live2D 还需额外填「动作查找表」。
 - 在预制体的**根物体**上挂 **`AnimActor`**，把上面那个动画控制器拖到它的 `Animator` 栏（一般会自动找到）。
 - 把预制体放进第 2 步配置的角色文件夹里。
 
@@ -248,7 +248,7 @@ Tools > Ale Toolkit > Anim Simulator System > Welcome
 | `ATK_INPUT_SYSTEM` | 同上 | `com.unity.inputsystem` | 光标操作输入（点击 / 拖拽 / 旋转 / 按压）不可用 |
 | `ATK_ADDRESSABLE` | 同上 | `com.unity.addressables` | 角色 / 背景无法按地址异步加载（退化为 `Resources` 兜底并告警） |
 | `ASS_SPINE` | 本插件欢迎窗口<br/>（`Tools > Ale Toolkit > Anim Simulator System > Welcome`） | `com.esotericsoftware.spine.spine-unity` | `SpineAnimator` 不参与编译，Spine 动画播放与换装不可用 |
-| `ASS_LIVE2D` | 同上 | Cubism SDK for Unity | `Live2dAnimator` 不参与编译，Live2D 动作播放与换装不可用 |
+| `ASS_LIVE2D` | 同上 | Cubism SDK for Unity | `Live2DAnimator` 不参与编译，Live2D 动作播放与换装不可用 |
 
 `ASS_` 是本插件自有前缀（= AnimSimulatorSystem）。**两个后端宏可以同时启用**，互不排斥。切换宏后需等待 Unity 重新编译生效。
 
@@ -285,7 +285,7 @@ Packages/com.ale.animsimulatorsystem/     ← 包根
 │   ├── AnimSimulatorManager.cs   主流程与子组件管理（单例）、进度条读写、条件广播
 │   ├── AnimSimLog.cs             统一日志
 │   ├── Animator/                 AnimActor / AnimActionPlayer / AnimatorBase / AnimData
-│   │                             + SpineAnimator / Live2dAnimator / AnimTrackOrdinal
+│   │                             + SpineAnimator / Live2DAnimator / AnimTrackOrdinal
 │   ├── Attributes/               皮肤名下拉的特性标记
 │   ├── Condition/                解锁条件判定器（等级进度条-等级 / 进度条-进度值）
 │   ├── Config/                   AnimSimulatorConfig（ScriptableObject）
@@ -303,7 +303,6 @@ Packages/com.ale.animsimulatorsystem/     ← 包根
 ## 📋 待办事项
 - 动作列表**拖拽滚动松手后不做吸附对齐**：停在两条之间时，焦点缩放曲线会让上下两条都呈半放大态。滚轮走的是整格步进，不受影响。
 - 动作列表的 `focusOffsetCurve` 目前填的是像素估算值，需在编辑器内目视微调。
-- Live2D 后端的按序数分层与层权重目前只做过代码与静态验证，尚未在真实 Live2D 角色上实测。
 - README 的英文 / 日文版本。
 
 ## 📄 许可

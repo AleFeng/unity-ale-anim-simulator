@@ -6,6 +6,14 @@
 
 ## [2.3.1] - 2026-08-11
 
+**一轮以 Live2D 实测驱动的修补。** 本版把 Live2D 后端第一次放到真实模型上跑（Cubism SDK 自带的 Natori 与 Koharu），沿途暴露并修掉的问题占了大半——多数是「不报任何错、只是表现不对」的那一类。另有 Random 类型点击提示的两处收尾、测试用背景不加载，以及动作列表倒序显示的职责下沉。
+
+### 破坏性变更
+
+- **`Live2dAnimator` 更名为 `Live2DAnimator`**（文件同步更名为 `Live2DAnimator.cs`），与 `Live2D` 官方写法一致。
+  - 预制体上的组件引用按 GUID 记录，**不受影响**；按名引用该类型的自有代码需同步改名。
+  - 宏关闭时保留的空类声明也一并改名——两个 `#if` 分支的类名必须与文件名一致，否则关掉 `ASS_LIVE2D` 就会报「类名与文件名不符」，而那恰恰是空类体要保住的场合（让预制体上的组件引用不至于变成 Missing Script）。
+
 **修复 Random(点击随机) 类型的点击提示动画表现。** 2.3.0 引入该类型时，只让它走到「淡入」这一级就停下了。
 
 ### 修复
@@ -38,8 +46,20 @@
   - 每个动画控制器实例只告警一次：同一角色上多条动作都配错时，刷满控制台反而会盖住别的信息。
   - 告警文案直接点出最常见的成因（动作上的 `Click Mode Anim Play Speed` 被置零），并说明拖拽 / 旋转 / 按压这类由玩家驱动进度的动作**也不需要**把速度设为 0——它们以正常速度起播，首次写入进度时会自动切到采样通道。
 
+### Demo
+
+- **新增两个 Live2D 测试场景与角色**：`AnimSimulatorSystemDemo_Live2D_Natori` 与 `..._Koharu`（原 Spine 场景同时更名为 `..._Spine`）。角色取自 Cubism SDK 自带的示例模型，模型资产已**完整复制进 Demo**，不再依赖 `Assets/Live2D/Cubism/Samples/`。
+  - Natori（9 条动作）用来铺满动作列表并覆盖四种操作类型；Koharu 的 `body` 与 `face01`/`face02` **参数集互不相交**，用来演示多轨道的「叠加」与「覆盖」两种关系——轨道刻意拉开到 `Body`(层1) / `Face`(层3) / `Arms`(层10) / `Action`(层19) / `Other`(层20)，横跨序数区间两端。
+  - Koharu 的三条剪辑自带根 `CubismRenderController.Opacity` 曲线（即使用文档里那条约束所述情形），已删除该曲线以免与插件的淡入淡出争写；剪辑内的 `InstanceId` 事件保持不变，故 `fadeMotionList` 仍能匹配。
+  - 导入源与中间文件（`model3/motion3/exp3/physics3/pose3.json`、`moc3`、生成的 `.controller`）在确认零引用后删除——moc 字节已内嵌在 `.asset` 中。**副作用**：这两个模型今后无法从源文件重新导入；若把 `model3.json` 放回去，Cubism 导入器会重新生成预制体并覆盖插件组件。
+
+> Demo 的这两个场景用于验证 Live2D 后端，随仓库分发；`Samples~/Demo` 的同步由维护者手动进行。
+
 ### 文档
 
+- **动作列表 UI 一节补上两个滚动开关**，并点明「排布方向」与「滚轮方向」是两件事：`Reverse Content Order`（第 0 条排最上还是最下，Demo 勾选）与 `Reverse Scroll Direction`（滚轮方向取反，只影响滚轮不影响拖拽，Demo 不勾）。排错速查随之加两行。
+- **`Click Mode Anim Play Speed` 字段说明加了「不要填 0」的警示**，并说明拖拽 / 旋转 / 按压这类进度驱动型动作同样不该设为 0。
+- **Live2D 的「采样通道」一条补上「逐帧是必须的、不是可省的优化」**，以及由此带来的部署约束：`Live2DAnimator` 最好与 `CubismModel` 挂在同一个物体上，否则收不到 `CubismUpdateController` 的调度、只能回落到自身 `LateUpdate`，时序变为未定义。
 - **补齐「URP 工程的三项必需设置」一节。** 三项缺一不可、症状互不相同、且**都不会报错**，此前文档只写了其中一项（Renderer List）。另两项是本轮在 Live2D 测试场景里实测踩出来的：
   - **HDR Precision 必须 64 Bits**（或关掉 HDR）。Cubism 把模型画进离屏 RT 再以预乘 alpha blit 回相机缓冲，而该 RT 的格式从相机颜色格式派生——URP 在「HDR 开 + 32 位」下用的 `B10G11R11_UFloat` **没有 alpha 通道**，采样出的 alpha 恒为 1，混合退化为直接覆盖，于是**除模型外满屏漆黑**（背景、Spine 角色等在模型之前绘制的东西全被抹掉）。
   - **需要排在模型之后的物体必须走不透明队列**（`renderQueue < 2500`）。Cubism 的绘制通道注入在 `BeforeRenderingTransparents`，透明队列在它之后绘制，会盖住模型。由此也得到一条分层规则：不透明队列 = 模型之后，透明队列 = 模型之前。

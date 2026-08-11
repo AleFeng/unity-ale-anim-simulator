@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Ale.AnimSimulatorSystem
@@ -10,7 +10,7 @@ namespace Ale.AnimSimulatorSystem
     /// Cubism 只有部件（<c>CubismPart</c>）与可绘制对象（<c>CubismDrawable</c>）。所以 Live2D 侧的「一件皮肤」
     /// 只能是一份<b>配置出来的映射</b>：皮肤名 → 该皮肤要显示的部件 ID 集合。</para>
     ///
-    /// <para>换装时，<c>Live2dAnimator</c> 取「基础皮肤 + 应用中皮肤」的并集展开成部件集合，
+    /// <para>换装时，<c>Live2DAnimator</c> 取「基础皮肤 + 应用中皮肤」的并集展开成部件集合，
     /// 集合内的部件不透明度置 1、其余<b>被本组件管理的</b>部件置 0——未在任何皮肤里出现过的部件不受影响，
     /// 避免误伤模型的固有部件（身体、脸等）。</para>
     ///

@@ -1,4 +1,4 @@
-using static Ale.Toolkit.Editor.ToolkitEditorL10n;
+﻿using static Ale.Toolkit.Editor.ToolkitEditorL10n;
 
 namespace Ale.AnimSimulatorSystem.Editor
 {
@@ -45,13 +45,13 @@ namespace Ale.AnimSimulatorSystem.Editor
 
             // ── 宏开关区 ──────────────────────────────────────────────────────────
             Add("按项目实际使用的动画运行时启用。两者可同时启用——一个工程里 Spine 与 Live2D 角色并存，" +
-                "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2dAnimator 决定。",
+                "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2DAnimator 决定。",
                 "Enable the ones matching the animation runtimes your project actually uses. Both can be enabled at once — " +
                 "Spine and Live2D actors coexist in one project, and which backend an actor uses is decided by whether its " +
-                "prefab carries a SpineAnimator or a Live2dAnimator.",
+                "prefab carries a SpineAnimator or a Live2DAnimator.",
                 "プロジェクトで実際に使用するアニメーションランタイムに合わせて有効にしてください。両方を同時に有効にできます——" +
                 "1 つのプロジェクトで Spine と Live2D のキャラクターが共存でき、どちらのバックエンドを使うかは" +
-                "キャラクタープレハブに SpineAnimator と Live2dAnimator のどちらが付いているかで決まります。");
+                "キャラクタープレハブに SpineAnimator と Live2DAnimator のどちらが付いているかで決まります。");
 
             // Spine
             Add("启用后 SpineAnimator 参与编译，可播放 Spine 动画、按皮肤名组合换装。" +
@@ -65,15 +65,15 @@ namespace Ale.AnimSimulatorSystem.Editor
                 "Spine Unity ランタイムが検出されませんでした。\nマクロを有効にすると、SpineAnimator はコンパイルできません。\n\nこのまま有効にしますか？");
 
             // Live2D
-            Add("启用后 Live2dAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。",
-                "When enabled, Live2dAnimator is compiled in, allowing Cubism motion playback and part-based outfit composition.",
-                "有効にすると Live2dAnimator がコンパイルされ、Cubism モーションの再生とパーツによる着せ替えが可能になります。");
+            Add("启用后 Live2DAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。",
+                "When enabled, Live2DAnimator is compiled in, allowing Cubism motion playback and part-based outfit composition.",
+                "有効にすると Live2DAnimator がコンパイルされ、Cubism モーションの再生とパーツによる着せ替えが可能になります。");
             Add("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）",
                 "  ⚠ {0} not imported (not a UPM package — download the .unitypackage from the official site)",
                 "  ⚠ {0} 未インポート（UPM パッケージではありません。公式サイトから .unitypackage を入手してください）");
-            Add("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2dAnimator 将无法编译。\n\n确定要继续启用吗？",
-                "The Live2D Cubism SDK was not detected.\nAfter enabling the define, Live2dAnimator will fail to compile.\n\nEnable anyway?",
-                "Live2D Cubism SDK が検出されませんでした。\nマクロを有効にすると、Live2dAnimator はコンパイルできません。\n\nこのまま有効にしますか？");
+            Add("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2DAnimator 将无法编译。\n\n确定要继续启用吗？",
+                "The Live2D Cubism SDK was not detected.\nAfter enabling the define, Live2DAnimator will fail to compile.\n\nEnable anyway?",
+                "Live2D Cubism SDK が検出されませんでした。\nマクロを有効にすると、Live2DAnimator はコンパイルできません。\n\nこのまま有効にしますか？");
             Add("Live2D Cubism SDK 不是 UPM 包：官方以 .unitypackage 分发（含专有 Cubism Core 原生库），" +
                 "需从官网下载后拖入工程，导入到 Assets/Live2D/Cubism/。" +
                 "Cubism 5 SDK 自带 Live2D.Cubism 程序集定义，导入后本插件即可自动引用。",

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Ale.Toolkit.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -217,7 +217,7 @@ namespace Ale.AnimSimulatorSystem.Editor
             EditorGUILayout.LabelField(Tr("插件支持（编译宏）"), EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
                 Tr("按项目实际使用的动画运行时启用。两者可同时启用——一个工程里 Spine 与 Live2D 角色并存，" +
-                   "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2dAnimator 决定。"),
+                   "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2DAnimator 决定。"),
                 EditorStyles.wordWrappedMiniLabel);
             EditorGUILayout.Space(2);
 
@@ -232,9 +232,9 @@ namespace Ale.AnimSimulatorSystem.Editor
 
             DrawMacroToggle("Live2D", AnimSimulatorDefines.Live2d, AnimSimulatorDefines.PackageLive2d,
                 ref _live2dEnabled, _live2dInstalled,
-                Tr("启用后 Live2dAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。"),
+                Tr("启用后 Live2DAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。"),
                 Tr("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）"),
-                Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2dAnimator 将无法编译。\n\n确定要继续启用吗？"),
+                Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2DAnimator 将无法编译。\n\n确定要继续启用吗？"),
                 DrawLive2dInstallHint);
         }
 

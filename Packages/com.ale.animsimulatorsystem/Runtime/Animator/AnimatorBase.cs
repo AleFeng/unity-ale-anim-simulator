@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Ale.Toolkit.Runtime;
 using UnityEngine;
@@ -8,7 +8,7 @@ namespace Ale.AnimSimulatorSystem
 {
     /// <summary>
     /// 动画播放器基类：承载与动画后端<b>无关</b>的全部机制，由 <see cref="SpineAnimator"/> /
-    /// <c>Live2dAnimator</c> 继承并各自实现后端差异。上层的 <see cref="AnimActor"/> 与
+    /// <c>Live2DAnimator</c> 继承并各自实现后端差异。上层的 <see cref="AnimActor"/> 与
     /// <see cref="AnimActionPlayer"/> 一律面向本类编程，对具体后端无感。
     ///
     /// <para><b>基类负责</b>：状态机（状态名 → 一组动画）与渲染器引用计数、每轨道的播放栈
@@ -66,7 +66,7 @@ namespace Ale.AnimSimulatorSystem
         // 一遍 13 个空桩（两个后端各一份，逐字节相同），改动契约要同步 4 处。改为带默认实现的
         // virtual 之后，空类体直接继承默认实现，编辑点只剩本处一个。
         //
-        // 代价：子类漏写 override 会静默无效而不是编译报错。本包只有 SpineAnimator 与 Live2dAnimator
+        // 代价：子类漏写 override 会静默无效而不是编译报错。本包只有 SpineAnimator 与 Live2DAnimator
         // 两个子类且同在本目录下，新增后端时请对照本区逐条实现。
 
         /// <summary>解析默认渲染器（状态未指定专用渲染器时使用）。<c>Awake</c> 时调用一次。</summary>
@@ -217,11 +217,11 @@ namespace Ale.AnimSimulatorSystem
         }
 
         // 立刻隐藏渲染器（不走补间）
-        private void HideRendererImmediate(Component renderer)
+        private void HideRendererImmediate(Component rendererParam)
         {
-            if (!renderer) return;
-            SetRendererAlpha(renderer, 0f);
-            if (CanDeactivateRenderer(renderer)) renderer.gameObject.SetActive(false);
+            if (!rendererParam) return;
+            SetRendererAlpha(rendererParam, 0f);
+            if (CanDeactivateRenderer(rendererParam)) rendererParam.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -229,12 +229,12 @@ namespace Ale.AnimSimulatorSystem
         ///
         /// <para><b>渲染器与本组件同体（或本组件在其子树内）时不能禁用它</b>——那会把本组件一起停掉，
         /// 状态机、补间回调、协程就再也跑不起来了。两个后端的常见挂法正好一个踩一个不踩：
-        /// Live2D 的 <c>CubismRenderController</c> 通常就在模型根上，与 <c>Live2dAnimator</c> 同体；
+        /// Live2D 的 <c>CubismRenderController</c> 通常就在模型根上，与 <c>Live2DAnimator</c> 同体；
         /// Spine 的 <c>SkeletonAnimation</c> 一般在 <c>SpineAnimator</c> 的子物体上。
         /// 这种情况下只把不透明度归零，物体保持激活。</para>
         /// </summary>
-        private bool CanDeactivateRenderer(Component renderer)
-            => renderer && !transform.IsChildOf(renderer.transform);
+        private bool CanDeactivateRenderer(Component rendererParam)
+            => rendererParam && !transform.IsChildOf(rendererParam.transform);
 
         // 取状态实际使用的渲染器：状态指定了就用它，否则用默认渲染器
         private Component ResolveStateRenderer(FAnimStateData stateData)
@@ -257,8 +257,8 @@ namespace Ale.AnimSimulatorSystem
             // 获取状态数据
             if (_dicStateData.TryGetValue(state, out var stateData) == false) return;
 
-            var renderer = ResolveStateRenderer(stateData);
-            if (!renderer)
+            var rendererComp = ResolveStateRenderer(stateData);
+            if (!rendererComp)
             {
                 AnimSimLog.Warn(this, $"渲染器为空，无法添加状态 {state} 的动画，GameObject={gameObject.name}");
                 return;
@@ -266,22 +266,22 @@ namespace Ale.AnimSimulatorSystem
 
             // 计数器增加
             int count = 1;
-            if (_dicRendererUsageCount.ContainsKey(renderer) == false)
-                _dicRendererUsageCount[renderer] = count;
+            if (_dicRendererUsageCount.ContainsKey(rendererComp) == false)
+                _dicRendererUsageCount[rendererComp] = count;
             else
-                count = ++_dicRendererUsageCount[renderer];
+                count = ++_dicRendererUsageCount[rendererComp];
 
             // 第一次使用该渲染器，淡入显示
             if (count == 1)
-                FadeAnimator(true, renderer);
+                FadeAnimator(true, rendererComp);
 
             if (stateData.animDatas == null) return;
             // 播放 动画数据
-            PlayAnimDatas(renderer, stateData.animDatas);
+            PlayAnimDatas(rendererComp, stateData.animDatas);
         }
 
         /// <summary>播放 状态数据中配置的一组动画。</summary>
-        private void PlayAnimDatas(Component renderer, AnimData[] animDatas)
+        private void PlayAnimDatas(Component rendererParam, AnimData[] animDatas)
         {
             foreach (var animData in animDatas)
             {
@@ -311,9 +311,9 @@ namespace Ale.AnimSimulatorSystem
                     animData.loopIntervalTimeRange != Vector2.zero &&
                     animData.loopIntervalTimeRange.y >= animData.loopIntervalTimeRange.x;
                 if (hasLoopInterval)
-                    StartLoopIntervalSchedule(renderer, animData);
+                    StartLoopIntervalSchedule(rendererParam, animData);
                 else
-                    PlayAnim(renderer, animData);
+                    PlayAnim(rendererParam, animData);
             }
         }
 
@@ -334,23 +334,23 @@ namespace Ale.AnimSimulatorSystem
             // 获取状态数据
             if (_dicStateData.TryGetValue(state, out var stateData) == false) return;
 
-            var renderer = ResolveStateRenderer(stateData);
-            if (!renderer)
+            var rendererComp = ResolveStateRenderer(stateData);
+            if (!rendererComp)
             {
                 AnimSimLog.Warn(this, $"渲染器为空，无法移除状态 {state} 的动画，GameObject={gameObject.name}");
                 return;
             }
 
             // 计数器减少
-            if (_dicRendererUsageCount.TryGetValue(renderer, out var count))
+            if (_dicRendererUsageCount.TryGetValue(rendererComp, out var count))
             {
                 count--;
                 if (count == 0)
                     // 不再使用该渲染器，淡出隐藏
-                    FadeAnimator(false, renderer);
+                    FadeAnimator(false, rendererComp);
                 // 更新计数器
                 count = count < 0 ? 0 : count; // 避免负数
-                _dicRendererUsageCount[renderer] = count;
+                _dicRendererUsageCount[rendererComp] = count;
             }
 
             if (stateData.animDatas == null) return;
@@ -365,9 +365,9 @@ namespace Ale.AnimSimulatorSystem
                     _dicTrackToAnimNameLooping.Remove(trackIndex);
 
                 // 停止 循环随机间隔调度
-                StopLoopIntervalSchedule(renderer, trackIndex);
+                StopLoopIntervalSchedule(rendererComp, trackIndex);
                 // 清除该轨道动画
-                StopAnimOnRenderer(renderer, trackIndex, null);
+                StopAnimOnRenderer(rendererComp, trackIndex, null);
                 // 清空该轨道的播放栈与令牌
                 _trackToAnimDataListPlayingMap.Remove(trackIndex);
                 _trackToPlayToken.Remove(trackIndex);
@@ -403,12 +403,12 @@ namespace Ale.AnimSimulatorSystem
             new Dictionary<Component, Dictionary<int, ToolkitTweenHandle>>();
 
         /// <summary>停止某渲染器上全部的 循环随机间隔调度。</summary>
-        private void StopLoopIntervalScheduleAll(Component renderer)
+        private void StopLoopIntervalScheduleAll(Component rendererParam)
         {
-            if (!renderer) return;
+            if (!rendererParam) return;
             if (_dicRendererTrackToLoopHandle.Count == 0) return;
 
-            if (_dicRendererTrackToLoopHandle.TryGetValue(renderer, out var dicTrackToHandle))
+            if (_dicRendererTrackToLoopHandle.TryGetValue(rendererParam, out var dicTrackToHandle))
             {
                 foreach (var kv in dicTrackToHandle)
                     kv.Value.Kill();
@@ -417,10 +417,10 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <summary>停止 指定轨道的 循环随机间隔调度。</summary>
-        private void StopLoopIntervalSchedule(Component renderer, int trackIndex)
+        private void StopLoopIntervalSchedule(Component rendererParam, int trackIndex)
         {
-            if (!renderer) return;
-            if (_dicRendererTrackToLoopHandle.TryGetValue(renderer, out var dicTrackToHandle))
+            if (!rendererParam) return;
+            if (_dicRendererTrackToLoopHandle.TryGetValue(rendererParam, out var dicTrackToHandle))
             {
                 if (dicTrackToHandle.TryGetValue(trackIndex, out var handle))
                 {
@@ -433,17 +433,17 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 启动指定轨道的 循环随机间隔调度：播放一次动画，等待「动画时长 + 随机间隔」后再播下一次，如此递归。
         /// </summary>
-        private void StartLoopIntervalSchedule(Component renderer, AnimData animData)
+        private void StartLoopIntervalSchedule(Component rendererParam, AnimData animData)
         {
-            if (!renderer || animData == null) return;
+            if (!rendererParam || animData == null) return;
 
             // 停止已有（判空之后再做，否则 animData 为 null 时这一行就先抛了）
-            StopLoopIntervalSchedule(renderer, animData.AnimTrack);
+            StopLoopIntervalSchedule(rendererParam, animData.AnimTrack);
 
             string animName = animData.ResolveAnimName();
             if (string.IsNullOrEmpty(animName)) return;
 
-            float duration = GetAnimDuration(renderer, animName);
+            float duration = GetAnimDuration(rendererParam, animName);
             if (duration <= 0f) return;
 
             // 本调度要求「每次都按单次播放」，播完才等间隔。这个「单次」必须传到下游：后端据
@@ -460,19 +460,19 @@ namespace Ale.AnimSimulatorSystem
             int trackIndex = animDataOnce.AnimTrack;
 
             // 获取或创建轨道字典
-            if (!_dicRendererTrackToLoopHandle.TryGetValue(renderer, out var dicTrackToHandle))
+            if (!_dicRendererTrackToLoopHandle.TryGetValue(rendererParam, out var dicTrackToHandle))
             {
                 dicTrackToHandle = new Dictionary<int, ToolkitTweenHandle>();
-                _dicRendererTrackToLoopHandle.Add(renderer, dicTrackToHandle);
+                _dicRendererTrackToLoopHandle.Add(rendererParam, dicTrackToHandle);
             }
 
             // 递归调度：播放一次动画，等待 动画时长+随机间隔 后，调度下一次
             void ScheduleNextLoop()
             {
-                if (!renderer || !renderer.gameObject.activeInHierarchy) return;
+                if (!rendererParam || !rendererParam.gameObject.activeInHierarchy) return;
 
                 // 仅当该轨道空闲时才播放，避免与其它来源的动画抢轨道
-                PlayAnimWhenTrackEmpty(renderer, animDataOnce);
+                PlayAnimWhenTrackEmpty(rendererParam, animDataOnce);
 
                 // 计算随机间隔，等待 动画时长 + 间隔时间 后，调度下一次循环
                 float intervalDelay = UnityEngine.Random.Range(animDataOnce.loopIntervalTimeRange.x, animDataOnce.loopIntervalTimeRange.y);
@@ -521,7 +521,7 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>取某条轨道当前所用的渲染器，未记录时回退到默认渲染器。</summary>
         protected Component ResolveTrackRenderer(int trackIndex)
         {
-            if (_trackToRenderer.TryGetValue(trackIndex, out var renderer) && renderer) return renderer;
+            if (_trackToRenderer.TryGetValue(trackIndex, out var rendererComp) && rendererComp) return rendererComp;
             return DefaultRenderer;
         }
 
@@ -544,11 +544,11 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>
         /// 播放动画（指定渲染器）。<paramref name="animData"/> 配置了起播延时的会先挂起。
         /// </summary>
-        public void PlayAnim(Component renderer, AnimData animData, Action<AnimData> onOncePlayComplete = null)
+        public void PlayAnim(Component rendererParam, AnimData animData, Action<AnimData> onOncePlayComplete = null)
         {
             if (animData == null) return;
-            if (!renderer) renderer = DefaultRenderer;
-            if (!renderer)
+            if (!rendererParam) rendererParam = DefaultRenderer;
+            if (!rendererParam)
             {
                 AnimSimLog.Warn(this, $"渲染器为空，播放动画失败，GameObject={gameObject.name}");
                 return;
@@ -561,7 +561,7 @@ namespace Ale.AnimSimulatorSystem
                 var delayHandle = ToolkitTween.DelayedCall(animData.startDelayTime, () =>
                 {
                     _animStartDelayHandleMap.Remove(animData);
-                    PlayAnimImmediate(renderer, animData, onOncePlayComplete);
+                    PlayAnimImmediate(rendererParam, animData, onOncePlayComplete);
                 }, owner: this);
                 // 仅登记真正在途的延时。句柄无效时不登记，
                 // 否则这条记录会永久卡住该动画数据——上面的 ContainsKey 会让后续播放一律提前返回。
@@ -569,7 +569,7 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
 
-            PlayAnimImmediate(renderer, animData, onOncePlayComplete);
+            PlayAnimImmediate(rendererParam, animData, onOncePlayComplete);
         }
 
         // 速度为 0 的告警只出一次。同一个角色上多条动作都配错时，刷满控制台反而盖住别的信息。
@@ -604,9 +604,9 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <summary>立刻播放动画（不走起播延时）。</summary>
-        private void PlayAnimImmediate(Component renderer, AnimData animData, Action<AnimData> onOncePlayComplete = null)
+        private void PlayAnimImmediate(Component rendererParam, AnimData animData, Action<AnimData> onOncePlayComplete = null)
         {
-            if (!renderer || animData == null) return;
+            if (!rendererParam || animData == null) return;
 
             string animName = animData.ResolveAnimName();
             if (string.IsNullOrEmpty(animName))
@@ -629,22 +629,22 @@ namespace Ale.AnimSimulatorSystem
             if (animDataListPlaying.Contains(animData)) return;
 
             // 交给后端播放
-            if (!PlayAnimOnRenderer(renderer, animData, trackIndex)) return;
+            if (!PlayAnimOnRenderer(rendererParam, animData, trackIndex)) return;
 
             // 记录 新动画 与 轨道归属、并推进播放令牌
             animDataListPlaying.Add(animData);
-            _trackToRenderer[trackIndex] = renderer;
+            _trackToRenderer[trackIndex] = rendererParam;
             _trackToPlayToken[trackIndex] = ++_playTokenNext;
 
             // 非循环播放时，注册 动画完成的回调
             if (animData.isLoop == false)
-                ScheduleOnceComplete(renderer, animData, onOncePlayComplete);
+                ScheduleOnceComplete(rendererParam, animData, onOncePlayComplete);
         }
 
         /// <summary>播放动画，仅当 指定轨道上 没有正在播放的动画。</summary>
-        private void PlayAnimWhenTrackEmpty(Component renderer, AnimData animData)
+        private void PlayAnimWhenTrackEmpty(Component rendererParam, AnimData animData)
         {
-            if (!renderer || animData == null) return;
+            if (!rendererParam || animData == null) return;
 
             int count = 0;
             if (_trackToAnimDataListPlayingMap.TryGetValue(animData.AnimTrack, out var listPlaying))
@@ -652,7 +652,7 @@ namespace Ale.AnimSimulatorSystem
 
             // 仅当轨道上 没有正在播放的动画时，才播放新动画
             if (count == 0)
-                PlayAnimImmediate(renderer, animData);
+                PlayAnimImmediate(rendererParam, animData);
         }
 
         /// <summary>停止动画。</summary>
@@ -676,19 +676,19 @@ namespace Ale.AnimSimulatorSystem
 
             animDataListPlaying.RemoveAt(index);
 
-            var renderer = ResolveTrackRenderer(trackIndex);
-            if (!renderer) return;
+            var rendererComp = ResolveTrackRenderer(trackIndex);
+            if (!rendererComp) return;
 
             if (index == animDataListPlaying.Count && index > 0)
             {
                 // 被移除的是栈顶，且栈里还压着别的动画：恢复播放上一条
-                StopAnimOnRenderer(renderer, trackIndex, animDataListPlaying[index - 1]);
+                StopAnimOnRenderer(rendererComp, trackIndex, animDataListPlaying[index - 1]);
                 _trackToPlayToken[trackIndex] = ++_playTokenNext;
             }
             else
             {
                 // 否则，直接停止该轨道动画
-                StopAnimOnRenderer(renderer, trackIndex, null);
+                StopAnimOnRenderer(rendererComp, trackIndex, null);
                 _trackToPlayToken.Remove(trackIndex);
             }
         }
@@ -732,13 +732,13 @@ namespace Ale.AnimSimulatorSystem
         /// 排期「单次播放完成」：等待 时长/速度 后停止动画并触发回调。
         /// 句柄被登记下来，动画若被提前停止即可取消这次计时。
         /// </summary>
-        private void ScheduleOnceComplete(Component renderer, AnimData animData, Action<AnimData> onOncePlayComplete)
+        private void ScheduleOnceComplete(Component rendererParam, AnimData animData, Action<AnimData> onOncePlayComplete)
         {
             // 计算动画时长（考虑速度倍率）
             float speed = Mathf.Abs(animData.speed);
             if (speed == 0f) return; // 速度为0, 动画暂停，无法完成
 
-            float duration = GetAnimDuration(renderer, animData.ResolveAnimName());
+            float duration = GetAnimDuration(rendererParam, animData.ResolveAnimName());
             if (duration <= 0f) return;
 
             // 同一条数据不重复排期
@@ -788,61 +788,61 @@ namespace Ale.AnimSimulatorSystem
         /// 淡入/淡出渲染器（补间其整体透明度）。
         /// </summary>
         /// <param name="isFadeIn">是否为淡入</param>
-        /// <param name="renderer">目标渲染器，为空时使用默认渲染器</param>
+        /// <param name="rendererParam">目标渲染器，为空时使用默认渲染器</param>
         /// <param name="clearAnimOnFadeOut">淡出完成后是否清除动画数据。
         /// true（默认）= 正常销毁流程，清除动画轨道和数据；
         /// false = 临时隐藏，仅禁用对象，保留动画数据以便之后恢复。</param>
-        public void FadeAnimator(bool isFadeIn, Component renderer = null, bool clearAnimOnFadeOut = true)
+        public void FadeAnimator(bool isFadeIn, Component rendererParam = null, bool clearAnimOnFadeOut = true)
         {
-            if (!renderer) renderer = DefaultRenderer;
-            if (!renderer) return;
+            if (!rendererParam) rendererParam = DefaultRenderer;
+            if (!rendererParam) return;
 
             // 立刻完成 当前的淡入/淡出：其完成回调会同步执行并把自己从表中移除，
             // 因此下面登记新句柄时表里必定不残留旧记录。必须在 SetActive(true) 之前——
             // 旧的淡出回调里带着 SetActive(false)，顺序反了会把刚激活的对象又关掉。
-            if (_dicRendererFadeHandle.TryGetValue(renderer, out var handleFadeCur))
+            if (_dicRendererFadeHandle.TryGetValue(rendererParam, out var handleFadeCur))
                 handleFadeCur.Complete();
 
             // 如果是淡入，确保对象是激活状态
             if (isFadeIn)
-                renderer.gameObject.SetActive(true);
+                rendererParam.gameObject.SetActive(true);
 
             float fadeDur = Mathf.Max(0.001f, animFadeDuration);
             float targetAlpha = isFadeIn ? 1f : 0f;
-            float startAlpha = GetRendererAlpha(renderer);
+            float startAlpha = GetRendererAlpha(rendererParam);
 
             // fadeDur 恒 > 0，故 To() 必定异步推进、完成回调不会在本方法返回前触发——
             // 下面那行「登记新句柄」才不会被回调里的 Remove 抢先。
             // owner 传 this：本组件被销毁后补间自动作废，不再向已失效的渲染器写透明度。
             var handleFadeNew = ToolkitTween.To(startAlpha, targetAlpha, fadeDur,
-                x => SetRendererAlpha(renderer, x),
+                x => SetRendererAlpha(rendererParam, x),
                 EToolkitEase.Linear,
                 onComplete: () =>
                 {
                     // 目标已被销毁，直接移除记录并返回
-                    if (!renderer)
+                    if (!rendererParam)
                     {
-                        _dicRendererFadeHandle.Remove(renderer);
+                        _dicRendererFadeHandle.Remove(rendererParam);
                         return;
                     }
                     // 立刻设置为目标透明度
-                    SetRendererAlpha(renderer, targetAlpha);
+                    SetRendererAlpha(rendererParam, targetAlpha);
                     // 如果是淡出，禁用对象
                     if (isFadeIn == false)
                     {
                         if (clearAnimOnFadeOut)
-                            ClearRenderer(renderer);
+                            ClearRenderer(rendererParam);
                         // 禁用对象（临时隐藏 和 正常销毁 都需要）。
                         // 与本组件同体的渲染器不能禁用，否则会把本组件一起停掉——见 CanDeactivateRenderer。
-                        if (renderer && CanDeactivateRenderer(renderer)) renderer.gameObject.SetActive(false);
+                        if (rendererParam && CanDeactivateRenderer(rendererParam)) rendererParam.gameObject.SetActive(false);
                     }
 
                     // 移除记录
-                    _dicRendererFadeHandle.Remove(renderer);
+                    _dicRendererFadeHandle.Remove(rendererParam);
                 },
                 owner: this);
 
-            _dicRendererFadeHandle[renderer] = handleFadeNew;
+            _dicRendererFadeHandle[rendererParam] = handleFadeNew;
         }
 
         /// <summary>
@@ -898,11 +898,11 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <summary>清除某个渲染器上的全部动画（含循环间隔调度）。</summary>
-        private void ClearRenderer(Component renderer)
+        private void ClearRenderer(Component rendererParam)
         {
-            if (renderer) ClearRendererAnim(renderer);
+            if (rendererParam) ClearRendererAnim(rendererParam);
             // 清除所有正在运行的 循环随机间隔调度
-            StopLoopIntervalScheduleAll(renderer);
+            StopLoopIntervalScheduleAll(rendererParam);
         }
 
         /// <summary>清除所有动画与状态。</summary>
@@ -1106,4 +1106,105 @@ namespace Ale.AnimSimulatorSystem
 
         #endregion
     }
+    
+    #region 枚举定义-动画轨道
+    /// <summary>
+    /// 动画轨道。
+    /// 定义了常见的动画轨道类型，例如身体、头部、面部等。便于在 配置时进行 分类与管理。
+    /// 分配到不同的 动画轨道 上的动画，可以同时进行播放。
+    /// 需要 指定位置的动画 被 其他动画 覆盖时，则将这些动画 分配到 相同的动画轨道上。
+    /// </summary>
+    [Serializable]
+    public enum EAnimTrack
+    {
+        /// <summary>
+        /// 无。未指定动画轨道，或不需要区分动画轨道的情况。
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// 身体。整体的基础动画，例如 站立、走路、跑步等 循环播放的动画。
+        /// </summary>
+        Body,
+        /// <summary>
+        /// 头部。例如 点头、摇头等动画。
+        /// </summary>
+        Head,
+        /// <summary>
+        /// 面部。例如 面部表情的切换等动画。
+        /// </summary>
+        Face,
+        /// <summary>
+        /// 眼睛。例如 眨眼、看向不同方向等动画。
+        /// </summary>
+        Eyes,
+        /// <summary>
+        /// 嘴巴。例如 说话时的 张合动画。
+        /// </summary>
+        Mouth,
+        /// <summary>
+        /// 眉毛。例如 眉毛的上扬、下垂等动画。
+        /// </summary>
+        Brows,
+        /// <summary>
+        /// 鼻子。例如 鼻子的缩放、晃动等动画。
+        /// </summary>
+        Nose,
+        /// <summary>
+        /// 耳朵。例如 兽人的大耳朵 随机间隔的 摆动动画。
+        /// </summary>
+        Ears,
+        /// <summary>
+        /// 头发。例如 头发飘动、被风吹起等 动画。
+        /// </summary>
+        Hair,
+        /// <summary>
+        /// 手臂。例如 手臂的挥动、摆动等动画。
+        /// </summary>
+        Arms,
+        /// <summary>
+        /// 腿部。例如 站立、走路、跑步等 动画。
+        /// </summary>
+        Legs,
+        /// <summary>
+        /// 胸部。例如 胸部的起伏、晃动等动画。
+        /// </summary>
+        Breast,
+        /// <summary>
+        /// 腰部。例如 腰部的扭动、摆动等动画。
+        /// </summary>
+        Waist,
+        /// <summary>
+        /// 腹部。例如 腹部的起伏、晃动等动画。
+        /// </summary>
+        Belly,
+        /// <summary>
+        /// 臀部。例如 臀部的晃动、摆动等动画。
+        /// </summary>
+        Buttock,
+        /// <summary>
+        /// 背部。例如 翅膀、披风等，随机间隔的摆动动画。
+        /// </summary>
+        Back,
+        /// <summary>
+        /// 尾巴。例如 尾巴的摆动、卷曲等动画。
+        /// </summary>
+        Tail,
+        /// <summary>
+        /// 配件。例如 发饰、帽子、耳坠 等，随机间隔的摆动动画。
+        /// </summary>
+        Parts,
+        
+        /// <summary>
+        /// 动作。一般用于整体、复杂的复合动作，可能会覆盖到 之前分配的 其他轨道的动画。
+        /// 例如，惊吓、攻击等动作，可能会覆盖到 之前分配在 身体、头部、面部等轨道的动画。
+        /// </summary>
+        Action = 900,
+        
+        /// <summary>
+        /// 其他。不易分类 或 无需区分的动画。
+        /// </summary>
+        Other = 999,
+    }
+    #endregion
 }

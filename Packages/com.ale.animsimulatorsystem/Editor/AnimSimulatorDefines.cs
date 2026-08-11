@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Ale.Toolkit.Editor;
 
 namespace Ale.AnimSimulatorSystem.Editor
@@ -12,14 +12,14 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// <see cref="AnimSimulatorWelcomeWindow"/> 管理。宏的增删统一经 toolkit 的 <see cref="DefineUtils"/>。</para>
     ///
     /// <para><b>两个宏可以同时启用</b>：一个工程里 Spine 与 Live2D 角色并存，具体用哪个后端由角色预制体上
-    /// 挂的是 <c>SpineAnimator</c> 还是 <c>Live2dAnimator</c> 决定。</para>
+    /// 挂的是 <c>SpineAnimator</c> 还是 <c>Live2DAnimator</c> 决定。</para>
     /// </summary>
     public static class AnimSimulatorDefines
     {
         // ── 宏名常量 ──────────────────────────────────────────────────────────────
         /// <summary>Spine 支持宏。启用后 <c>SpineAnimator</c> 参与编译，可播放 Spine 动画与换装。</summary>
         public const string Spine = "ASS_SPINE";
-        /// <summary>Live2D 支持宏。启用后 <c>Live2dAnimator</c> 参与编译，可播放 Cubism 动作与换装。</summary>
+        /// <summary>Live2D 支持宏。启用后 <c>Live2DAnimator</c> 参与编译，可播放 Cubism 动作与换装。</summary>
         public const string Live2d = "ASS_LIVE2D";
 
         // ── 依赖的动画运行时 ───────────────────────────────────────────────────────
