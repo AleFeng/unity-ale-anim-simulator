@@ -198,10 +198,9 @@ namespace Ale.AnimSimulatorSystem.Editor
             if (GUILayout.Button(Tr("创建配置资产"), GUILayout.Height(28)))
                 CreateConfigAsset();
 
+            // 使用文档就是包根的 README——原先那份 Docs~/AnimSimulatorSystem/AnimSimulatorSystem.md
+            // 已并入其中，旁边那个「查看 README」按钮因此与本按钮完全重复，一并去掉。
             if (GUILayout.Button(Tr("查看使用文档"), GUILayout.Height(28)))
-                OpenDoc("Packages/com.ale.animsimulatorsystem/Docs~/AnimSimulatorSystem/AnimSimulatorSystem.md");
-
-            if (GUILayout.Button(Tr("查看 README"), GUILayout.Height(28)))
                 OpenDoc("Packages/com.ale.animsimulatorsystem/README.md");
 
             EditorGUILayout.EndHorizontal();

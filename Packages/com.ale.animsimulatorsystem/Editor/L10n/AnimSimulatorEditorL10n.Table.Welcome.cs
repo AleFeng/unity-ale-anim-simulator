@@ -27,7 +27,6 @@ namespace Ale.AnimSimulatorSystem.Editor
             Add("快捷操作",     "Quick Actions",   "クイック操作");
             Add("创建配置资产", "Create Config",   "設定アセットを作成");
             Add("查看使用文档", "View Manual",     "使用ドキュメントを見る");
-            Add("查看 README",  "View README",     "README を見る");
             Add("示例场景经 Package Manager > Anim Simulator System > Samples > Import 导入后，" +
                 "位于 Assets/Samples/ 下。",
                 "The sample scene lands under Assets/Samples/ after importing it via " +
