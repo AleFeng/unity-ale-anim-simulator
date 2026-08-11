@@ -24,7 +24,7 @@
 # 示例场景
 
 在示例场景中，演示了所有 动画模拟器 的功能与所需的 美术资产类型。\
-示例场景以 UPM 的 Sample 形式随包分发，导入方法见 [AnimSimulatorSystem 使用文档](../AnimSimulatorSystem.md#示例场景) 的「示例场景」一节。
+示例场景以 UPM 的 Sample 形式随包分发，导入方法见 [AnimSimulatorSystem 使用文档](../../README.md#示例场景) 的「示例场景」一节。
 
 # 原文件规范
 
