@@ -149,6 +149,8 @@ namespace Ale.AnimSimulatorSystem
         private static readonly int AnimatorTriggerFadeOut = Animator.StringToHash("TriggerFadeOut"); // 触发 淡出
         private static readonly int AnimatorTriggerListOpen = Animator.StringToHash("TriggerListOpen"); // 触发 列表打开
         private static readonly int AnimatorTriggerListClose = Animator.StringToHash("TriggerListClose"); // 触发 列表关闭
+        // 触发 「只有点击提示进入展开态、列表不铺开」。Random 类型专用，见 OpenCloseAnimActionList。
+        private static readonly int AnimatorTriggerTipOnly = Animator.StringToHash("TriggerTipOnly");
         
         /// <summary>
         /// 淡入或淡出 动画动作列表
@@ -175,7 +177,9 @@ namespace Ale.AnimSimulatorSystem
         // 三种播放器类型各取所需，故两级各有各的判定，不能共用一个「是不是 Operate」：
         //
         //   Operate      淡入 + 展开   —— 玩家滚动列表选中一条再点
-        //   Random       只淡入        —— 点了就随机播，没什么可挑的，铺开列表反而误导
+        //   Random       淡入 + 展开   —— 但只有点击提示进入展开态，列表不铺开：点了就随机播，
+        //                                没什么可挑的，铺开列表反而误导。提示圈的表现与 Operate 一致，
+        //                                否则同样「能点」的两种播放器给出的视觉反馈会不一样。
         //   ProgressBar  两者皆无      —— 根本不接受点击
         //
         // 判定一律先判播放器非空：本类的这几个方法都是 public，外部在没有播放器时调用即空引用。
@@ -188,22 +192,82 @@ namespace Ale.AnimSimulatorSystem
         private bool CanExpandList => _animActionPlayerCurrent && _animActionPlayerCurrent.IsAnimActionSelectable;
 
         /// <summary>
-        /// 触发一个 Animator 触发器，并把其余三个复位。
+        /// 触发一个 Animator 触发器，并把其余的复位。
         /// <para>仅用于淡入淡出这一对：打开 / 关闭那一对必须<b>保留</b>已置位的淡入触发器
         /// （打开流程会先淡入再打开），故不走这里。</para>
         /// </summary>
         private void SetTriggerExclusive(int trigger)
         {
-            if (!animator) return;
+            if (!TrySetTrigger(trigger)) return;
 
-            animator.SetTrigger(trigger);
-            foreach (var other in AnimatorTriggersAll)
+            foreach (var other in TriggersPresent)
                 if (other != trigger) animator.ResetTrigger(other);
         }
 
-        // 四个互斥触发器，供上面的复位遍历使用
+        /// <summary>
+        /// 触发一个 Animator 触发器；控制器上没有该参数时返回 <c>false</c> 而不去触发。
+        /// <para>Unity 的 <c>SetTrigger</c> / <c>ResetTrigger</c> 遇到不存在的参数会往控制台刷错误，
+        /// 而 <c>TriggerTipOnly</c> 是后加到动作列表 UI 上的——沿用旧 UI 预制体的工程没有这个参数。</para>
+        /// </summary>
+        private bool TrySetTrigger(int trigger)
+        {
+            if (!animator) return false;
+
+            if (System.Array.IndexOf(TriggersPresent, trigger) < 0)
+            {
+                if (trigger == AnimatorTriggerTipOnly && !_tipOnlyMissingWarned)
+                {
+                    _tipOnlyMissingWarned = true;
+                    AnimSimLog.Warn(this,
+                        "动作列表 UI 的 Animator 上没有 TriggerTipOnly 参数，Random(点击随机) 类型的点击提示" +
+                        "将停在「已淡入但未展开」的形态，而不是与 Operate 一致的展开态。" +
+                        "请更新动作列表 UI 预制体（新增 A_TipOnly 状态与同名触发器）。" +
+                        $"GameObject={gameObject.name}");
+                }
+                return false;
+            }
+
+            animator.SetTrigger(trigger);
+            return true;
+        }
+
+        // 五个互斥触发器。实际存在哪些由 TriggersPresent 探测——见那里的说明。
         private static readonly int[] AnimatorTriggersAll =
-            { AnimatorTriggerFadeIn, AnimatorTriggerFadeOut, AnimatorTriggerListOpen, AnimatorTriggerListClose };
+        {
+            AnimatorTriggerFadeIn, AnimatorTriggerFadeOut,
+            AnimatorTriggerListOpen, AnimatorTriggerListClose, AnimatorTriggerTipOnly,
+        };
+
+        // 控制器上确实存在的那些触发器。null = 尚未探测成功。
+        private int[] _triggersPresent;
+        private bool _tipOnlyMissingWarned;
+
+        /// <summary>
+        /// <see cref="AnimatorTriggersAll"/> 中在当前控制器上<b>确实存在</b>的那些。
+        /// <para>Animator 尚未初始化时不缓存结果，留到下次再探——此时 <c>parameters</c> 返回空数组，
+        /// 缓存下来会让后续所有触发器都被误判为不存在。</para>
+        /// </summary>
+        private int[] TriggersPresent
+        {
+            get
+            {
+                if (_triggersPresent != null) return _triggersPresent;
+                if (!animator || !animator.isInitialized) return System.Array.Empty<int>();
+
+                var parameters = animator.parameters;
+                var present = new List<int>(AnimatorTriggersAll.Length);
+                foreach (var hash in AnimatorTriggersAll)
+                    foreach (var p in parameters)
+                        if (p.type == AnimatorControllerParameterType.Trigger && p.nameHash == hash)
+                        {
+                            present.Add(hash);
+                            break;
+                        }
+
+                _triggersPresent = present.ToArray();
+                return _triggersPresent;
+            }
+        }
         
         /// <summary>
         /// 打开或关闭 动画动作列表
@@ -223,21 +287,29 @@ namespace Ale.AnimSimulatorSystem
                 if ((CanFadeIn || isForceOpen) && !_isFadeIn)
                     FadeAnimActionList(true, isForceOpen);
 
-                // 【第二级：展开】只有需要玩家挑一条的播放器（或强制打开）才铺开列表
-                if (!CanExpandList && !isForceOpen) return;
+                // 【第二级：进入展开态】接受玩家点击的播放器都要走这一级——点击提示的表现
+                // （放大 + 旋转）对 Operate 与 Random 必须一致，差别只在列表铺不铺开，
+                // 故只是触发器不同：
+                //   Operate / 强制  → TriggerListOpen  提示圈展开态 + 列表铺开
+                //   Random          → TriggerTipOnly   提示圈展开态，列表保持隐藏且不吃射线
+                // ProgressBar 与「没有播放器」在上一级就被 CanFadeIn 挡住，到不了这里。
+                if (!CanFadeIn && !isForceOpen) return;
                 // 状态未变化，不重复触发
                 if (_isOpen) return;
 
-                animator.SetTrigger(AnimatorTriggerListOpen);
+                // 触发失败（旧 UI 预制体没有 TriggerTipOnly）时不置位状态，退回「已淡入未展开」的旧表现
+                if (!TrySetTrigger((CanExpandList || isForceOpen) ? AnimatorTriggerListOpen : AnimatorTriggerTipOnly))
+                    return;
                 _isOpen = true;
             }
             // 关闭列表
             else
             {
-                // 状态未变化，不重复触发关闭动画
+                // 状态未变化，不重复触发关闭动画。Random 的展开态同样由这里收回——
+                // 它进的是 A_TipOnly，与 A_ListOpen 一样接受 TriggerListClose。
                 if (_isOpen)
                 {
-                    animator.SetTrigger(AnimatorTriggerListClose);
+                    TrySetTrigger(AnimatorTriggerListClose);
                     _isOpen = false;
                 }
 

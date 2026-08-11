@@ -4,6 +4,24 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.3.1] - 2026-08-11
+
+**修复 Random(点击随机) 类型的点击提示动画表现。** 2.3.0 引入该类型时，只让它走到「淡入」这一级就停下了。
+
+### 修复
+
+- **Random 类型的点击提示不再停在半途。** 此前它悬停后停在 `A_ListClose`（提示圈 1.0 倍、不旋转），而 Operate 会继续走到 `A_ListOpen`（提示圈 1.55 倍 + 持续旋转）——两种同样「能点」的播放器给出的视觉反馈不一样，Random 的看起来像是没响应完。
+  - 新增动画剪辑 **`A_TipOnly`** 与同名状态：对 `CircleClickTip` 的处理与 `A_ListOpen` **逐条相同**，只是把 `CircularScrollingList` 的 `CanvasGroup.Alpha` / `BlocksRaycasts` 两条曲线按住 0。保留曲线而非删除——删了就变成「不写」，列表会留在上一个状态写下的值上。
+  - 新增 Animator 参数 **`TriggerTipOnly`**。`UIAnimActionList` 按播放器类型选触发器：Operate 走 `TriggerListOpen`，Random 走 `TriggerTipOnly`。
+  - `A_ListOpen` 与 `A_TipOnly` 之间互设转换，光标从一种播放器直接滑到另一种时可就地切换；两者都接受 `TriggerListClose` 与 `TriggerFadeOut`。
+  - `_isOpen` 的语义随之由「列表已铺开」放宽为「已进入展开态」，关闭分支因此对两种类型都能正确收回。
+
+### 变更
+
+- **`UIAnimActionList` 触发 Animator 参数前先探测参数是否存在。** Unity 的 `SetTrigger` / `ResetTrigger` 遇到不存在的参数会往控制台刷错误，而 `TriggerTipOnly` 是本版新增的——沿用旧动作列表 UI 预制体的工程没有这个参数。现在探测一次并缓存，缺失时静默退回 2.3.0 的表现（提示圈停在已淡入未展开的形态），并**告警一次**提示更新预制体。Animator 尚未初始化时不缓存探测结果，避免把「参数一个都不存在」错误地记下来。
+
+> **自制动作列表 UI 预制体的工程需要补这个状态**，否则 Random 类型的提示圈表现仍是 2.3.0 的样子。Demo 侧改的是 `AC_UIAnimActionList.controller`（新增参数、状态与转换）并新增 `A_TipOnly.anim`，`UIAnimActionList.prefab` 本身没有改动。
+
 ## [2.3.0] - 2026-08-10
 
 **三项功能新增：动作播放器的 Random(点击随机) 类型、可配的轨道混合权重、动作列表的行距倍率与焦点居中。** 前两项是纯加量，既有配置的行为一字不变；Live2D 的自动分层规则有一处行为变更（见「变更」）。

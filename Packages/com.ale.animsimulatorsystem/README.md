@@ -573,7 +573,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
     | 类型 | 光标悬停时 | 点击时 | 播哪一条 |
     |---|---|---|---|
     | Operate(玩家操作) | 淡入点击提示 **+ 铺开动作列表** | 播放列表中当前选中的那条 | 玩家滚动列表自己挑 |
-    | Random(点击随机) | **只淡入点击提示，不铺开列表** | 当场随机抽一条播放 | 系统按权重随机 |
+    | Random(点击随机) | 点击提示的表现**与 Operate 完全一致**，但**不铺开列表** | 当场随机抽一条播放 | 系统按权重随机 |
     | ProgressBar(进度条控制) | 无反应 | 不接受点击 | 由进度条配置驱动 |
 
     - **Random(点击随机)** 自 2.3.0 起提供。抽样只在**满足解锁条件**的动作中进行，并遵守下面动画动作上的 `Random Type Weight`（随机权重）与 `Random Type Play Limit`（限制播放次数）——与进度条驱动的随机播放是同一套抽样。适合「这里可以点，但点出什么不由玩家挑」的轻交互。
@@ -688,8 +688,25 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
    └─ ImgCircleClickTip
 ```
 
-- `CircularScrollingList` 这个**节点名是历史遗留**（2.0.0 之前挂的是同名的第三方组件），现在挂的是 Unity 原生 ScrollRect。不要改名——4 个动画剪辑（`A_FadeIn` / `A_FadeOut` / `A_ListOpen` / `A_ListClose`）的曲线是**按节点路径名绑定**的，改名会让整套开合动画失配。同理，`CircleClickTip` 也不要挪层级。
-- 列表的显示 / 隐藏由 Animator 驱动 `CircularScrollingList` 上 CanvasGroup 的 `Alpha` 与 `Blocks Raycasts`：`A_ListOpen` 置 1、`A_ListClose` / `A_FadeOut` 置 0。**收起状态下列表是收不到任何 UI 射线的**，这是有意为之。
+- `CircularScrollingList` 这个**节点名是历史遗留**（2.0.0 之前挂的是同名的第三方组件），现在挂的是 Unity 原生 ScrollRect。不要改名——5 个动画剪辑（`A_FadeIn` / `A_FadeOut` / `A_ListOpen` / `A_ListClose` / `A_TipOnly`）的曲线是**按节点路径名绑定**的，改名会让整套开合动画失配。同理，`CircleClickTip` 也不要挪层级。
+- 列表的显示 / 隐藏由 Animator 驱动 `CircularScrollingList` 上 CanvasGroup 的 `Alpha` 与 `Blocks Raycasts`：`A_ListOpen` 置 1、`A_ListClose` / `A_FadeOut` / `A_TipOnly` 置 0。**收起状态下列表是收不到任何 UI 射线的**，这是有意为之。
+- **`A_TipOnly` 是 Random(点击随机) 类型专用的状态**（2.3.1 起）。它对 `CircleClickTip` 的处理与 `A_ListOpen` **逐条相同**（放大到 1.55 倍 + 持续旋转），只是把列表的两条曲线按住 0——两种同样「能点」的播放器，点击提示的视觉反馈必须一致，差别只在列表铺不铺开。
+
+  状态机因此是五个状态：
+
+  ```
+  A_FadeOut ──TriggerFadeIn──▶ A_FadeIn ──(播完自动)──▶ A_ListClose
+                                                          │
+                                    TriggerListOpen ◀──────┼──────▶ TriggerTipOnly
+                                            │                              │
+                                            ▼                              ▼
+                                       A_ListOpen ◀──────────────────▶ A_TipOnly
+                                    （提示圈展开 + 列表铺开）      （只有提示圈展开）
+  ```
+
+  `A_ListOpen` 与 `A_TipOnly` 之间互设转换，是为了让光标从一种播放器直接滑到另一种时能就地切换。两者都接受 `TriggerListClose` 收回、`TriggerFadeOut` 直接淡出。
+
+  > **自制 UI 预制体要补上这个状态。** 沿用旧预制体（没有 `TriggerTipOnly` 参数）时插件不会报错，Random 类型的提示圈会停在「已淡入但未展开」的形态，并在首次发生时告警一次。
 - 格子预制体（`UIAnimActionListBox.prefab`）挂在 `UIAnimActionScrollList` 的 `Cell Prefab` 上，不要作为子物体预先摆进 Content —— 格子由虚拟滚动按需实例化与复用。
 
 #### 配置要点
@@ -765,7 +782,9 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | 滚轮位移过慢 / 拖沓 | ④ Scroll Tween Duration 过大 | 0.1 秒是较跟手的取值，超过 0.2 会明显发黏 |
 | 运行时看到 Scroll Sensitivity 变成 0 | 正常现象，列表按 ④ 接管了滚轮 | 看预制体上的值是否仍是行高 |
 | 格子位置错乱 / 相互重叠 | Content 上挂了 Layout Group 或 Content Size Fitter | 移除这些组件，定位交回虚拟滚动 |
-| 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` 的曲线 |
+| 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` / `A_TipOnly` 的曲线 |
+| Random 播放器的点击提示不放大、不旋转，比 Operate 的"小一号" | UI 预制体缺 `A_TipOnly` 状态与 `TriggerTipOnly` 参数 | 看控制台是否有「没有 TriggerTipOnly 参数」的告警 |
+| Random 播放器悬停时列表也铺开了 | `A_TipOnly` 里 `CircularScrollingList` 的两条曲线没归 0 | 查该剪辑的 `CanvasGroup.Alpha` / `BlocksRaycasts` 是否恒 0 |
 
 #### 运行期自检片段
 
