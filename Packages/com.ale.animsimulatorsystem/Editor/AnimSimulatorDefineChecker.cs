@@ -1,17 +1,20 @@
-﻿using Ale.Toolkit.Editor;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace Ale.AnimSimulatorSystem.Editor
 {
     /// <summary>
-    /// 动画模拟器系统 编辑器加载检查器（<c>[InitializeOnLoad]</c>）。每次启动 / 域重载后延迟执行三件事：
-    /// ① <b>旧宏迁移</b>：把老工程里仍启用的 <c>HAS_SPINE</c> 一次性改写为 <c>ASS_SPINE</c>；
-    /// ② <b>运行时 / 宏一致性提示</b>：开了宏却没装对应动画运行时时在 Console 警告（仅提示，不强制修改）；
-    /// ③ <b>首次自动弹窗</b>：本会话尚未显示过欢迎窗口且未禁用自动显示时，弹出
+    /// 动画模拟器系统 编辑器加载检查器（<c>[InitializeOnLoad]</c>）。每次启动 / 域重载后延迟执行两件事：
+    /// ① <b>运行时 / 宏一致性提示</b>：开了宏却没装对应动画运行时时在 Console 警告；
+    /// ② <b>首次自动弹窗</b>：本会话尚未显示过欢迎窗口且未禁用自动显示时，弹出
     ///    <see cref="AnimSimulatorWelcomeWindow"/>。
     ///
-    /// <para><c>ATK_*</c> 宏属项目级全局设定，其迁移与一致性检查由 toolkit 的 <c>ToolkitDefineChecker</c>
+    /// <para><b>只提示，绝不改写 PlayerSettings。</b><c>ASS_*</c> 的增删一律由用户经
+    /// <see cref="AnimSimulatorWelcomeWindow"/> 显式操作——自动改写会与别的插件对同名宏的管理逻辑
+    /// 互相覆盖（例如 Fs 框架会按 Spine 命名空间存在与否写 <c>HAS_SPINE</c>），每次写入触发一次重编译，
+    /// 编辑器会陷入「Compiling Scripts」死循环。<c>HAS_SPINE</c> 归其定义方管，本包不干涉。</para>
+    ///
+    /// <para><c>ATK_*</c> 宏属项目级全局设定，其一致性检查由 toolkit 的 <c>ToolkitDefineChecker</c>
     /// 负责，本类只管本插件自有的 <c>ASS_*</c>。</para>
     /// </summary>
     [InitializeOnLoad]
@@ -27,35 +30,8 @@ namespace Ale.AnimSimulatorSystem.Editor
         {
             EditorApplication.delayCall -= OnDelayedInit;
 
-            // 迁移确实改写了宏：PlayerSettings 变更会触发重新编译与域重载，本轮到此为止，
-            // 一致性检查与欢迎窗口留到重载后的下一轮——此时读到的宏状态才是最终的。
-            if (MigrateLegacyDefines()) return;
-
             CheckRuntimeConsistency();
             CheckWelcomeWindow();
-        }
-
-        /// <summary>
-        /// 把旧宏名迁移为新宏名：对每个仍启用的旧宏，补上对应新宏并移除旧宏。
-        /// </summary>
-        /// <returns>是否确实改写了宏（改写会触发重新编译）。</returns>
-        private static bool MigrateLegacyDefines()
-        {
-            bool changed = false;
-            foreach (var kv in AnimSimulatorDefines.LegacyRename)
-            {
-                string legacy = kv.Key;
-                string modern = kv.Value;
-                if (!ToolkitDefines.IsDefineEnabled(legacy)) continue;      // 旧宏未启用：无需迁移
-
-                if (!ToolkitDefines.IsDefineEnabled(modern))
-                    DefineUtils.ApplyDefine(true, modern);                  // 补上新宏
-                DefineUtils.ApplyDefine(false, legacy);                     // 移除旧宏
-                changed = true;
-
-                Debug.Log($"[Anim Simulator System] 已迁移旧宏 '{legacy}' → '{modern}'。");
-            }
-            return changed;
         }
 
         /// <summary>动画运行时 / 宏一致性检查（仅提示，不自动修改）。</summary>

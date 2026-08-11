@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using Ale.Toolkit.Editor;
+﻿using Ale.Toolkit.Editor;
 
 namespace Ale.AnimSimulatorSystem.Editor
 {
     /// <summary>
     /// 动画模拟器系统 自有编译宏（<c>ASS_</c> = AnimSimulatorSystem）的中枢：宏名常量、对应的动画运行时、
-    /// 宏启用状态 / 运行时安装状态检测，以及旧宏名（<c>HAS_SPINE</c>）→ 新宏名（<c>ASS_SPINE</c>）的迁移映射。
+    /// 宏启用状态 / 运行时安装状态检测。
     ///
     /// <para>这两个宏决定<b>本插件支持哪些动画后端</b>，与 toolkit 的 <c>ATK_*</c>（项目级可选依赖）平级但各管各的：
     /// <c>ATK_*</c> 由 toolkit 欢迎窗口管理，<c>ASS_*</c> 由本包的
@@ -41,17 +40,6 @@ namespace Ale.AnimSimulatorSystem.Editor
         // Spine 与 Cubism 的程序集都独立于本插件的宏编译，故命名空间存在即代表运行时已安装。
         private const string NsSpine  = "Spine.Unity";
         private const string NsLive2D = "Live2D.Cubism";
-
-        /// <summary>
-        /// 旧宏名 → 新宏名 迁移映射。2.0.0 从 Fs 框架迁到 Ale Toolkit 时把 <c>HAS_SPINE</c> 改名为
-        /// <c>ASS_SPINE</c>，但老工程的 Player Settings 里仍是旧名——旧名不再被任何代码引用，
-        /// 于是 Spine 代码会静默地整段编译不进去。由 <see cref="AnimSimulatorDefineChecker"/> 在加载时一次性改写。
-        /// </summary>
-        public static readonly IReadOnlyDictionary<string, string> LegacyRename =
-            new Dictionary<string, string>
-            {
-                { "HAS_SPINE", Spine },
-            };
 
         // ── 宏启用状态 ──────────────────────────────────────────────────────────────
         /// <summary>当前是否启用了 <see cref="Spine"/> 宏。</summary>

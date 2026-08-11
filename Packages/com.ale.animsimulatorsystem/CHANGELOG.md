@@ -4,6 +4,18 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.3.2] - 2026-08-11
+
+**移除 `HAS_SPINE` 旧宏迁移：本插件不再改写 PlayerSettings。** `HAS_SPINE` 归定义它的插件管辖，本包不干涉——两边都自动改写同一个宏，编辑器会陷入无限重编译。
+
+### 破坏性变更
+
+- **移除 `AnimSimulatorDefines.LegacyRename` 与 `AnimSimulatorDefineChecker.MigrateLegacyDefines()`**，`HAS_SPINE` → `ASS_SPINE` 的自动迁移就此取消。
+  - **起因**：实测撞上死循环。工程里同时装了 Fs 框架与本插件时，Fs 的 `SpineDefineChecker` 检测到 `Spine` 命名空间存在便添加 `HAS_SPINE`，本插件的迁移随即把它删掉换成 `ASS_SPINE`；两个 `[InitializeOnLoad]` 各写一次 PlayerSettings、各触发一次重编译与域重载，然后再来一轮——编辑器停在「Compiling Scripts」上出不来。
+  - `HAS_SPINE` 从来不是本插件的宏，2.0.0 之后本插件的代码也不再读它。抢着改别人定义的宏，本就越界。
+  - ⚠️ **从 2.0.0 之前升级上来的工程需手动开一次 `ASS_SPINE`**：`Tools > Ale Toolkit > Anim Simulator System > Welcome` 勾选 Spine。不勾的话 `SpineAnimator` 只剩空类壳、Spine 动画不工作（预制体上的组件引用不会变成 Missing Script，但配置读不出来）。
+  - `AnimSimulatorDefineChecker` 保留运行时 / 宏一致性提示与首次自动弹窗——**只读不写**。
+
 ## [2.3.1] - 2026-08-11
 
 **一轮以 Live2D 实测驱动的修补。** 本版把 Live2D 后端第一次放到真实模型上跑（Cubism SDK 自带的 Natori 与 Koharu），沿途暴露并修掉的问题占了大半——多数是「不报任何错、只是表现不对」的那一类。另有 Random 类型点击提示的两处收尾、测试用背景不加载，以及动作列表倒序显示的职责下沉。
