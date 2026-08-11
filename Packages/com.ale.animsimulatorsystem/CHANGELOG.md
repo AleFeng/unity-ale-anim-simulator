@@ -82,6 +82,12 @@
   - Demo 的 `UIAnimActionList.prefab` 已把 `UIAnimActionScrollList` 的 `Reverse Content Order` 勾上，观感与此前一致。**自制动作列表 UI 预制体的工程需要照做**，否则升级后动作会从正序显示。
   - 同一批 toolkit 改动还带来 `Reverse Scroll Direction`（反向滚轮，只影响滚轮不影响拖拽），本插件默认不开启。
 
+- **动作列表静止时必定对齐到某一条动作，两条入口都不再停在半路。** 焦点列表的语义是「停在哪条就选中哪条」，停在两条之间既没有明确的选中项，焦点缩放曲线还会让上下两条都呈半放大态。能力全部落在 `com.ale.toolkit` 1.7.8 上，本插件不需要改一行代码——这是列表控件层面的通用行为，不是动作列表特有的。依赖的 toolkit 最低版本随之由 1.7.7 抬到 **1.7.8**。
+  - **拖拽松手 → 吸附对齐**（`Snap After Drag`，默认开）。**不吞惯性**：松手先让 `ScrollRect` 的惯性照常滑，速度衰减到 `Snap Velocity Threshold`（默认 200 像素/秒）以下才接管，「甩一下翻好几条」的手感保留；补间时长由 `Snap Tween Duration`（默认 0.15 秒）控制。**吸附目标就是当前焦点条目**（与 `FocusedIndex` 同一条反解），故对齐过程中选中项不会跳变。
+  - **滚轮 → 按整数条步进**（`Wheel Rows Per Notch`，默认 1 = 一档一条）。此前一档走的是 `ScrollRect.Scroll Sensitivity` 的像素值——那是一份**与行距重复、要人工同步**的数据：行距由 `Cell Prefab 高度 × Row Pitch Scale` 自动算出，`Row Pitch Scale` 一改就得记着回去改这个像素值，否则滚轮必然停在两条之间。Demo 恰好就处在这个状态（灵敏度 60、行距 90，一档只走 0.667 条）。现在位移量由行距 × 档位条数直接得出，不再有第二份数值。
+  - ⚠️ **`Scroll Sensitivity` 就此对动作列表失效**（仍会被取走并置 0，那是为了不让 `ScrollRect` 重复处理同一次滚轮）。原先靠把它设成 `2 × 行距` 实现「一档两条」的，改配 `Wheel Rows Per Notch = 2`。
+  - 低于 toolkit 1.7.8 时插件仍能编译运行，但拖拽松手后停哪算哪，且需自行把 `Scroll Sensitivity` 设成等于行距。
+
 - **清掉 `Live2DAnimator` 里两处只写不读的内部状态**，都是 2.3.0 改自动分层算法时遗留的，删除不改变任何行为：
   - `_layersInUse`（已占用的层集合）——「第一个空闲层」式的分配才需要避让别人占了哪些层；改按轨道序数确定性映射后，层号只取决于轨道自身。
   - `FTrackPlayState.speed`——两条通道都用不上：原生通道把速度直接交给 `CubismMotionController.PlayAnimation`，采样通道的进度完全由玩家操作驱动、与速度无关。

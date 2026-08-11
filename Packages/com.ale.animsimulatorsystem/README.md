@@ -765,13 +765,18 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 
 `RectMask2D` 是按 Viewport 矩形裁剪的，而动作名标签是自格子中心**向右伸出**的（示例中 `ImgNameLabel` 伸到 +150px）。Viewport 只有 100px 宽时，动作名会被齐根切掉、只剩中间的图标。示例取 500×400（**关于中心对称**加宽，格子与其子物体的相对位置不受影响）。调整动作名排版时，记得同步复查这个宽度。
 
-**④ 滚轮的步长与平滑位移，分别由两个组件上的两个字段控制。**
+**④ 滚轮按「整数条」步进，一档换一条动作。**
 
 | 字段 | 在哪 | 含义 |
 |---|---|---|
-| `Scroll Sensitivity` | ScrollRect | **一档滚轮走多远**（像素）。设为**行距**（示例 60；改了 `Row Pitch Scale` 就要同步改这里），一档正好一条动作；否则会停在两条之间 |
+| `Wheel Rows Per Notch` | UIAnimActionScrollList | **一档滚轮跨几条**（`com.ale.toolkit` ≥ 1.7.8）。默认 1 = 一档换一条焦点 |
 | `Scroll Tween Duration` | UIAnimActionScrollList | **一档走完用多久**（秒）。默认 0.1；设为 0 则恢复瞬间跳变 |
-| `Reverse Scroll Direction` | UIAnimActionScrollList | **滚轮方向反过来**（`com.ale.toolkit` ≥ 1.7.7）。默认关。只影响滚轮，**不影响拖拽**——拖拽是「抓着内容走」，方向天然正确 |
+| `Reverse Scroll Direction` | UIAnimActionScrollList | **滚轮方向反过来**（`com.ale.toolkit` ≥ 1.7.7）。Demo 里**勾选**。只影响滚轮，**不影响拖拽**——拖拽是「抓着内容走」，方向天然正确 |
+
+⚠️ **`Scroll Sensitivity`（ScrollRect 上）对本列表不起作用**，`com.ale.toolkit` 1.7.8 起如此。此前它是「一档走多少像素」，得手工设成等于行距才不会停在两条之间——而行距是 `Cell Prefab 高度 × Row Pitch Scale` 自动算出来的，等于要人维护一份重复数据，`Row Pitch Scale` 一改就得记着回来同步。现在位移量直接由行距 × 档位条数得出，不再有第二份数值。
+
+- 原先靠把它设成 `2 × 行距` 来实现「一档两条」的，改配 `Wheel Rows Per Notch = 2`。
+- 该值**仍会在运行期被取走并置 0**，见下方说明——那是为了不让 ScrollRect 重复处理同一次滚轮，与位移量无关。
 
 `Movement Type` 建议 `Clamped`，滚到两端不回弹过冲。
 
@@ -779,22 +784,37 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 
 | 字段 | 管什么 | Demo 的取值 |
 |---|---|---|
-| `Reverse Content Order` | 第 0 条排在最上还是最下 | **勾选**（第 0 条在最下方，从下往上翻） |
-| `Reverse Scroll Direction` | 滚轮方向是否取反 | 不勾选 |
+| `Reverse Content Order` | 第 0 条排在最上还是最下 | 不勾选（第 0 条在最上方，按配置的自然序） |
+| `Reverse Scroll Direction` | 滚轮方向是否取反 | **勾选** |
 
 > `Reverse Content Order` 自 2.3.1 起接管了动作列表的倒序显示。此前是本插件把数据数组整个翻过来实现的，于是「第几条」在数据层与配置层含义相反；改用呈现层开关后**数据索引不变**，`FocusedIndex` 拿到的就是配置里的自然序号。
 >
-> ⚠️ **自制动作列表 UI 预制体的工程升级到 2.3.1 后需要手动勾上 `Reverse Content Order`**，否则动作会从正序显示。
+> ⚠️ **想保持 2.3.1 之前那种「第 0 条在最下方」的观感，需要手动勾上 `Reverse Content Order`**（Demo 没有勾，故按正序显示）。两个开关彼此独立，勾哪个不影响另一个。
 
-⚠️ **`Scroll Sensitivity` 在运行期会被列表取走并置 0**，这是有意的，不是 bug。原因是 `ScrollRect` 与 `UIAnimActionScrollList` 挂在同一个 GameObject 上，而 `ExecuteEvents` 会把滚轮事件派发给该物体上**全部** `IScrollHandler`——两者都会收到。不把 `ScrollRect` 的灵敏度清零，就会先被它瞬间挪一档、再被补间从头拉回，白抖一帧。清零后位移完全由列表给出，行为唯一。
+⚠️ **`Scroll Sensitivity` 在运行期会被列表取走并置 0**，这是有意的，不是 bug。原因是 `ScrollRect` 与 `UIAnimActionScrollList` 挂在同一个 GameObject 上，而 `ExecuteEvents` 会把滚轮事件派发给该物体上**全部** `IScrollHandler`——两者都会收到。不把 `ScrollRect` 的灵敏度清零，就会先被它按自己的像素值挪一下、再被列表按整数条挪一下，白抖一帧且位置错乱。清零后位移完全由列表给出，行为唯一。
 
-- 这只改运行期的字段值，**不动预制体**——Inspector 上的 `Scroll Sensitivity` 仍是「一档滚多远」的唯一可调入口，只是改由列表来应用它。
-- 所以**运行时读到 `scrollSensitivity` 为 0 属正常**，别照着它去反推「滚轮坏了」。
-- 连滚数档时按**目标位置**累加，而非按当前位置——否则每档都从半路重新起算，越滚越短、最后停在两条之间。
+- 这只改运行期的字段值，**不动预制体**；所以**运行时读到 `scrollSensitivity` 为 0 属正常**，别照着它去反推「滚轮坏了」。
+- 预制体上那个值现在**只是历史遗留，改它没有任何效果**（1.7.8 前它才是步长）。要调一档滚多少，改 `Wheel Rows Per Notch`。
+- 连滚数档时按**目标槽位**累加，而非按当前位置——否则每档都从半路重新起算，越滚越短。
+- 一档的起点会先归到最近的整条上：常态下起点本就对齐、归整不改变它；若因关掉了拖拽吸附而停在半路，一档滚轮顺带把它拉回格上。
 
-> 已知限制：**拖拽滚动松手后不做吸附对齐**。停在两条之间时，焦点缩放曲线会让上下两条都呈半放大态。只用滚轮不受影响（一档整格步进，且拖拽开始时会取消进行中的补间）。
+**⑤ 拖拽松手后的吸附对齐**（`com.ale.toolkit` ≥ 1.7.8）。
 
-**⑤ 场景 EventSystem 的输入模块必须接线（最隐蔽的一条）。**
+焦点列表的语义是「停在哪条就选中哪条」。拖拽停在两条之间时，既没有明确的选中项，焦点缩放曲线还会让上下两条都呈半放大态。自 2.3.1 起松手后会自动对齐：
+
+| 字段 | 在哪 | 含义 |
+|---|---|---|
+| `Snap After Drag` | UIAnimActionScrollList | **松手是否吸附**。默认**开**。关掉则完全交还 ScrollRect（拖到哪停哪，2.3.1 之前的表现） |
+| `Snap Tween Duration` | UIAnimActionScrollList | **吸附补间时长**（秒）。默认 0.15。0 = 瞬间对齐 |
+| `Snap Velocity Threshold` | UIAnimActionScrollList | **惯性降到多慢才开始吸附**（像素/秒）。默认 200 |
+| `Inertia` / `Deceleration Rate` | ScrollRect | 惯性本身仍是 ScrollRect 原生的，列表不碰 |
+
+- **不吞惯性**：松手当帧只登记「待吸附」，先让 ScrollRect 的惯性照常滑，速度衰减到阈值以下才接管——「甩一下翻好几条」的手感因此保留。阈值调大 = 更早吸附（滑行更短促），调小 = 更贴近原生惯性，`0` = 等惯性完全停下。ScrollRect 没开 `Inertia` 时松手即吸附。
+  > 之所以不等惯性自然归零：ScrollRect 的惯性是指数衰减，要到 `|v| < 1` 才清零，尾巴很长。那段慢速蠕动对选择动作毫无意义，还让吸附迟迟不来。
+- **吸附目标就是当前焦点条目**，不是「重新找一条」——吸附与 `FocusedIndex` 用的是同一条反解，所以对齐过程中**选中项不会跳变**，只是把它从「最接近焦点线」挪到「正对焦点线」。
+- 滚到两端时不会有多余动作：首尾留白保证了边界位置本就正对焦点线。
+
+**⑥ 场景 EventSystem 的输入模块必须接线（最隐蔽的一条）。**
 
 本系统有**两条互相独立**的输入通路，务必先分清：
 
@@ -816,16 +836,22 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | 条目全挤在列表顶部，滚轮完全没反应 | ① 缺首尾留白（toolkit < 1.7.1） | 比一下 Content 高度是否 ≤ Viewport 高度 |
 | 首尾几条动作永远选不中，中间的正常 | ① 同上 | 滚到底，看焦点能否落到最后一条 |
 | 只有压在格子上才滚得动，空隙处滚不动 | ② Viewport 缺可命中 Image，或勾了 Cull Transparent Mesh | 查 Viewport 的 Image 与 CanvasRenderer |
-| 滚轮和格子点击都没反应，但悬停展开正常 | ⑤ EventSystem 输入模块引用失效 | 播放时查模块的 `scrollWheel` / `point` 是否为空 |
+| 滚轮和格子点击都没反应，但悬停展开正常 | ⑥ EventSystem 输入模块引用失效 | 播放时查模块的 `scrollWheel` / `point` 是否为空 |
 | 动作名看不见，只剩中间的图标 | ③ Viewport 太窄，被 RectMask2D 裁掉 | 把 Viewport 加宽，看标签是否回来 |
-| 一档滚轮跳过好几条，或总停在两条之间 | ④ Scroll Sensitivity 与行距不一致 | 令其等于 Cell Prefab 高度 × Row Pitch Scale |
+| 一档滚轮总停在两条之间 | ④ toolkit < 1.7.8：那时步长是 Scroll Sensitivity 的像素值，与行距不等就会卡半路 | 升级 toolkit；升级前的权宜之计是令其等于 Cell Prefab 高度 × Row Pitch Scale |
+| 一档滚轮跳过好几条 | ④ `Wheel Rows Per Notch` 大于 1 | 改回 1 |
+| 改了 Scroll Sensitivity 但滚轮距离没变化 | ④ 1.7.8 起它已不决定位移量 | 改 `Wheel Rows Per Notch` |
 | 焦点条目明显偏下，对不准视口中线 | ① toolkit < 1.7.5，格子轴心在顶端、放大只向下长开 | 量一下偏移是否恰为 (缩放 − 1) × 行距 / 2 |
 | 想调条目疏密，却只能改格子预制体高度 | ① toolkit < 1.7.5，没有 Row Pitch Scale | 升级 toolkit 后改倍率，不要动预制体高度 |
-| 升级到 2.3.1 后动作变成正序显示了 | ④ UI 预制体上没勾 `Reverse Content Order`（该职责已从插件代码移到列表上） | 在 `UIAnimActionScrollList` 上勾选它 |
+| 升级到 2.3.1 后动作变成正序显示了 | ④ UI 预制体上没勾 `Reverse Content Order`（该职责已从插件代码移到列表上；Demo 也没勾） | 想要倒序就在 `UIAnimActionScrollList` 上勾选它 |
 | 滚轮方向不对，但拖拽是对的 | ④ `Reverse Scroll Direction` 勾反了 | 它只作用于滚轮，拖拽不受其影响 |
 | 滚轮切换条目是瞬间跳变的 | ④ Scroll Tween Duration 为 0，或 toolkit < 1.7.2 | 把它设为 0.1 左右 |
 | 滚轮位移过慢 / 拖沓 | ④ Scroll Tween Duration 过大 | 0.1 秒是较跟手的取值，超过 0.2 会明显发黏 |
 | 运行时看到 Scroll Sensitivity 变成 0 | 正常现象，列表按 ④ 接管了滚轮 | 看预制体上的值是否仍是行高 |
+| 拖拽松手后停在两条之间 | ⑤ `Snap After Drag` 没勾，或 toolkit < 1.7.8 | 勾上它；低版本 toolkit 没有这个字段 |
+| 松手后要等好一会儿才对齐 | ⑤ `Snap Velocity Threshold` 太小，惯性尾巴拖太久 | 调大到 200～400 试试 |
+| 松手立刻被"吸"住，甩不动几条 | ⑤ 阈值太大，或 ScrollRect 关了 `Inertia` | 调小阈值；确认 ScrollRect 的 `Inertia` 是勾上的 |
+| 吸附时选中项跳到了别的动作上 | 不会发生：吸附目标就是当前焦点条目 | 若确有此现象，先查 `Scroll Sensitivity` 是否 ≠ 行距 |
 | 格子位置错乱 / 相互重叠 | Content 上挂了 Layout Group 或 Content Size Fitter | 移除这些组件，定位交回虚拟滚动 |
 | 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` / `A_TipOnly` 的曲线 |
 | Random 播放器的点击提示不放大、不旋转，比 Operate 的"小一号" | UI 预制体缺 `A_TipOnly` 状态与 `TriggerTipOnly` 参数 | 看控制台是否有「没有 TriggerTipOnly 参数」的告警 |
@@ -866,7 +892,7 @@ if (hits.Count > 0)
 
 - **射线命中 0 个** → 列表处于收起态（`Blocks Raycasts` 为 0），或要点 ② 没配好。
 - **命中了但"无人处理"** → 命中的对象不在 ScrollRect 的子树下（例如被某个兄弟节点的图形挡在了上层）。
-- **Content 动了，但实际滚轮不动** → 列表侧没问题，去查要点 ⑤ 的输入模块。
+- **Content 动了，但实际滚轮不动** → 列表侧没问题，去查要点 ⑥ 的输入模块。
 
 ## 背景预制体
 
