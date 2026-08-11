@@ -99,18 +99,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: face01
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 1
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -138,18 +138,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: face02
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 1
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -177,18 +177,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: body
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 1
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 50
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -295,18 +295,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: face01
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 1
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -413,18 +413,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: body
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 0
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -452,18 +452,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: body
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 0
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
@@ -570,18 +570,18 @@ MonoBehaviour:
     actionDirectionY: 0
     actionDirectionZ: 0
     animName: face02
-    dampingTime: 0
+    dampingTime: 0.06
     isLoop: 1
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
     randomTypePlayLimit: 0
-    clickModeAnimPlaySpeed: 0
-    rotateModeAngleRangeMax: 0
+    clickModeAnimPlaySpeed: 1
+    rotateModeAngleRangeMax: 360
     isAntiClockwise: 0
-    pressModeAnimPressSpeed: 0
-    pressModeAnimReleaseSpeed: 0
-    pressModeAnimActionStopDelay: 0
+    pressModeAnimPressSpeed: 1
+    pressModeAnimReleaseSpeed: 1.5
+    pressModeAnimActionStopDelay: 0.5
     progressBarConfigs: []
     conditions:
       groupOperator: 0
