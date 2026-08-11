@@ -101,13 +101,19 @@ namespace Ale.AnimSimulatorSystem
             OnEnableInput();
 
 #if UNITY_EDITOR
-            // 测试用 直接加载指定角色
-            if (HasTestActor)
+            // 测试用：直接加载配置好的 角色 与 背景。
+            //
+            // 两者是**各自独立**的：只配了背景（或只配了角色）都应当生效，故这里的门开在
+            // 「两者任一」上，各自再单独判定要不要加载。此前这段只看 HasTestActor、也只调
+            // ReloadTestActor，于是「背景-测试用」那两个字段在启动时根本没人读——
+            // 配了背景预制体却什么都不发生，只能靠组件右键菜单手动重新加载。
+            if (HasTestActor || HasTestBackground)
             {
-                // 开始 动画模拟器
+                // 开始 动画模拟器（淡入 UI，并把随后加载进来的角色 / 背景纳入淡入淡出的管辖）
                 StartAnimSimulator();
-                // 测试用 直接加载指定角色
-                ReloadTestActor();
+
+                if (HasTestActor) ReloadTestActor();
+                if (HasTestBackground) ReloadTestBackground();
             }
 #endif
         }
