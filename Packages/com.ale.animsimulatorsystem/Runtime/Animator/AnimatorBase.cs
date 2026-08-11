@@ -572,6 +572,37 @@ namespace Ale.AnimSimulatorSystem
             PlayAnimImmediate(renderer, animData, onOncePlayComplete);
         }
 
+        // 速度为 0 的告警只出一次。同一个角色上多条动作都配错时，刷满控制台反而盖住别的信息。
+        private bool _animSpeedZeroWarned;
+
+        /// <summary>
+        /// 播放速度为 0 时告警一次。
+        ///
+        /// <para><b>为什么需要这条告警</b>：速度 0 在两个后端都表现为「动画定格在起始帧」，而且<b>都不报错</b>——
+        /// Spine 侧是 <c>TrackEntry.TimeScale = 0</c>，Live2D 侧会因 Cubism 表达不了「暂停」而切到采样通道、
+        /// 停在进度 0。角色就那么一动不动地杵着，既没有异常也没有日志，排查起来极其费劲。</para>
+        ///
+        /// <para><b>最常见的成因</b>：动作上的 <c>Click Mode Anim Play Speed</c>（默认 1）被置零。若该动作是
+        /// 用脚本或编辑器批量生成的，要特别留意——<c>SerializedProperty.arraySize</c> 造出来的数组元素
+        /// <b>不会执行 C# 字段初始化器</b>，带默认值的字段会全是 0。</para>
+        ///
+        /// <para>拖拽 / 旋转 / 按压这类<b>由玩家驱动进度</b>的动作同样不该把速度设为 0：它们以正常速度起播，
+        /// 首次写入进度时会自动切到采样通道。</para>
+        /// </summary>
+        private void WarnIfSpeedZero(AnimData animData, string animName)
+        {
+            if (_animSpeedZeroWarned) return;
+            // 与两个后端的判据保持一致：它们取的都是 Mathf.Abs(speed)
+            if (Mathf.Abs(animData.speed) > 0f) return;
+
+            _animSpeedZeroWarned = true;
+            AnimSimLog.Warn(this,
+                $"动画 '{animName}' 的播放速度为 0，将定格在起始帧、不会播放（本告警只出一次）。" +
+                "若它由 动画动作播放器 触发，请检查该动作的 Click Mode Anim Play Speed 是否被置零（默认 1）；" +
+                "拖拽 / 旋转 / 按压这类由玩家驱动进度的动作也不需要把它设为 0。" +
+                $"GameObject={gameObject.name}");
+        }
+
         /// <summary>立刻播放动画（不走起播延时）。</summary>
         private void PlayAnimImmediate(Component renderer, AnimData animData, Action<AnimData> onOncePlayComplete = null)
         {
@@ -583,6 +614,8 @@ namespace Ale.AnimSimulatorSystem
                 AnimSimLog.Warn(this, $"动画名为空，播放失败，GameObject={gameObject.name}");
                 return;
             }
+
+            WarnIfSpeedZero(animData, animName);
 
             // 获取 当前轨道上 正在播放的动画列表
             int trackIndex = animData.AnimTrack;

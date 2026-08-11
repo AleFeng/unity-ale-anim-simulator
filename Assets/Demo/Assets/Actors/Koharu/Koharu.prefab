@@ -296,7 +296,7 @@ MonoBehaviour:
     actionDirectionZ: 0
     animName: face01
     dampingTime: 0.06
-    isLoop: 1
+    isLoop: 0
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
@@ -383,7 +383,7 @@ MonoBehaviour:
   actionPlayerName: "\u52A8\u4F5C\u64AD\u653E\u5668-\u8EAB\u4F53"
   comment: "Live2D \u6D4B\u8BD5\uFF1AKoharu\uFF08\u8EAB\u4F53/\u8138\u90E8\u5206\u8F68\uFF09"
   animator: {fileID: 593580654311569726}
-  animTrackDefault: 10
+  animTrackDefault: 1
   animTrackSubDefault: 0
   animTrackBlendWeight: 1
   playAnimActionIntervalTime: 0.5
@@ -571,7 +571,7 @@ MonoBehaviour:
     actionDirectionZ: 0
     animName: face02
     dampingTime: 0.06
-    isLoop: 1
+    isLoop: 0
     isReverse: 0
     startDelayTime: 0
     randomTypeWeight: 100
@@ -597,6 +597,162 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 80644896118953012, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00006
+      objectReference: {fileID: 0}
+    - target: {fileID: 80644896118953012, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 80644896118953012, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 80644896118953012, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 82931019126225805, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _lastOpacity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 181342536979457719, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00027999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 181342536979457719, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 181342536979457719, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 181342536979457719, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 429611748259276948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00039
+      objectReference: {fileID: 0}
+    - target: {fileID: 429611748259276948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 429611748259276948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 429611748259276948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 476971725779503298, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00075
+      objectReference: {fileID: 0}
+    - target: {fileID: 476971725779503298, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 476971725779503298, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 476971725779503298, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 554839553235835434, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 554839553235835434, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 554839553235835434, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 554839553235835434, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 667784925746527495, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00029999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 667784925746527495, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 667784925746527495, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 667784925746527495, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 726510051308894102, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 755337296021741550, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.0008
+      objectReference: {fileID: 0}
+    - target: {fileID: 755337296021741550, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 755337296021741550, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 755337296021741550, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 757051783426877774, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00081999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 757051783426877774, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 757051783426877774, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 757051783426877774, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1024952243528902324, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1039240552412517016, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00035
+      objectReference: {fileID: 0}
+    - target: {fileID: 1039240552412517016, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1039240552412517016, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1039240552412517016, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 1493994016412714365, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -661,6 +817,22 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[15]'
       value: 
       objectReference: {fileID: 2316252259185898717}
+    - target: {fileID: 1510346624842415125, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00042
+      objectReference: {fileID: 0}
+    - target: {fileID: 1510346624842415125, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1510346624842415125, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1510346624842415125, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 1667800296854264616, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -689,6 +861,22 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[6]'
       value: 
       objectReference: {fileID: 2649405235685838822}
+    - target: {fileID: 1696998918367682954, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00037
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696998918367682954, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696998918367682954, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696998918367682954, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 1795471330523274979, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -697,6 +885,150 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[1]'
       value: 
       objectReference: {fileID: 4728236388034097662}
+    - target: {fileID: 1907258871404664007, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00017
+      objectReference: {fileID: 0}
+    - target: {fileID: 1907258871404664007, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1907258871404664007, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1907258871404664007, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1945554493080657832, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1951627339887102889, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00078
+      objectReference: {fileID: 0}
+    - target: {fileID: 1951627339887102889, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1951627339887102889, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1951627339887102889, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1967936168678859047, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.000069999995
+      objectReference: {fileID: 0}
+    - target: {fileID: 1967936168678859047, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1967936168678859047, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1967936168678859047, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2166239824283231361, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00087
+      objectReference: {fileID: 0}
+    - target: {fileID: 2166239824283231361, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2166239824283231361, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2166239824283231361, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2352418804563462898, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2427242810515104945, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2499607983876711293, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2499607983876711293, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2499607983876711293, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2499607983876711293, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2574797754088870723, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673657095337569648, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00072999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673657095337569648, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673657095337569648, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673657095337569648, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2675331021106035536, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00047
+      objectReference: {fileID: 0}
+    - target: {fileID: 2675331021106035536, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2675331021106035536, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2675331021106035536, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2858055133372738037, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00065
+      objectReference: {fileID: 0}
+    - target: {fileID: 2858055133372738037, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2858055133372738037, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2858055133372738037, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 2892254441777203425, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -765,6 +1097,26 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[15]'
       value: 
       objectReference: {fileID: 337247108325816541}
+    - target: {fileID: 3025444683606304457, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3116969719096613146, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00009
+      objectReference: {fileID: 0}
+    - target: {fileID: 3116969719096613146, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3116969719096613146, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3116969719096613146, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 3140899459487430929, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -773,6 +1125,178 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[1]'
       value: 
       objectReference: {fileID: 1540285393634242740}
+    - target: {fileID: 3176230925896238449, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00043
+      objectReference: {fileID: 0}
+    - target: {fileID: 3176230925896238449, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3176230925896238449, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3176230925896238449, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3178731393294509471, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00071
+      objectReference: {fileID: 0}
+    - target: {fileID: 3178731393294509471, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3178731393294509471, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3178731393294509471, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3211103862544295826, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3244732673362155053, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00081
+      objectReference: {fileID: 0}
+    - target: {fileID: 3244732673362155053, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3244732673362155053, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3244732673362155053, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3252843153239579963, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314904339061668538, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00078999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314904339061668538, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314904339061668538, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3314904339061668538, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3430688972600111517, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00021
+      objectReference: {fileID: 0}
+    - target: {fileID: 3430688972600111517, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3430688972600111517, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3430688972600111517, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3440945798556673233, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00049
+      objectReference: {fileID: 0}
+    - target: {fileID: 3440945798556673233, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3440945798556673233, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3440945798556673233, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3468071723106007049, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00088999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 3468071723106007049, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3468071723106007049, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3468071723106007049, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513777012801754995, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00074
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513777012801754995, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513777012801754995, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513777012801754995, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3523242397099736447, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00021999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 3523242397099736447, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3523242397099736447, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3523242397099736447, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3891185578778756787, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3978399731581353200, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00037999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 3978399731581353200, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3978399731581353200, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3978399731581353200, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 4109038795601196265, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -805,6 +1329,138 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[7]'
       value: 
       objectReference: {fileID: 3070453554630818374}
+    - target: {fileID: 4261869761763989020, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4261869761763989020, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4261869761763989020, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349481209199998752, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00040999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349481209199998752, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349481209199998752, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349481209199998752, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407830660663014635, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.0007
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407830660663014635, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407830660663014635, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407830660663014635, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4474527020843769761, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578499070852626948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578499070852626948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578499070852626948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578499070852626948, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4648401820037382775, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00013999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 4648401820037382775, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4648401820037382775, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4648401820037382775, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736548475743588484, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.0001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736548475743588484, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736548475743588484, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4736548475743588484, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4957187587819949551, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5033463586083350221, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00064
+      objectReference: {fileID: 0}
+    - target: {fileID: 5033463586083350221, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5033463586083350221, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5033463586083350221, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5036609445816519997, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00075999997
+      objectReference: {fileID: 0}
+    - target: {fileID: 5036609445816519997, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5036609445816519997, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5036609445816519997, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 5155947353944858374, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -849,6 +1505,154 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[5]'
       value: 
       objectReference: {fileID: 3521832289155178209}
+    - target: {fileID: 5314591718516522025, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00084
+      objectReference: {fileID: 0}
+    - target: {fileID: 5314591718516522025, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5314591718516522025, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5314591718516522025, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5482202557717770552, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00034
+      objectReference: {fileID: 0}
+    - target: {fileID: 5482202557717770552, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5482202557717770552, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5482202557717770552, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5588454447943089085, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5667490850223798393, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00051
+      objectReference: {fileID: 0}
+    - target: {fileID: 5667490850223798393, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5667490850223798393, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5667490850223798393, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5770693491664293895, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00087999995
+      objectReference: {fileID: 0}
+    - target: {fileID: 5770693491664293895, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5770693491664293895, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5770693491664293895, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5971982686881465211, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00036
+      objectReference: {fileID: 0}
+    - target: {fileID: 5971982686881465211, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5971982686881465211, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5971982686881465211, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5999907990066756634, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00016
+      objectReference: {fileID: 0}
+    - target: {fileID: 5999907990066756634, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5999907990066756634, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5999907990066756634, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6112566950799736587, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00014999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 6112566950799736587, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6112566950799736587, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6112566950799736587, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6245832051412358183, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00013
+      objectReference: {fileID: 0}
+    - target: {fileID: 6245832051412358183, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6245832051412358183, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6245832051412358183, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6252079615909440084, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00002
+      objectReference: {fileID: 0}
+    - target: {fileID: 6252079615909440084, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6252079615909440084, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6252079615909440084, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 6319476543163219811, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -857,6 +1661,22 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[1]'
       value: 
       objectReference: {fileID: 7940775316395602584}
+    - target: {fileID: 6369889405918743742, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00068999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 6369889405918743742, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6369889405918743742, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6369889405918743742, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 6449433951457446560, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -929,6 +1749,278 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[17]'
       value: 
       objectReference: {fileID: 607234398843156592}
+    - target: {fileID: 6581869232247924215, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6595424105899736195, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00005
+      objectReference: {fileID: 0}
+    - target: {fileID: 6595424105899736195, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6595424105899736195, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6595424105899736195, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6655904729608609215, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00072
+      objectReference: {fileID: 0}
+    - target: {fileID: 6655904729608609215, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6655904729608609215, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6655904729608609215, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6809361272944961540, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00083
+      objectReference: {fileID: 0}
+    - target: {fileID: 6809361272944961540, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6809361272944961540, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6809361272944961540, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6890848172728923204, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6892964086137678600, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00077
+      objectReference: {fileID: 0}
+    - target: {fileID: 6892964086137678600, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6892964086137678600, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6892964086137678600, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6903688597393133275, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00032999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 6903688597393133275, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6903688597393133275, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6903688597393133275, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7239828678392119335, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7260742996119119796, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00012
+      objectReference: {fileID: 0}
+    - target: {fileID: 7260742996119119796, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7260742996119119796, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7260742996119119796, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7264720712733751364, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00048
+      objectReference: {fileID: 0}
+    - target: {fileID: 7264720712733751364, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7264720712733751364, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7264720712733751364, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7321315110771943929, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.0009
+      objectReference: {fileID: 0}
+    - target: {fileID: 7321315110771943929, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7321315110771943929, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7321315110771943929, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7350172223119412933, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00018
+      objectReference: {fileID: 0}
+    - target: {fileID: 7350172223119412933, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7350172223119412933, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7350172223119412933, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7356776664780118721, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7401541204632546828, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7466859115350363613, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550696334358766267, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00031
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550696334358766267, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550696334358766267, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550696334358766267, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7630630845078550171, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00027
+      objectReference: {fileID: 0}
+    - target: {fileID: 7630630845078550171, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7630630845078550171, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7630630845078550171, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7735592939765706414, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00018999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 7735592939765706414, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7735592939765706414, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7735592939765706414, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7774981441661548549, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7778307554211555678, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00010999999
+      objectReference: {fileID: 0}
+    - target: {fileID: 7778307554211555678, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7778307554211555678, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7778307554211555678, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7828065863028357954, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7981374059031626946, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.0002
+      objectReference: {fileID: 0}
+    - target: {fileID: 7981374059031626946, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7981374059031626946, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7981374059031626946, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8201876143230790498, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00032
+      objectReference: {fileID: 0}
+    - target: {fileID: 8201876143230790498, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8201876143230790498, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8201876143230790498, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     - target: {fileID: 8231205431623274190, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -989,9 +2081,49 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8478578418102155151, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8586169634072101124, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: m_Name
       value: Koharu
+      objectReference: {fileID: 0}
+    - target: {fileID: 8719611969571009308, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8828254303965243541, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00004
+      objectReference: {fileID: 0}
+    - target: {fileID: 8828254303965243541, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8828254303965243541, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8828254303965243541, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8850142177447674148, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00029
+      objectReference: {fileID: 0}
+    - target: {fileID: 8850142177447674148, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8850142177447674148, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8850142177447674148, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
       objectReference: {fileID: 0}
     - target: {fileID: 8903379845493512830, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
@@ -1013,10 +2145,34 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[4]'
       value: 
       objectReference: {fileID: 8504156891280912225}
+    - target: {fileID: 9053313792119196742, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9064645443122376882, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9137970940005739295, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
       objectReference: {fileID: 2506927538082835729}
+    - target: {fileID: 9191412369127356390, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _zOffset
+      value: -0.00008
+      objectReference: {fileID: 0}
+    - target: {fileID: 9191412369127356390, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _quaternion.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9191412369127356390, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.w
+      value: 6.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 9191412369127356390, guid: e2745320db9192c4fb4ba04861d75c32, type: 3}
+      propertyPath: _offsetScale.z
+      value: 6.7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
