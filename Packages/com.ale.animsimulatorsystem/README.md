@@ -706,6 +706,8 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 
   `A_ListOpen` 与 `A_TipOnly` 之间互设转换，是为了让光标从一种播放器直接滑到另一种时能就地切换。两者都接受 `TriggerListClose` 收回、`TriggerFadeOut` 直接淡出。
 
+  **`A_ListClose` 是 idle 态，不是隐藏态。** 光标离开后 Operate 与 Random 都回到这里——提示圈缩回 1.0 倍、`ImgCircleClickTip` 上那个独立 Animator 的慢速自转（`A_CircleRotation`）继续跑，「这里能点」的提示仍在。真正让提示圈消失的是 `A_FadeOut`，由**播放器的绑定 / 解绑**触发（见 `SetAnimActionPlayer`），与悬停无关。
+
   > **自制 UI 预制体要补上这个状态。** 沿用旧预制体（没有 `TriggerTipOnly` 参数）时插件不会报错，Random 类型的提示圈会停在「已淡入但未展开」的形态，并在首次发生时告警一次。
 - 格子预制体（`UIAnimActionListBox.prefab`）挂在 `UIAnimActionScrollList` 的 `Cell Prefab` 上，不要作为子物体预先摆进 Content —— 格子由虚拟滚动按需实例化与复用。
 
@@ -785,6 +787,7 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | 列表已淡出却仍挡住背后的点击 | 开合动画未把 `Blocks Raycasts` 归 0 | 查 `A_ListClose` / `A_FadeOut` / `A_TipOnly` 的曲线 |
 | Random 播放器的点击提示不放大、不旋转，比 Operate 的"小一号" | UI 预制体缺 `A_TipOnly` 状态与 `TriggerTipOnly` 参数 | 看控制台是否有「没有 TriggerTipOnly 参数」的告警 |
 | Random 播放器悬停时列表也铺开了 | `A_TipOnly` 里 `CircularScrollingList` 的两条曲线没归 0 | 查该剪辑的 `CanvasGroup.Alpha` / `BlocksRaycasts` 是否恒 0 |
+| 光标一离开，某个播放器的提示圈就整个消失（别的还在） | 关闭分支把它判成了「不接受点击」 | 查该播放器的 `Anim Action Player Type` 是不是 ProgressBar |
 
 #### 运行期自检片段
 

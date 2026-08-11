@@ -313,9 +313,16 @@ namespace Ale.AnimSimulatorSystem
                     _isOpen = false;
                 }
 
-                // 不需要展开列表的播放器（Random / ProgressBar / 没有播放器）一并淡出。
-                // 从未淡入过的会被 FadeAnimActionList 自身的状态守卫挡掉，是空操作。
-                if (!CanExpandList)
+                // 光标离开后停在 idle 形态（A_ListClose：提示圈缩回 1.0 倍、子物体继续慢转），
+                // Operate 与 Random 一致——「这里能点」这件事在光标离开后仍要提示，不该整个消失。
+                //
+                // 只有**根本不接受点击**的播放器才在这里淡出。判据是 CanFadeIn 而不是 CanExpandList：
+                // 后者对 Random 也为假，用它会把 Random 的提示圈一起淡掉。ProgressBar 与「没有播放器」
+                // 本就没淡入过，此处是空操作（被 FadeAnimActionList 自身的状态守卫挡掉）；真正会走到的
+                // 是播放器类型在运行期从 Operate/Random 切成 ProgressBar 的场合——已淡入的提示得收掉。
+                //
+                // 提示圈整体的淡入淡出归 SetAnimActionPlayer 管（绑定播放器时淡入、解绑时淡出）。
+                if (!CanFadeIn)
                     FadeAnimActionList(false);
             }
         }

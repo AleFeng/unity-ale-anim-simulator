@@ -16,6 +16,10 @@
   - `A_ListOpen` 与 `A_TipOnly` 之间互设转换，光标从一种播放器直接滑到另一种时可就地切换；两者都接受 `TriggerListClose` 与 `TriggerFadeOut`。
   - `_isOpen` 的语义随之由「列表已铺开」放宽为「已进入展开态」，关闭分支因此对两种类型都能正确收回。
 
+- **Random 类型在光标离开后不再整个淡出。** 它此前会直接走 `A_FadeOut`（提示圈消失），而 Operate 停在 `A_ListClose`（提示圈缩回 1.0 倍、子物体继续慢转）——「这里能点」这件事在光标离开后仍要提示，不该整个消失。
+  - 起因是 2.3.0 在关闭分支里按 `CanExpandList` 决定要不要淡出，而该判据对 Random 也为假。现改为按 `CanFadeIn`：只有**根本不接受点击**的播放器才淡出。
+  - 提示圈整体的淡入淡出本就归 `SetAnimActionPlayer` 管（绑定播放器时淡入、解绑时淡出），与悬停无关；关闭分支里那次淡出仅用于「播放器类型在运行期从 Operate/Random 切成 ProgressBar」这一种场合——已淡入的提示得收掉。
+
 ### 变更
 
 - **`UIAnimActionList` 触发 Animator 参数前先探测参数是否存在。** Unity 的 `SetTrigger` / `ResetTrigger` 遇到不存在的参数会往控制台刷错误，而 `TriggerTipOnly` 是本版新增的——沿用旧动作列表 UI 预制体的工程没有这个参数。现在探测一次并缓存，缺失时静默退回 2.3.0 的表现（提示圈停在已淡入未展开的形态），并**告警一次**提示更新预制体。Animator 尚未初始化时不缓存探测结果，避免把「参数一个都不存在」错误地记下来。
