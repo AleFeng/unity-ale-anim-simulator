@@ -31,6 +31,9 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// </summary>
         public const string PackageLive2D = "Live2D Cubism SDK for Unity";
 
+        /// <summary>spine-unity 官方安装说明页（git URL 的取法、与 Spine 编辑器版本的对应关系）。</summary>
+        public const string UrlSpineUnityInstall = "https://esotericsoftware.com/spine-unity-installation";
+
         /// <summary>Live2D Cubism SDK for Unity 官方下载页。</summary>
         public const string UrlLive2DDownload = "https://www.live2d.com/en/sdk/download/unity/";
 

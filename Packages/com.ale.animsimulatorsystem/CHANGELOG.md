@@ -67,7 +67,7 @@
 
 ### 文档
 
-- **动作列表 UI 一节补上两个滚动开关**，并点明「排布方向」与「滚轮方向」是两件事：`Reverse Content Order`（第 0 条排最上还是最下，Demo 勾选）与 `Reverse Scroll Direction`（滚轮方向取反，只影响滚轮不影响拖拽，Demo 不勾）。排错速查随之加两行。
+- **动作列表 UI 一节补上两个滚动开关**，并点明「排布方向」与「滚轮方向」是两件事：`Reverse Content Order`（第 0 条排最上还是最下，Demo 不勾）与 `Reverse Scroll Direction`（滚轮方向取反，只影响滚轮不影响拖拽，Demo 勾选）。排错速查随之加两行。
 - **`Click Mode Anim Play Speed` 字段说明加了「不要填 0」的警示**，并说明拖拽 / 旋转 / 按压这类进度驱动型动作同样不该设为 0。
 - **Live2D 的「采样通道」一条补上「逐帧是必须的、不是可省的优化」**，以及由此带来的部署约束：`Live2DAnimator` 最好与 `CubismModel` 挂在同一个物体上，否则收不到 `CubismUpdateController` 的调度、只能回落到自身 `LateUpdate`，时序变为未定义。
 - **补齐「URP 工程的三项必需设置」一节。** 三项缺一不可、症状互不相同、且**都不会报错**，此前文档只写了其中一项（Renderer List）。另两项是本轮在 Live2D 测试场景里实测踩出来的：
@@ -79,8 +79,8 @@
 
 - **动作列表的倒序显示改由滚动列表承担，`UIAnimActionList.reverseContentOrder` 删除。** 该字段此前的做法是把 `_animActionContentList` 整个 `Reverse()` 掉，于是「第几条」在数据层与配置层含义相反，读代码时得时刻记着这层反转。现改用 `com.ale.toolkit` 1.7.7 在顺序虚拟列表上新增的同名开关——它只是把条目排到另一个槽位上，**数据索引不变**，`FocusedIndex` 拿到的就是配置里的自然序号。
   - 依赖的 `com.ale.toolkit` 最低版本随之由 1.7.5 抬到 **1.7.7**。低于该版本插件仍能编译运行，但动作列表会按配置的正序显示。
-  - Demo 的 `UIAnimActionList.prefab` 已把 `UIAnimActionScrollList` 的 `Reverse Content Order` 勾上，观感与此前一致。**自制动作列表 UI 预制体的工程需要照做**，否则升级后动作会从正序显示。
-  - 同一批 toolkit 改动还带来 `Reverse Scroll Direction`（反向滚轮，只影响滚轮不影响拖拽），本插件默认不开启。
+  - ⚠️ **想保持 2.3.1 之前那种「第 0 条在最下方」的观感，需要在 `UIAnimActionScrollList` 上手动勾上 `Reverse Content Order`**；不勾则按配置的自然序显示。Demo 没有勾（改为正序），勾上的是 `Reverse Scroll Direction`。
+  - 同一批 toolkit 改动还带来 `Reverse Scroll Direction`（反向滚轮，只影响滚轮不影响拖拽），字段默认关，Demo 里开启。两个开关彼此独立。
 
 - **动作列表静止时必定对齐到某一条动作，两条入口都不再停在半路。** 焦点列表的语义是「停在哪条就选中哪条」，停在两条之间既没有明确的选中项，焦点缩放曲线还会让上下两条都呈半放大态。能力全部落在 `com.ale.toolkit` 1.7.8 上，本插件不需要改一行代码——这是列表控件层面的通用行为，不是动作列表特有的。依赖的 toolkit 最低版本随之由 1.7.7 抬到 **1.7.8**。
   - **拖拽松手 → 吸附对齐**（`Snap After Drag`，默认开）。**不吞惯性**：松手先让 `ScrollRect` 的惯性照常滑，速度衰减到 `Snap Velocity Threshold`（默认 200 像素/秒）以下才接管，「甩一下翻好几条」的手感保留；补间时长由 `Snap Tween Duration`（默认 0.15 秒）控制。**吸附目标就是当前焦点条目**（与 `FocusedIndex` 同一条反解），故对齐过程中选中项不会跳变。

@@ -17,7 +17,7 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// </summary>
     public class AnimSimulatorWelcomeWindow : EditorWindow
     {
-        private const string Version = "2.0.0";
+        private const string Version = "2.3.1";
 
         // 打开时的初始高宽；窗口可手动调整（见 OpenWindow），缩放下限为 MinWindowSize。
         private static readonly Vector2 WindowSize    = new Vector2(540f, 660f);
@@ -225,7 +225,8 @@ namespace Ale.AnimSimulatorSystem.Editor
                 Tr("启用后 SpineAnimator 参与编译，可播放 Spine 动画、按皮肤名组合换装。" +
                    "需通过 Package Manager 安装 Spine Unity 运行时（git URL 分发，不在 UPM 注册表中）。"),
                 Tr("  ⚠ {0} 未安装（需通过 Package Manager 安装）"),
-                Tr("尚未检测到 Spine Unity 运行时。\n启用宏后，SpineAnimator 将无法编译。\n\n确定要继续启用吗？"));
+                Tr("尚未检测到 Spine Unity 运行时。\n启用宏后，SpineAnimator 将无法编译。\n\n确定要继续启用吗？"),
+                DrawSpineInstallHint);
 
             EditorGUILayout.Space(2);
 
@@ -235,6 +236,25 @@ namespace Ale.AnimSimulatorSystem.Editor
                 Tr("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）"),
                 Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2DAnimator 将无法编译。\n\n确定要继续启用吗？"),
                 DrawLive2DInstallHint);
+        }
+
+        /// <summary>
+        /// Spine 宏方块下的安装说明。它虽是 UPM 包，却<b>不在 UPM 注册表中</b>——官方以 git URL 分发，
+        /// 只能手动添加，且 URL 末尾的分支号要与导出骨骼数据所用的 Spine 编辑器版本对应。
+        /// 这两件事在 Package Manager 里都看不出来，故在此给出说明与官方安装页的入口。
+        /// </summary>
+        private static void DrawSpineInstallHint()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                Tr("Spine Unity 运行时不在 UPM 注册表中：官方以 git URL 分发，需在 Package Manager 用 " +
+                   "Add package from git URL… 手动添加 spine-unity，以及它依赖的 spine-csharp。" +
+                   "URL 末尾的分支号须与导出骨骼数据所用的 Spine 编辑器版本一致，" +
+                   "否则导入时会报骨骼数据版本不匹配。"),
+                EditorStyles.wordWrappedMiniLabel);
+            if (GUILayout.Button(Tr("打开 Spine Unity 安装说明页"), GUILayout.Height(22)))
+                Application.OpenURL(AnimSimulatorDefines.UrlSpineUnityInstall);
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>

@@ -62,6 +62,22 @@ namespace Ale.AnimSimulatorSystem.Editor
             Add("尚未检测到 Spine Unity 运行时。\n启用宏后，SpineAnimator 将无法编译。\n\n确定要继续启用吗？",
                 "The Spine Unity runtime was not detected.\nAfter enabling the define, SpineAnimator will fail to compile.\n\nEnable anyway?",
                 "Spine Unity ランタイムが検出されませんでした。\nマクロを有効にすると、SpineAnimator はコンパイルできません。\n\nこのまま有効にしますか？");
+            Add("Spine Unity 运行时不在 UPM 注册表中：官方以 git URL 分发，需在 Package Manager 用 " +
+                "Add package from git URL… 手动添加 spine-unity，以及它依赖的 spine-csharp。" +
+                "URL 末尾的分支号须与导出骨骼数据所用的 Spine 编辑器版本一致，" +
+                "否则导入时会报骨骼数据版本不匹配。",
+                "The Spine Unity runtime is not on the UPM registry: it is distributed by git URL and must be added " +
+                "manually via Package Manager > Add package from git URL…, together with the spine-csharp package it " +
+                "depends on. The branch at the end of the URL must match the Spine editor version used to export the " +
+                "skeleton data, otherwise the import reports a skeleton data version mismatch.",
+                "Spine Unity ランタイムは UPM レジストリにありません：公式は git URL で配布しており、" +
+                "Package Manager の Add package from git URL… から spine-unity と、それが依存する spine-csharp を" +
+                "手動で追加する必要があります。URL 末尾のブランチ番号は、スケルトンデータの書き出しに使用した " +
+                "Spine エディターのバージョンと一致させてください。一致しないとインポート時に" +
+                "スケルトンデータのバージョン不一致エラーになります。");
+            Add("打开 Spine Unity 安装说明页",
+                "Open the spine-unity installation guide",
+                "spine-unity インストール手順を開く");
 
             // Live2D
             Add("启用后 Live2DAnimator 参与编译，可播放 Cubism 动作、按部件组合换装。",
