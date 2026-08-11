@@ -47,6 +47,11 @@
 
 ### 变更
 
+- **动作列表的倒序显示改由滚动列表承担，`UIAnimActionList.reverseContentOrder` 删除。** 该字段此前的做法是把 `_animActionContentList` 整个 `Reverse()` 掉，于是「第几条」在数据层与配置层含义相反，读代码时得时刻记着这层反转。现改用 `com.ale.toolkit` 1.7.7 在顺序虚拟列表上新增的同名开关——它只是把条目排到另一个槽位上，**数据索引不变**，`FocusedIndex` 拿到的就是配置里的自然序号。
+  - 依赖的 `com.ale.toolkit` 最低版本随之由 1.7.5 抬到 **1.7.7**。低于该版本插件仍能编译运行，但动作列表会按配置的正序显示。
+  - Demo 的 `UIAnimActionList.prefab` 已把 `UIAnimActionScrollList` 的 `Reverse Content Order` 勾上，观感与此前一致。**自制动作列表 UI 预制体的工程需要照做**，否则升级后动作会从正序显示。
+  - 同一批 toolkit 改动还带来 `Reverse Scroll Direction`（反向滚轮，只影响滚轮不影响拖拽），本插件默认不开启。
+
 - **`UIAnimActionList` 触发 Animator 参数前先探测参数是否存在。** Unity 的 `SetTrigger` / `ResetTrigger` 遇到不存在的参数会往控制台刷错误，而 `TriggerTipOnly` 是本版新增的——沿用旧动作列表 UI 预制体的工程没有这个参数。现在探测一次并缓存，缺失时静默退回 2.3.0 的表现（提示圈停在已淡入未展开的形态），并**告警一次**提示更新预制体。Animator 尚未初始化时不缓存探测结果，避免把「参数一个都不存在」错误地记下来。
 
 > **自制动作列表 UI 预制体的工程需要补这个状态**，否则 Random 类型的提示圈表现仍是 2.3.0 的样子。Demo 侧改的是 `AC_UIAnimActionList.controller`（新增参数、状态与转换）并新增 `A_TipOnly.anim`，`UIAnimActionList.prefab` 本身没有改动。

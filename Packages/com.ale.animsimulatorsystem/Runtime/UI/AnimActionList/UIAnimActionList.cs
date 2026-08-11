@@ -25,8 +25,6 @@ namespace Ale.AnimSimulatorSystem
         [SerializeField] private CanvasGroup animActionListCanvasGroup;
         [Tooltip("动画动作 列表组件")]
         [SerializeField] private UIAnimActionScrollList animActionList;
-        [Tooltip("倒序显示动作。列表以焦点居中呈现时，倒序更符合从下往上翻的直觉。")]
-        [SerializeField] private bool reverseContentOrder = true;
 
         /// <summary>
         /// 获取 UI Canvas 组件
@@ -98,12 +96,12 @@ namespace Ale.AnimSimulatorSystem
                 if (allAnimActions != null)
                 {
                     // 填充 动画动作 数据列表
+                    // 数据一律按配置的自然顺序装填。「倒序显示」是呈现层的事，交给滚动列表自己的
+                    // reverseContentOrder（在 UIAnimActionScrollList 上勾选）——它只是把条目排到
+                    // 另一个槽位上，数据索引不变。此前是在这里把数据翻过来，于是「第几条」在数据层
+                    // 与配置层含义相反，读代码时得时刻记着这层反转。
                     for (int i = 0; i < allAnimActions.Count; i++)
                         _animActionContentList.Add(new UIAnimActionListBoxContent(allAnimActions[i]));
-
-                    // 倒序显示：焦点居中的呈现方式下，倒序更贴合从下往上翻的直觉
-                    if (reverseContentOrder)
-                        _animActionContentList.Reverse();
                 }
             }
 

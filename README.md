@@ -90,7 +90,7 @@ Spine 与 Live2D 只负责把动画**播出来**，而「玩家摸一下角色�
 - 光标操作输入（点击 / 拖拽 / 旋转 / 按压）依赖 `com.unity.inputsystem` 与 `ATK_INPUT_SYSTEM` 宏。
 
 ### 必需：Ale Toolkit
-本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.5**）之上，用到的底层能力：
+本插件构建于 **[Ale Toolkit](https://github.com/AleFeng/unity-ale-toolkit)**（`com.ale.toolkit`，**≥ 1.7.7**）之上，用到的底层能力：
 
 | toolkit 能力 | 插件中的用途 |
 |---|---|
@@ -107,9 +107,10 @@ Spine 与 Live2D 只负责把动画**播出来**，而「玩家摸一下角色�
 
 toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写进 `package.json` 的 `dependencies`，需自行安装。
 
-> **最低版本是 1.7.5**：
+> **最低版本是 1.7.7**：
 > - **1.7.3** 给 `ToolkitTween` 新增了通用浮点补间 `To()`，本插件用它补间 Spine 的 `Skeleton.A` 与 Live2D 的 `CubismRenderController.Opacity`——这两个目标都不是 `UnityEngine.Object`，落不到 toolkit 原有的任何固定通道上。
 > - **1.7.5** 把顺序虚拟列表的**行距与格子高度解耦**（新增 `rowPitchScale` 行距倍率），并把格子轴心由顶端改为正中。后者是动作列表的一处显示修复：焦点缩放曲线放大焦点条目时，顶端轴心会让它只向下长开、视觉中心比焦点线低 `(缩放 − 1) × 行距 / 2`。低于该版本插件仍能编译运行，但动作列表的条目间距不可调、焦点条目对不准中线。
+> - **1.7.7** 给顺序虚拟列表加了 `reverseContentOrder`（倒序排布）与 `reverseScrollDirection`（反向滚轮）。动作列表的倒序显示自 2.3.1 起改由前者承担——此前是本插件把数据数组翻过来实现的，导致「第几条」在数据层与配置层含义相反。低于该版本插件仍能编译运行，但动作列表会按配置的正序显示。
 
 > **`ToolkitMonoSingleton` 的行为提示**：它的 `Instance` **不会自动创建实例**。场景中必须先存在 `AnimSimulatorManager` 组件，`AnimActionPlayer` 等才能注册进去；否则会给出明确警告而非静默失效。
 
@@ -120,7 +121,7 @@ toolkit 走 git URL / 本地路径分发（不在 UPM 注册表），故未写�
 
 ## 📦 安装
 
-> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)，必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。用与下方相同的方式先安装 toolkit：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit#1.7.5`。漏装或颠倒会报 `找不到 Ale.Toolkit.*` 一类编译错——补装 toolkit 并等重新编译即可，无需重装本插件。
+> ⚠️ **本插件依赖通用底层包 [`com.ale.toolkit`](https://github.com/AleFeng/unity-ale-toolkit)，必须先装它、再装本插件。** Unity Package Manager 不支持在 `package.json` 的 `dependencies` 里写 git URL，无法自动拉取，故**顺序不能颠倒**。用与下方相同的方式先安装 toolkit：`https://github.com/AleFeng/unity-ale-toolkit.git?path=/Packages/com.ale.toolkit#1.7.7`。漏装或颠倒会报 `找不到 Ale.Toolkit.*` 一类编译错——补装 toolkit 并等重新编译即可，无需重装本插件。
 
 ### 使用 UPM（推荐）
 `Window > Package Manager` → 左上角 `+` → `Install package from git URL...` → 粘贴：
