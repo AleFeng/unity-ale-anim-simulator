@@ -16,6 +16,11 @@
   - ⚠️ **从 2.0.0 之前升级上来的工程需手动开一次 `ASS_SPINE`**：`Tools > Ale Toolkit > Anim Simulator System > Welcome` 勾选 Spine。不勾的话 `SpineAnimator` 只剩空类壳、Spine 动画不工作（预制体上的组件引用不会变成 Missing Script，但配置读不出来）。
   - `AnimSimulatorDefineChecker` 保留运行时 / 宏一致性提示与首次自动弹窗——**只读不写**。
 
+### 修复
+
+- **`package.json` 的 `description` 里 toolkit 最低版本由 `≥ 1.7.3` 订正为 `≥ 1.7.8`**。2.3.0 抬到 1.7.5、2.3.1 抬到 1.7.7 再抬到 1.7.8，README 与 CHANGELOG 都同步了，只有 `package.json` 一直停在 2.2.0 时代的 1.7.3。
+- **说明 `dependencies` 为何留空**：toolkit 只经 git URL 分发，而 UPM 不支持在 `dependencies` 里写 git URL，声明了反而会解析失败——只能靠使用者先装 toolkit 再装本包。这一约束此前只写在 README 里，`package.json` 自身看不出来（JSON 无法写注释），故补进 `description`。
+
 ## [2.3.1] - 2026-08-11
 
 **一轮以 Live2D 实测驱动的修补。** 本版把 Live2D 后端第一次放到真实模型上跑（Cubism SDK 自带的 Natori 与 Koharu），沿途暴露并修掉的问题占了大半——多数是「不报任何错、只是表现不对」的那一类。另有 Random 类型点击提示的两处收尾、测试用背景不加载，以及动作列表倒序显示的职责下沉。
