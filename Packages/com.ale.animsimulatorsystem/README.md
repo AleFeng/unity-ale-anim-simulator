@@ -26,6 +26,14 @@
     - [四、轨道 → 层 映射](#四轨道--层-映射)
     - [五、Live2D 皮肤](#五live2d-皮肤)
     - [六、两条使用约束](#六两条使用约束)
+  - [Unity Animator 接入](#unity-animator-接入)
+    - [一、无需安装](#一无需安装)
+    - [二、Unity 角色预制体](#二unity-角色预制体)
+    - [三、动画查找表（必填）](#三动画查找表必填)
+    - [四、轨道 → 动画层](#四轨道--动画层)
+    - [五、Unity 皮肤](#五unity-皮肤)
+    - [六、淡入淡出与透明度](#六淡入淡出与透明度)
+    - [七、三条使用约束](#七三条使用约束)
 - [系统配置](#系统配置)
   - [动画模拟管理器](#动画模拟管理器)
   - [资源文件路径](#资源文件路径)
@@ -143,14 +151,14 @@
 - 挂载 AnimActor组件。
   - 双击刚制作好的 角色预制体，打开 预制体编辑模式。
   - 在 Hierarchy面板中 选中 角色预制体的 根物体，在 Inspector面板中 点击 [Add Component]按钮，添加 AnimActor组件。
-  - 将角色的动画控制器（Spine 角色是 **SpineAnimator**，Live2D 角色是 **Live2DAnimator**），拖拽到 AnimActor组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（Spine 角色是 **SpineAnimator**，Live2D 角色是 **Live2DAnimator**，用 Unity 自带动画的角色是 **UnityAnimator**），拖拽到 AnimActor组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](Docs~/image-63.png)
 
 - 放置 AnimActionPlayer(动画动作播放器)。
   - 将 Demo 中的 `Assets\UI\AnimActionPlayer\AnimActionPlayer.prefab` 预制体（导入 Sample 后位于 `Assets\Samples\Anim Simulator System\<版本号>\...` 下），拖拽放置到 角色预制体中。
   - 也可以自己手动创建空物体，并挂载 AnimActionPlayer组件 与 SphereCollider组件 来完成。只是通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
-  - 将角色的动画控制器（SpineAnimator 或 Live2DAnimator），拖拽到 AnimActionPlayer组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
+  - 将角色的动画控制器（SpineAnimator / Live2DAnimator / UnityAnimator），拖拽到 AnimActionPlayer组件的 **Animator(动画控制器)** 栏中。组件一般会 自动寻找并挂载，可以再次确认。
 
 ![alt text](Docs~/image-65.png)
 
@@ -166,7 +174,7 @@
   - 在 AnimActionPlayer组件的 Anim Actions(动画动作列表)中，点击右下角的[+][-]按钮，在列表末尾 增加一个 动画动作条目。
   - 将 Action Name(动作名称)设置成“动作-测试”。这个名称 仅用于配置文件之间的识别与指定。游戏中显示的名称，需要在 UiDisplayActionName(显示动作名称)中进行设置。
   - 将 Action Operation Type(动作操作类型)设置成 Click(点击)。表示这个 动画动作 是通过玩家点击 来触发的。
-  - 在 **Anim Name(动画名称)** 栏中，填写这个动作要播放的动画名，例如“dress-up”。这个名字就是在 Spine 或 Live2D 中制作动画时起的名字，**两个后端使用相同的命名规则**。
+  - 在 **Anim Name(动画名称)** 栏中，填写这个动作要播放的动画名，例如“dress-up”。这个名字就是在 Spine 或 Live2D 中制作动画时起的名字（Unity 后端则是动画查找表里登记的名字），**三个后端使用相同的命名规则**。
 
 ![alt text](Docs~/image-67.png)
 
@@ -186,9 +194,9 @@
 
 # 动画后端
 
-插件支持 **Spine** 与 **Live2D** 两个动画后端，**可在同一工程内同时启用**。一个工程里两种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator` 还是 `Live2DAnimator` 决定。
+插件支持 **Spine**、**Live2D** 与 **Unity 自带动画** 三个动画后端，**可在同一工程内同时启用**。一个工程里三种角色并存，用哪个后端由角色预制体上挂的是 `SpineAnimator`、`Live2DAnimator` 还是 `UnityAnimator` 决定。
 
-上层的 AnimActor 与 AnimActionPlayer 只与动画控制器的公共基类 `AnimatorBase` 打交道，对具体后端无感。**动画与皮肤都用字符串名指定，两个后端使用相同的命名规则**，因此同一份动作 / 皮肤组配置对两边都成立。
+上层的 AnimActor 与 AnimActionPlayer 只与动画控制器的公共基类 `AnimatorBase` 打交道，对具体后端无感。**动画与皮肤都用字符串名指定，三个后端使用相同的命名规则**，因此同一份动作 / 皮肤组配置对三边都成立。
 
 ## 启用后端
 
@@ -198,10 +206,11 @@
 |---|---|---|
 | `ASS_SPINE` | `com.esotericsoftware.spine.spine-unity`（+ `spine-csharp`） | git URL，经 Package Manager 安装 |
 | `ASS_LIVE2D` | Cubism SDK for Unity（≥ Cubism 5 SDK R1 beta2） | **不是 UPM 包**，需从官网下载 `.unitypackage` 手动导入 |
+| `ASS_UNITY_ANIM` | 无 | **引擎内置**，无需安装任何东西 |
 
-- 两个宏**可以同时启用**，互不排斥。
-- 只装了运行时、没开宏，对应的动画控制器不会参与编译；欢迎窗口会显示运行时的安装状态，开宏时若检测不到运行时会先弹确认。
-- 两个都不启用时插件仍能编译，但角色动画无法播放——编辑器加载时会给出提示。
+- 三个宏**可以同时启用**，互不排斥。
+- 只装了运行时、没开宏，对应的动画控制器不会参与编译；欢迎窗口会显示运行时的安装状态，开宏时若检测不到运行时会先弹确认。`ASS_UNITY_ANIM` 没有「装没装」这一说，故它的方块里不显示安装状态、也不弹确认。
+- 三个都不启用时插件仍能编译，但角色动画无法播放——编辑器加载时会给出提示。
 
 ## Spine 接入
 
@@ -332,7 +341,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 **Cubism 没有「皮肤」这个概念**——Spine 的 Skin 是骨架数据里的一等公民，可按名取用并合并；Cubism 只有部件（`CubismPart`）与可绘制对象（`CubismDrawable`）。所以 Live2D 侧的「一件皮肤」是一份**配置出来的映射**，在 `Live2DAnimator` 的 **Live2D Skins** 中定义：
 
-- **Skin Name**：皮肤名。与 Spine 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对两个后端都适用。
+- **Skin Name**：皮肤名。与 Spine 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对三个后端都适用。
 - **Part Ids**：该皮肤要显示的部件 ID 列表（即 Cubism Editor 中的部件 ID）。
 - **Textures**（可选）：贴图替换，把某个可绘制对象的主贴图换成另一张。用于「同一套部件、不同花色」的场合。
 
@@ -348,6 +357,85 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
    > 这也是**同一份配置在两个后端表现不同**的一个来源：Spine 侧写的是 `TrackEntry.TrackTime` 这种持久状态，`AnimationState.Apply` 每帧会照着它重摆姿势，天然就停得住。
    >
    > ⚠️ 由此带来一条部署约束：**`Live2DAnimator` 最好与 `CubismModel` 挂在同一个物体上**。`CubismUpdateController` 只登记同物体上的 `ICubismUpdatable`；挂到别处时会回落到组件自身的 `LateUpdate`，与 Cubism 各组件的先后顺序就变成未定义的了。
+
+## Unity Animator 接入
+
+用 Unity 自带的 `Animator` 与 `AnimationClip` 驱动动画。适合 2D 精灵 / 逐帧动画、3D 模型与 UGUI——凡是能被 `.anim` 剪辑驱动的东西都可以。
+
+### 一、无需安装
+
+`Animator`、`AnimationClip`、Playables 都是引擎内置类型，**没有要装的包**。在欢迎窗口里启用 `ASS_UNITY_ANIM` 即可。
+
+底层实现是 Playables：`UnityAnimator` 在运行时自建一张 `PlayableGraph`（`AnimationLayerMixerPlayable` + 每条轨道一个 `AnimationClipPlayable`），经 `AnimationPlayableOutput` 输出到角色的 `Animator`。因此：
+
+> **不需要 AnimatorController。** 状态机在本系统这一层（状态 → 一组动画 → 轨道），再叠一层 AnimatorController 的状态机只会两边争写同一条动画流。
+
+### 二、Unity 角色预制体
+
+- 角色上需要有一个 **`Animator`** 组件作为动画输出的目标。**Controller 栏留空**——填了会被自动置空并告警（见[七、三条使用约束](#七三条使用约束)）。不需要 Avatar，普通物体树即可。
+- 挂载 **`UnityAnimator`**，并配置：
+  - **Unity Animator**：上面那个 `Animator` 组件。添加组件时会自动寻找并填入。
+  - **Unity State Data**：状态名 → 该状态要播的一组动画。与 Spine / Live2D 的状态数据列表一一对应。
+    - 其中的 **Unity Animator**（可选）是该状态专用的渲染器，留空则用默认的。用于一个角色由多个模型拼成的场合。
+  - **Unity Anim Clips**：动画查找表，见下。
+- 根物体上再挂 **`AnimActor`**，把 `UnityAnimator` 拖到它的 Animator 栏。之后的皮肤组、动画动作播放器配置与另两个后端完全相同。
+
+### 三、动画查找表（必填）
+
+Unity **没有「按名查找剪辑」的 API**（`RuntimeAnimatorController.animationClips` 要有控制器才有，而且与状态名不是一回事）。因此与 Live2D 一样，需要在 `UnityAnimator` 的 **Unity Anim Clips(动画查找表)** 里把动画名与剪辑一一对应起来。
+
+- **Anim Name**：动画名。动作配置里填的就是这个名字。
+- **Clip**：`AnimationClip` 资产。
+- 动画名留空时，会用剪辑自身的资产名兜底，省去手填。
+- 重复的动画名会给出告警，后一条被忽略。
+
+### 四、轨道 → 动画层
+
+本系统的轨道号（`主轨道 × 10 + 子轨道`）会被压成层混合器的**输入下标**（`主轨道序数 × 10 + 子轨道`，上界 289），与 Spine 侧用的是同一条公式，无需任何手工映射。输入数按需增长。
+
+**输入下标即覆盖优先级**：下标大的后应用、盖住下标小的。这就是 [轨道与混合权重](#轨道与混合权重) 里「枚举值大的轨道覆盖枚举值小的」在本后端的落点。
+
+> ⚠️ **一条与 Spine 的实质差异：替换粒度是「逐 Transform」，不是「逐属性」。**
+>
+> Unity 的动画层在混合时以**被动到的节点**为单位：高轨道动了某个 Transform，就会把这个 Transform 的**全部通道**（位移 / 旋转 / 缩放）都换成自己的值，哪怕它只给其中一条打了关键帧；它没动到的节点则原样透出低轨道。Spine 的粒度更细，是逐条 timeline 的。
+>
+> 实际影响：
+> - **不同轨道动不同的节点** → 正常共存。这也正是 `EAnimTrack` 的设计（身体 / 头部 / 面部 / 眼睛……本来就是不同节点），常规配法不会踩到。
+> - **不同轨道动同一个节点的不同通道**（比如一条只动位移、另一条只动旋转）→ 高轨道会把低轨道那条也一并复位。这种场合请把两者合进同一条剪辑，或改用 [AvatarMask](https://docs.unity3d.com/Manual/class-AvatarMask.html) 思路重新划分节点。
+
+### 五、Unity 皮肤
+
+**Unity 侧同样没有「皮肤」这个概念**，所以与 Live2D 一样，「一件皮肤」是一份配置出来的映射，在 `UnityAnimator` 的 **Unity Skins** 中定义：
+
+- **Skin Name**：皮肤名。与 Spine / Live2D 侧使用相同的命名规则（含路径时用 '/' 分隔），这样 AnimActor 上的一份皮肤组配置对三个后端都适用。
+- **Objects**：该皮肤要显示的物体列表。
+- **Materials**（可选）：材质 / 贴图覆盖，用于「同一套物体、不同花色」的场合。
+  - **Renderer** / **Material Index**：目标渲染器与材质槽位。
+  - **Material**：替换 `sharedMaterials[Material Index]`——换的是「用哪个材质资产」，不修改任何资产的内容。
+  - **Texture** / **Texture Property Name**：替换贴图（属性名留空用 URP 的 `_BaseMap`，内置管线一般是 `_MainTex`）。它作用在该槽位的**私有材质实例**上（本组件初始化时克隆、销毁时释放），因此既能还原、也不会弄脏磁盘上的 `.mat`。
+
+换装时取「基础皮肤 + 应用中皮肤」的并集，集合内的物体 `SetActive(true)`、其余**被本组件管辖的**物体 `SetActive(false)`。**未在任何皮肤里出现过的物体（身体、脸等角色固有部分）不受影响**，不会被误伤。多件皮肤可以叠加显示。
+
+> ⚠️ **同一个渲染器槽位不要既配材质替换、又配贴图替换**（哪怕来自不同皮肤）。贴图替换要求该槽位常驻私有材质实例，而材质替换会把整个槽位换掉，两者互相驱逐。选中组件时 Inspector 会就此告警。请统一成一种：为每种花色各做一个材质、只用材质替换，或者只用贴图替换。
+
+### 六、淡入淡出与透明度
+
+**Unity Alpha Mode** 决定整体透明度往哪写。默认 `Auto`，依次探测：
+
+| 模式 | 落点 | 适用 |
+|---|---|---|
+| `CanvasGroup` | `CanvasGroup.alpha`（含父级查找） | UGUI |
+| `SpriteRenderer` | 各 `SpriteRenderer.color` 的 alpha | 2D 精灵 / 逐帧动画 |
+| `Renderer` | 经 `MaterialPropertyBlock` 写材质色（**Unity Alpha Color Property**，默认 `_BaseColor`，材质没有该属性时自动退到 `_Color`） | 3D 模型 |
+| `None` | 不处理 | — |
+
+> ⚠️ **3D 场合：材质必须是透明混合的。** URP Lit 的 Surface Type 若是 Opaque，着色器根本不采 alpha，写了也看不出效果。为此 `Renderer` 模式在透明度归零时会顺带把 `Renderer.enabled` 关掉兜底——否则角色会「以为自己隐藏了却仍然全见」（渲染器与 `UnityAnimator` 同体时，基类的 `SetActive(false)` 那条兜底也不会触发）。
+
+### 七、三条使用约束
+
+1. **Animator 的 Controller 栏要留空。** 填了的话它会自建一张图，与本插件的输出同帧争写同一条动画流，先后没有定义、表现随机。默认（**Unity Clear Controller On Play**）会在起播时自动置空并告警一次；确实要保留控制器的，可以关掉这个开关，那时只出告警、后果自负。
+2. **Animator 的三项设置会被自动修正**（**Unity Force Animator Settings**，默认开）：`Apply Root Motion` 关闭、`Culling Mode` 改 `Always Animate`、`Update Mode` 改 `Normal`。三者都与「时间由插件自己驱动」不兼容——根运动会在每次循环回绕时瞬移，离屏剔除会让姿势在回到画面时突然跳一下，固定更新则会让求值与插件的推进脱钩。每项在改动前各告警一次。
+3. **不支持 AnimationEvent。** 插件自己持有每条轨道的时间游标并逐帧写入，循环回绕会造出跨整条剪辑的时间区间，动画事件的触发条件因此不成立（插件为此刻意把该区间压成零，以免根运动被同一个问题带偏）。需要「播到某一帧触发点什么」的话，请用动作的单次播放完成回调。
 
 # 系统配置
 
@@ -562,9 +650,9 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 - 角色预制体的根物体，需要挂载 AnimActor组件。
   - AnimActor组件 是角色预制体的核心组件，负责管理角色的动画状态、皮肤等动画相关的功能。
-  - Animator：动画控制器。指向角色的 **SpineAnimator** 或 **Live2DAnimator**。AnimActor 只与动画控制器的公共基类打交道，因此**同一份角色配置对两个后端都成立**，换后端只需换这个组件。
-  - State Init List：状态初始化列表。状态的切换，通常会伴随 动画的切换。状态列表与对应的动画组，在 Spine Animator 或 Live2D Animator 组件中进行配置。
-  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。填写时会**自动列出该角色可用的皮肤名下拉**（Spine 取骨架里的皮肤，Live2D 取 Live2DAnimator 上配置的皮肤）。
+  - Animator：动画控制器。指向角色的 **SpineAnimator**、**Live2DAnimator** 或 **UnityAnimator**。AnimActor 只与动画控制器的公共基类打交道，因此**同一份角色配置对三个后端都成立**，换后端只需换这个组件。
+  - State Init List：状态初始化列表。状态的切换，通常会伴随 动画的切换。状态列表与对应的动画组，在 Spine Animator / Live2D Animator / Unity Animator 组件中进行配置。
+  - Base Skins：基础皮肤列表。角色的基础皮肤，会始终存在，不会被替换。通常用于角色的基础服装、身体等部位的皮肤配置。填写时会**自动列出该角色可用的皮肤名下拉**（Spine 取骨架里的皮肤，Live2D 与 Unity 取各自动画控制器上配置的皮肤）。
 
 ### 皮肤组
 
@@ -575,8 +663,8 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - Is Must Select Skin：必须选择皮肤。是否 必须选择 至少一个皮肤。例如，眼睛的皮肤组，必须选择一个眼睛皮肤。饰品的皮肤组，可以不选择任何一个饰品皮肤。
   - Default Skin Number：默认皮肤序号。在必须选择皮肤时，默认选择的皮肤序号。从1开始计数。
   - Anim Actor Skins：角色皮肤列表。配置了这个皮肤组中，所有的皮肤选项。每个皮肤选项，代表一个可切换的皮肤。
-    - Skin Name：皮肤名称。Spine或Live2D中制作的皮肤，通过 文本名称 来进行指定，**两个后端使用相同的命名规则**（含文件夹路径时用 '/' 分隔）。这个名称 仅用于配置文件之间的 识别与指定。游戏中显示的名称，需要在 UiDisplaySkinName(显示皮肤名称)中进行设置。
-      - 该栏会**自动列出当前角色可用的皮肤名下拉**。取不到候选时（未指定动画控制器、骨架数据缺失、Live2D 尚未配置皮肤）会退化为普通文本框，仍可手工填写；已填但不在候选内的值会被保留并标注「缺失」，不会被下拉洗掉。
+    - Skin Name：皮肤名称。Spine / Live2D / Unity 三个后端的皮肤，都通过 文本名称 来进行指定，**三个后端使用相同的命名规则**（含文件夹路径时用 '/' 分隔）。这个名称 仅用于配置文件之间的 识别与指定。游戏中显示的名称，需要在 UiDisplaySkinName(显示皮肤名称)中进行设置。
+      - 该栏会**自动列出当前角色可用的皮肤名下拉**。取不到候选时（未指定动画控制器、骨架数据缺失、Live2D / Unity 尚未配置皮肤）会退化为普通文本框，仍可手工填写；已填但不在候选内的值会被保留并标注「缺失」，不会被下拉洗掉。
     - Ui Display Skin Name：显示皮肤名称。玩家在UI中，看到的这个皮肤的名称。自 2.2.0 起是 `TextValue`：上面一行直接填**纯文本**；启用 `ATK_LOCALIZATION` 后，下方还会多出一个「本地化」栏可选多语言条目，取不到时自动回退到纯文本。
     - Skin Image：皮肤图标。这个图标 会显示在UI中，作为这个皮肤的 预览图标，玩家通过点击这个图标，来选择切换这个皮肤。
 
@@ -588,7 +676,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - 可以将 AnimActionPlayer预制体，直接拖拽放置到 角色预制体中。也可以自己手动创建空物体，并挂载 AnimActionPlayer组件(SphereCollider组件通常会自动添加)来完成。通过预制体的方式，能够直接使用 已经配置好的 组件与参数，节省了配置的时间。
   - Action Player Name：动画动作播放器名称。这个名称 仅用于配置文件之间的识别与指定。
   - Comment：备注。对于这个动画动作播放器的备注说明，便于策划进行识别与区分。
-  - Animator：动画控制器。指向角色的 SpineAnimator 或 Live2DAnimator，负责动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
+  - Animator：动画控制器。指向角色的 SpineAnimator / Live2DAnimator / UnityAnimator，负责动画的播放与控制。通常会自动寻找并挂载到预制体上，如果没有找到，也可以手动添加并配置。
   - Anim Track Default：动画轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画轨道，就会使用这个默认的动画轨道。
   - Anim Track Sub Default：动画子轨道默认值。当通过这个动画动作播放器，触发播放动画时，如果没有在动画动作的配置中，指定动画子轨道，就会使用这个默认的动画子轨道。
   - Anim Track Blend Weight：轨道混合权重（0~1，默认 1.0）。这个播放器的动作**压在更低轨道之上的强度**。详见下面的 [轨道与混合权重](#轨道与混合权重)。
@@ -611,7 +699,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 
 > **`EAnimTrack` 枚举值大的轨道，覆盖枚举值小的轨道。**
 
-所以 `Action`(900) / `Other`(999) 会盖住 `Body`(1) / `Head`(2) 这些基础轨道——玩家操作触发的动作因此总能压过角色的待机、呼吸等循环动画，操作反馈最直观。这条保证在两个后端上都成立（Spine 按轨道号升序应用，Live2D 按层号先后应用；插件内部会把稀疏的轨道号压成保序的紧凑编号交给各自的运行时）。
+所以 `Action`(900) / `Other`(999) 会盖住 `Body`(1) / `Head`(2) 这些基础轨道——玩家操作触发的动作因此总能压过角色的待机、呼吸等循环动画，操作反馈最直观。这条保证在三个后端上都成立（Spine 按轨道号升序应用，Live2D 按层号先后应用，Unity 按层混合器的输入下标先后应用；插件内部会把稀疏的轨道号压成保序的紧凑编号交给各自的运行时）。
 
 **Anim Track Blend Weight（轨道混合权重）** 决定「盖得有多实」，配在 `AnimActionPlayer` 上，取值 0~1：
 
@@ -624,7 +712,8 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
 注意权重只影响**强度**，不影响**方向**——低轨道永远盖不过高轨道，改权重也不会反转这个关系。
 
 - **Spine**：落到 `TrackEntry.Alpha`。**权重取 1 时结果完全确定**；取小于 1 时有一处 Spine 的固有语义要知道——「以本条为基准姿势」（`MixBlend.First`）只作用于 Spine 的 **0 号轨道**，而本系统的轨道从 `Body` 起、0 号轨道空着。于是**没有任何轨道打过关键帧的骨骼**会与上一帧的姿势相混而非从初始姿势起混，多帧下呈渐近而非定值。真需要严格的基准姿势，把基础循环动画配到 `EAnimTrack.None`（即 0 号轨道）即可。
-- **Live2D**：落到 `CubismMotionController.SetLayerWeight`。Cubism 的 **0 号层是层混合器的基准层、权重恒为 1**，落到那里的权重设置无效（会告警一次）；另外拖拽 / 旋转 / 按压与反向播放走的是逐帧采样通道，不经过层混合器，权重对它们不适用。
+- **Live2D**：落到 `CubismMotionController.SetLayerWeight`。**Cubism 的这个方法对 0 号层直接静默返回**，落到那里的权重设置无效（会告警一次）——这是 Cubism 自己的取舍，不是 Unity 层混合器的规则；另外拖拽 / 旋转 / 按压与反向播放走的是逐帧采样通道，不经过层混合器，权重对它们不适用。
+- **Unity**：落到层混合器输入的权重（`SetInputWeight`）。0 号输入照常认权重，没有 Live2D 那条限制。需要留意的是**替换粒度是逐 Transform 而非逐属性**，详见 [四、轨道 → 动画层](#四轨道--动画层)。
 
 ### 动画动作列表
 
@@ -647,7 +736,7 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - Action Direction X：动作的交互方向 X轴。对交互方向的X轴进行旋转，调整交互的方向。例如，拖拽的交互方向，默认是水平垂直向上的，可以通过这个值进行选择来调整。
   - Action Direction Y：动作的交互方向 Y轴。对交互方向的Y轴进行旋转，调整交互的方向。
   - Action Direction Z：动作的交互方向 Z轴。对交互方向的Z轴进行旋转，调整交互的方向。
-  - Anim Name：动画名称。这个动作要播放的动画，用**动画制作时起的名字**来指定，例如“dress-up”。Spine 与 Live2D **使用相同的命名规则**——同一份动作配置对两个后端都成立。
+  - Anim Name：动画名称。这个动作要播放的动画，用**动画制作时起的名字**来指定，例如“dress-up”。三个后端**使用相同的命名规则**——同一份动作配置对三边都成立。（Spine 按名直接在骨架数据中查找；Live2D 与 Unity 需要在各自动画控制器的查找表里登记。）
     - Spine 侧按名在骨架数据中查找；Live2D 侧按名在 Live2DAnimator 的「动作查找表」中查找（Cubism 没有按名找动作的 API，需先在那张表里把动画名与动作剪辑对应起来）。
   - Damping Time：阻尼时间。用于平滑过渡动画的进度变化，单位是秒。一般设置成0.05秒左右，能够让动画进度的变化更自然一些。增大这个值，可以让动画的反应更迟钝，更有重量感。
   - Is Loop：是否循环。这个动画动作 是否需要循环播放。例如，从Idle动画切换到Walk动画，两个动画均为循环动画，那么这个动画动作就需要设置成 循环。
@@ -659,9 +748,9 @@ Cubism **没有「按名查找动作」的 API**——motion3.json 导入后会�
   - Random Type Weight：随机权重。权重值越大，被随机到的概率就越大。随机概率 = 这个动画动作的权重值 / 所有动画动作的权重值总和。例如，两个动画动作，动画动作A的权重值是10，动画动作B的权重值是40，那么动画动作A被随机到的概率就是10/(10+40)=20%，动画动作B被随机到的概率就是40/(10+40)=80%。
   - Random Type Play Limit：限制播放次数。这个动画动作可以被播放的最大次数，达到这个次数后，就不会再被随机到。设置为0则不限制。
   - Click Mode Anim Play Speed：点击模式 动画播放速度。这个动画动作的动画播放速度的倍速，默认为1.0。
-    > ⚠️ **不要填 0**。速度 0 在两个后端都表现为「动画定格在起始帧」且**不报错**（Spine 是 `TrackEntry.TimeScale = 0`，Live2D 会因 Cubism 表达不了暂停而切到采样通道停在进度 0），角色一动不动却毫无线索。自 2.3.1 起遇到这种配置会**告警一次**。
+    > ⚠️ **不要填 0**。速度 0 在三个后端都表现为「动画定格在起始帧」且**不报错**（Spine 是 `TrackEntry.TimeScale = 0`，Live2D 会因 Cubism 表达不了暂停而切到采样通道停在进度 0，Unity 则是时间游标不再推进），角色一动不动却毫无线索。自 2.3.1 起遇到这种配置会**告警一次**。
     >
-    > 拖拽 / 旋转 / 按压这类**由玩家驱动进度**的动作也不需要把它设为 0——它们以正常速度起播，首次写入进度时会自动切到采样通道。
+    > 拖拽 / 旋转 / 按压这类**由玩家驱动进度**的动作也不需要把它设为 0——它们以正常速度起播，之后由玩家写入的进度接管（Live2D 会切到采样通道，Spine 与 Unity 直接写播放时间）。
   - Rotate Mode Angle Range Max：旋转模式 角度范围最大值，单位是 度。旋转的角度达到这个最大值时，动画进度涨到100%。设置为360度时，可以进行全方位的旋转交互。设置为180度时，可以进行半周的旋转交互。
   - Is Anti Clockwise：是否逆时针。旋转交互时，是否 逆时针的方向来进行旋转。
   - Press Mode Anim Press Speed：按压模式 动画按压速度。在按压时 动画进度 上涨的速度倍率，默认为1.0。
@@ -897,5 +986,5 @@ if (hits.Count > 0)
 ## 背景预制体
 
 背景预制体 需要放置在 系统配置中 [资源文件路径](#资源文件路径) 中指定的背景文件夹路径下，才可以在动画模拟器系统中进行配置与使用。\
-背景预制体 与 角色预制体的 配置方式 其实是相同的，都是由 Spine 或 Live2D 动画资源导入到Unity中，制作成预制体，并挂载 AnimActor组件 与对应的动画控制器（SpineAnimator 或 Live2DAnimator）来完成。\
+背景预制体 与 角色预制体的 配置方式 其实是相同的，都是把 Spine / Live2D / Unity 动画资源导入到Unity中，制作成预制体，并挂载 AnimActor组件 与对应的动画控制器（SpineAnimator / Live2DAnimator / UnityAnimator）来完成。\
 做出区分是为了方便 分类整理，以及在系统配置中，能够区分背景与角色的文件夹路径，来进行不同的资源管理。

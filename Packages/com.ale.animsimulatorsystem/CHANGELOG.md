@@ -4,6 +4,36 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.4.0] - 2026-08-13
+
+**新增第三个动画后端：Unity 自带动画（`Animator` + `AnimationClip`）。** 上层配置一字未改——`AnimActor`、`AnimActionPlayer`、动作 / 皮肤组配置、轨道与混合权重、进度驱动的拖拽 / 旋转 / 按压，对新后端全部原样成立。换后端只需把角色预制体上的动画控制器组件换掉。
+
+### 新增
+
+- **`UnityAnimator`（`Runtime/Animator/UnityAnimator.cs`）**：以 Playables 实现的动画后端。运行时自建 `PlayableGraph`（`AnimationLayerMixerPlayable` + 每条轨道一个 `AnimationClipPlayable`），经 `AnimationPlayableOutput` 输出到角色的 `Animator`。**不需要 AnimatorController**——状态机在本系统这一层。
+  - **动画查找表**（`Unity Anim Clips`）：动画名 → `AnimationClip`。Unity 没有按名查找剪辑的 API，与 Live2D 同构。动画名留空时用剪辑的资产名兜底。
+  - **轨道**压成层混合器的输入下标（`主轨道序数 × 10 + 子轨道`，上界 289），与 `SpineAnimator` 用同一条公式，无需手工映射，输入数按需增长。实测 0 号输入照常认权重，故不做偏移。
+  - **时间由本类自己驱动**：每个剪辑 playable 一律 `SetSpeed(0)`，本类持每轨道的时间游标并在 `Update()` 里逐帧 `SetTime`。`AnimationClipPlayable` 的 `SetLoopTime` 是 internal（只有 Timeline 用得到），循环只能自己取模回绕；而这样一来权威就只有 `AnimData.isLoop`，不会跑到 `.anim` 资产的 Loop Time 导入设置上去。循环 / 反向 / 速度 / 进度擦洗因此共用一条路径，**不需要 Live2D 那套「原生通道 + 采样通道」的双通道**。
+  - **透明度**（`Unity Alpha Mode`）自动探测三种落点：`CanvasGroup.alpha`（UGUI）→ `SpriteRenderer.color`（2D 精灵）→ 材质色（3D，经 `MaterialPropertyBlock` 写 `Unity Alpha Color Property`，默认 `_BaseColor`，材质没有该属性时退到 `_Color`），也可手动指定。
+- **`UnityAnimSkinData`（`Runtime/Animator/UnityAnimSkinData.cs`）**：Unity 侧的皮肤定义 = 显隐物体组 + 可选的材质 / 贴图覆盖，与 `Live2DSkinData` 同构。只接管「被任一皮肤引用过」的物体，角色固有部分不受影响；多件皮肤可叠加。
+- **编译宏 `ASS_UNITY_ANIM`**，与另两个后端对称，在欢迎窗口里开关。**它没有需要安装的运行时**（引擎内置），故不设 `PackageXxx` 常量、探测命名空间与 `IsXxxPackageInstalled()`，宏方块里也不显示安装状态行、启用时不弹确认。
+
+### 变更
+
+- **`AnimSimulatorDefineChecker` 的「尚未启用任何动画后端宏」判据补上第三项**。否则只启用 `ASS_UNITY_ANIM` 的工程，每次域重载都会挨一句无意义的告警。
+- **`AnimSimulatorWelcomeWindow.DrawMacroToggle` 新增 `hasRuntimeDependency` 参数**（默认 `true`），为 `false` 时跳过安装状态行与启用前的确认弹窗——这两样都建立在「可能没装」之上，对引擎模块不成立。两个既有调用点一字未改。
+- **欢迎窗口副标题与宏区总述改写为三个后端**。这两条的中文原串同时是三语表的查表键，故 `AnimSimulatorEditorL10n.Table.Welcome.cs` 里对应条目一并就地改写，避免静默丢掉 EN / JA 译文。
+
+### 修复
+
+- **README 里 Cubism 0 号层的成因写反了**。原文称「0 号层是层混合器的基准层、权重恒为 1，这是 Unity 层混合器的规则」——实测 `AnimationLayerMixerPlayable` 的 0 号输入照常认权重（权重 0.5 时结果就是初始姿势与剪辑姿势的中点）。静默返回的那个守卫在 Cubism 自己的 `SetLayerWeight` 里，是 Cubism 的取舍。Live2D 侧的实际行为与给用户的建议都不变，只订正归因。
+
+### 已知限制
+
+- **Unity 后端的层替换粒度是「逐 Transform」而非 Spine 的「逐属性」**：高轨道动了某个节点，就会把该节点的全部通道（位移 / 旋转 / 缩放）都换成自己的值。不同轨道动不同节点（`EAnimTrack` 的常规用法）不受影响；动同一节点的不同通道时需要把两者合进同一条剪辑。
+- **Unity 后端不支持 `AnimationEvent`**：插件逐帧写入时间游标，循环回绕会造出跨整条剪辑的时间区间，事件触发条件不成立（插件为此刻意把该区间压成零，以免根运动被同一个问题带偏）。需要「播到某帧触发」请用动作的单次播放完成回调。
+- **Unity 后端会自动修正 `Animator` 的四项设置**（各告警一次）：清空 `Controller`、关闭 `Apply Root Motion`、`Culling Mode` 改 `Always Animate`、`Update Mode` 改 `Normal`。前者可用 `Unity Clear Controller On Play` 关掉，后三者可用 `Unity Force Animator Settings` 关掉。
+
 ## [2.3.2] - 2026-08-11
 
 **移除 `HAS_SPINE` 旧宏迁移：本插件不再改写 PlayerSettings。** `HAS_SPINE` 归定义它的插件管辖，本包不干涉——两边都自动改写同一个宏，编辑器会陷入无限重编译。
