@@ -19,49 +19,8 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("动画控制器：Spine Animator 或 Live2D Animator。留空时自动从自身或子物体查找。")]
         [SerializeField] private AnimatorBase animator;
 
-        // ── 旧配置的迁移入口 ──────────────────────────────────────────────────────────
-        // 2.1.2 之前，「初始状态」与「基础皮肤」在本组件与 AnimatorBase 上各存一份，两个 Start
-        // 各应用一次、执行顺序未定义——两处填得不一样时，角色最终显示哪一套是不确定的
-        // （Demo 里就是这种情况：本组件 [skin-base, eyelids/girly]，动画组件 [skin-base]）。
-        // 现统一由 AnimatorBase 持有。下面两个字段只为接住旧数据而保留、Inspector 中不可见，
-        // MigrateLegacyAnimatorConfig() 会把非空的值搬到 animator 上再清空自身。计划在 2.2.0 删除。
-        [FormerlySerializedAs("stateInitList")]
-        [HideInInspector] [SerializeField] private string[] stateInitListLegacy;
-        [FormerlySerializedAs("baseSkins")]
-        [HideInInspector] [SerializeField] private string[] baseSkinsLegacy;
-
-        /// <summary>
-        /// 把旧版配在本组件上的「初始状态 / 基础皮肤」搬到动画播放器上。幂等：搬完即清空来源，重复调用无副作用。
-        /// </summary>
-        /// <returns>本次是否确实搬运了数据。</returns>
-        public bool MigrateLegacyAnimatorConfig()
-        {
-            if (!animator) return false;
-
-            var moved = new List<string>();
-
-            if (stateInitListLegacy != null && stateInitListLegacy.Length > 0)
-            {
-                animator.StateInitList = stateInitListLegacy;
-                moved.Add("初始状态 [" + string.Join(", ", stateInitListLegacy) + "]");
-                stateInitListLegacy = null;
-            }
-
-            if (baseSkinsLegacy != null && baseSkinsLegacy.Length > 0)
-            {
-                animator.baseSkins = baseSkinsLegacy;
-                moved.Add("基础皮肤 [" + string.Join(", ", baseSkinsLegacy) + "]");
-                baseSkinsLegacy = null;
-            }
-
-            if (moved.Count == 0) return false;
-
-            AnimSimLog.Warn(this,
-                $"{gameObject.name} 上的旧配置已迁移到 " +
-                $"{animator.GetType().Name}——{string.Join("；", moved)}。" +
-                "这两项现在只配在动画组件上；请保存该预制体 / 场景以固化本次迁移。");
-            return true;
-        }
+        // 「初始状态」与「基础皮肤」自 2.1.2 起统一由 AnimatorBase 持有；本组件曾各存一份，
+        // 那两个隐藏字段与配套的迁移入口已在 2.6.0 移除。
 
 
         /// <summary>
@@ -112,20 +71,7 @@ namespace Ale.AnimSimulatorSystem
             // 从自身 / 子树 / 父级链上获取动画控制器。多态查找天然认得两种后端，无需按宏分支。
             if (!animator) animator = AnimatorBase.FindFor(this);
         }
-
-        private void OnValidate()
-        {
-            // 编辑器里打开 / 导入到这个组件时顺手完成迁移，用户不必手动做任何事。
-            MigrateLegacyAnimatorConfig();
-        }
 #endif
-
-        private void Awake()
-        {
-            // 兜底：若某份资产在编辑器里从未被打开过（OnValidate 没跑到），运行时也能正确迁移。
-            // 放在 Awake 而非 Start——必须赶在 AnimatorBase.Start 读取这两项之前。
-            MigrateLegacyAnimatorConfig();
-        }
 
         private void Start()
         {
