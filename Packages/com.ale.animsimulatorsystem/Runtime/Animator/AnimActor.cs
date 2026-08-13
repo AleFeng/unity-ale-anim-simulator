@@ -65,26 +65,47 @@ namespace Ale.AnimSimulatorSystem
 
 
         /// <summary>
-        /// 初始化完成 回调
+        /// 初始化完成 事件。上层若要在「皮肤已初始化」之后才下发指令，订阅本事件即可。
+        ///
+        /// <para><b>迟到订阅立即补发</b>：订阅时若已经完成初始化，只对<b>本次新增</b>的这个委托同步回调一次，
+        /// 已在链上的其它委托不会被重复触发。</para>
+        ///
+        /// <para><b>幂等</b>：广播恰好一次。<c>Start</c> 每个组件实例只跑一次，
+        /// <see cref="MarkInitComplete"/> 自身另有开关守卫。</para>
+        ///
+        /// <para>用 event 而非公开的 <c>Action</c> 属性：外部只能 <c>+=</c> / <c>-=</c>，
+        /// 既不会用 <c>=</c> 把别人的订阅整条盖掉，也无法从外部代播。与
+        /// <see cref="AnimatorBase.OnInitComplete"/> 同形。</para>
         /// </summary>
-        public Action<AnimActor> OnInitComplete
+        public event Action<AnimActor> OnInitComplete
         {
-            get => _onInitComplete;
-            set
+            add
             {
-                _onInitComplete = value;
-                // 如果已经完成初始化，则立即调用回调
-                if (_isInitComplete && _onInitComplete != null)
-                {
-                    _onInitComplete.Invoke(this);
-                }
+                if (value == null) return;
+                _onInitComplete += value;
+                // 已完成初始化：只补发给本次新增的这一个委托
+                if (_isInitComplete) value.Invoke(this);
             }
+            remove => _onInitComplete -= value;
         }
+        // 初始化完成 回调链
         private Action<AnimActor> _onInitComplete;
-        
+
+        /// <summary>是否已完成初始化：<c>Start</c> 应用完皮肤之后为 <c>true</c>。</summary>
+        public bool IsInitComplete => _isInitComplete;
+
         // 是否完成初始化
         private bool _isInitComplete;
-        
+
+        /// <summary>标记初始化完成并广播。幂等：只有第一次会广播。</summary>
+        private void MarkInitComplete()
+        {
+            if (_isInitComplete) return;
+            _isInitComplete = true;
+            // 广播期间订阅者自我退订是安全的：Invoke 走的是取值瞬间那个不可变的委托实例
+            _onInitComplete?.Invoke(this);
+        }
+
 #if UNITY_EDITOR
         private void Reset()
         {
@@ -114,9 +135,8 @@ namespace Ale.AnimSimulatorSystem
             // 初始状态由 AnimatorBase 自己在 Start 里应用，本组件不再插手
             // ——两处各应用一次会形成顺序未定义的竞争。
 
-            _isInitComplete = true;
-            // 调用 初始化完成 回调
-            OnInitComplete?.Invoke(this);
+            // 广播 初始化完成
+            MarkInitComplete();
         }
 
         #region 淡入淡出
