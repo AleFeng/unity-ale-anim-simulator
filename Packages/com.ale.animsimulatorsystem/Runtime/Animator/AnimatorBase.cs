@@ -161,13 +161,83 @@ namespace Ale.AnimSimulatorSystem
             InitAnimState();
         }
 
-        protected virtual void Start()
+        /// <summary>
+        /// 初始化的第二段：应用皮肤与初始状态，随后广播 <see cref="OnInitComplete"/>。
+        ///
+        /// <para><b>本方法刻意不是 <c>virtual</c>。</b>就绪信号必须在「基类 + 子类」两段初始化都跑完之后
+        /// 才广播；子类若能 <c>override</c> 掉 <c>Start</c>，广播点就会落到子类工作的前面
+        /// （<c>Live2DAnimator</c> 原本正是 <c>base.Start()</c> 打头、自己一行收尾）。
+        /// 子类的扩展点因此下移到 <see cref="OnAnimatorStart"/>。</para>
+        ///
+        /// <para>声明为 <c>protected</c> 而非 <c>private</c>：子类再写一个同名 <c>Start</c> 会得到
+        /// CS0108 隐藏告警，不至于静默把基类这一份顶掉——Unity 的消息派发只认最派生的那一个。</para>
+        /// </summary>
+        protected void Start()
         {
             // 初始化 皮肤
             InitSkin();
 
             // 设置初始状态
             SwitchAnimStateArray(stateInitList);
+
+            // 子类的初始化扩展
+            OnAnimatorStart();
+
+            // 广播 初始化完成
+            MarkInitComplete();
+        }
+
+        /// <summary>
+        /// 子类的 <c>Start</c> 扩展点：在基类应用完皮肤与初始状态之后、广播就绪信号之前调用。
+        /// </summary>
+        protected virtual void OnAnimatorStart() { }
+
+        #endregion
+
+        #region 初始化完成 信号
+
+        // 是否已完成初始化
+        private bool _isInitComplete;
+        // 初始化完成 回调链
+        private Action<AnimatorBase> _onInitComplete;
+
+        /// <summary>
+        /// 是否已完成初始化：<c>Awake</c> 解析完渲染器与状态表、<c>Start</c> 应用完皮肤与初始状态之后为 <c>true</c>。
+        /// </summary>
+        public bool IsInitComplete => _isInitComplete;
+
+        /// <summary>
+        /// 初始化完成 事件。上层若要在「皮肤表已建好、初始状态已应用」之后才下发指令，订阅本事件即可，
+        /// 不必去猜 <c>Awake</c> / <c>Start</c> 的帧序。
+        ///
+        /// <para><b>迟到订阅立即补发</b>：订阅时若已经完成初始化，只对<b>本次新增</b>的这个委托同步回调一次，
+        /// 已在链上的其它委托不会被重复触发。（<see cref="AnimActor.OnInitComplete"/> 那份旧写法补发的是
+        /// 整条链，多个订阅者时会互相重播，本处刻意不照抄。）</para>
+        ///
+        /// <para><b>幂等</b>：广播恰好一次。<c>Start</c> 每个组件实例只跑一次，禁用 / 重新激活都不会再触发。</para>
+        ///
+        /// <para>用 event 而非公开的 <c>Action</c> 属性：外部只能 <c>+=</c> / <c>-=</c>，
+        /// 既不会用 <c>=</c> 把别人的订阅整条盖掉，也无法从外部代播。</para>
+        /// </summary>
+        public event Action<AnimatorBase> OnInitComplete
+        {
+            add
+            {
+                if (value == null) return;
+                _onInitComplete += value;
+                // 已完成初始化：只补发给本次新增的这一个委托
+                if (_isInitComplete) value.Invoke(this);
+            }
+            remove => _onInitComplete -= value;
+        }
+
+        /// <summary>标记初始化完成并广播。幂等：只有第一次会广播。</summary>
+        private void MarkInitComplete()
+        {
+            if (_isInitComplete) return;
+            _isInitComplete = true;
+            // 广播期间订阅者自我退订是安全的：Invoke 走的是取值瞬间那个不可变的委托实例
+            _onInitComplete?.Invoke(this);
         }
 
         #endregion
@@ -1004,6 +1074,10 @@ namespace Ale.AnimSimulatorSystem
             _trackToAnimDataListPlayingMap.Clear();
             _trackToRenderer.Clear();
             _trackToPlayToken.Clear();
+
+            // 就绪信号的订阅链：组件已死，留着只会持有已失效订阅者的引用。
+            // _isInitComplete 不重置——对一个已销毁的组件，这个问句没有意义。
+            _onInitComplete = null;
         }
 
         #endregion

@@ -472,9 +472,10 @@ namespace Ale.AnimSimulatorSystem
         /// <summary>同物体上是否有 <c>CubismUpdateController</c>。有则由它驱动，没有则回落到自身的 LateUpdate。</summary>
         public bool HasUpdateController { get; set; }
 
-        protected override void Start()
+        // 挂 OnAnimatorStart 而不是 override Start：基类的 Start 已改为模板方法，
+        // 会在本方法返回后才广播就绪信号——订阅者拿到信号时 HasUpdateController 必定已就位。
+        protected override void OnAnimatorStart()
         {
-            base.Start();
             HasUpdateController = GetComponent<Live2D.Cubism.Framework.CubismUpdateController>() != null;
         }
 
