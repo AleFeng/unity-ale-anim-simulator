@@ -4,6 +4,27 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.6.0] - 2026-08-13
+
+**收拾 `AnimActor` 上的两笔旧账。** 一是 2.5.0 里点名、当时留待单独一版处理的 `OnInitComplete` 补发缺陷；二是注释写着「计划在 2.2.0 删除」、实际拖到 2.5.1 仍在的 legacy 迁移装置。两者都只影响 `AnimActor`，`AnimatorBase` 与三个后端一字未动。
+
+### 破坏性变更
+
+- **`AnimActor.OnInitComplete` 由公开的 `Action<AnimActor>` 属性改为 `event`。**
+  - 修掉两个缺陷：① 旧 setter 在已完成初始化时触发的是**整条委托链**，第二个订阅者一挂上，第一个就会被重播一次；② 它是可写属性，外部能用 `=` 把别人的订阅整条盖掉。新写法只对**本次新增**的那一个委托补发，且外部只能 `+=` / `-=`。与 `AnimatorBase.OnInitComplete`（2.5.0 引入）完全同形。
+  - ⚠️ **下游若用 `=` 赋值过这个属性，升级后会编译失败**——改成 `+=` 即可。用 `+=` 的调用方不受影响。包内唯一订阅者 `AnimSimulatorManager` 用的正是 `+=`，无需改动。
+  - 广播改由幂等的 `MarkInitComplete()` 统一执行。
+
+- **移除 `AnimActor` 的 legacy 迁移装置**：公开方法 `MigrateLegacyAnimatorConfig()`、两个 `[HideInInspector]` 字段 `stateInitListLegacy` / `baseSkinsLegacy`，以及仅用于调用它的 `OnValidate()` 与 `Awake()`。
+  - 「初始状态」与「基础皮肤」自 2.1.2 起已统一由 `AnimatorBase` 持有，这套装置只为搬运 2.1.2 之前的旧数据而存在，本应在 2.2.0 删除。
+  - ⚠️ **升级前请先在编辑器中打开并保存一次所有带 `AnimActor` 的预制体 / 场景。** 迁移的落盘只发生在 `OnValidate`（编辑器打开该资产时）；`Awake` 那次是运行期的、不写回磁盘。因此**自 2.1.2 之后从未在编辑器里打开过的资产，数据仍留在两个 legacy 字段里，升级后会丢失**。判断办法：用文本编辑器打开预制体，若 `stateInitListLegacy` / `baseSkinsLegacy` 不是 `[]`，就是还没迁移。
+  - 包内 Demo 的两个角色预制体（`Actor_Test_1` / `Koharu`）均已迁移完毕（两个字段都是 `[]`），不受影响。
+  - 资产里遗留的这两个 YAML 键会被 Unity 忽略，下次保存该资产时自动消失。
+
+### 新增
+
+- **`AnimActor.IsInitComplete`（属性）**：是否已完成初始化。补齐与 `AnimatorBase` 的接口对称，纯增量。
+
 ## [2.5.1] - 2026-08-13
 
 ### 修复
@@ -35,7 +56,7 @@
 
 ### 已知限制
 
-- **`AnimActor.OnInitComplete` 的迟到补发仍是旧写法，本版未动。** 它的 setter 在已完成时触发的是**整条委托链**而非本次新增的那一个，因此第二个订阅者一挂上，第一个就会被重播一次（`AnimSimulatorManager` 用的正是 `+=`）。新的 `AnimatorBase.OnInitComplete` 不存在这个问题。改动 `AnimActor` 会影响既有订阅者的回调次数，留待单独一版处理。
+- ~~**`AnimActor.OnInitComplete` 的迟到补发仍是旧写法，本版未动。**~~ **（已在 2.6.0 修复）** 它的 setter 在已完成时触发的是**整条委托链**而非本次新增的那一个，因此第二个订阅者一挂上，第一个就会被重播一次（`AnimSimulatorManager` 用的正是 `+=`）。新的 `AnimatorBase.OnInitComplete` 不存在这个问题。改动 `AnimActor` 会影响既有订阅者的回调次数，留待单独一版处理。
 
 ## [2.4.0] - 2026-08-13
 

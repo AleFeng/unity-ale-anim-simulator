@@ -16139,8 +16139,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Ale.AnimSimulatorSystem::Ale.AnimSimulatorSystem.AnimActor
   animator: {fileID: 7220536345315851535}
-  stateInitListLegacy: []
-  baseSkinsLegacy: []
   animActorSkinGroups: []
   references:
     version: 2
