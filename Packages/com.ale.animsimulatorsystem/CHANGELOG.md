@@ -4,6 +4,31 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.5.0] - 2026-08-13
+
+**`AnimatorBase` 新增初始化完成信号，上层不必再靠猜帧序等待动画后端就绪。** 起因是一个真实的对接场景：只持有 `AnimatorBase`、不使用 `AnimActor` 的上层（视觉小说的剧情演出系统即是这种用法），拿不到任何「我准备好了」的通知——`Awake` 时皮肤表与状态表都还没建，`Start` 里才 `InitSkin()` + `SwitchAnimStateArray(stateInitList)`，此前在 `Start` 之前下发的状态切换会被它整个盖掉，皮肤操作更会把皮肤表永久锁成空表。上层只能靠 `yield return null` 猜帧序绕过去。本版把这个信号补进基类，`AnimActor` 独占 `OnInitComplete` 的局面就此结束。
+
+### 新增
+
+- **`AnimatorBase.IsInitComplete`（属性）与 `AnimatorBase.OnInitComplete`（事件）**：`Awake` 解析完渲染器与状态表、`Start` 应用完皮肤与初始状态之后置位并广播。
+  - **迟到订阅立即补发，且只补发本次新增的那一个委托**。已在链上的其它委托不会被重复触发。
+  - **用 `event` 而非公开的 `Action` 属性**：外部只能 `+=` / `-=`，既不会用 `=` 把别人的订阅整条盖掉，也无法从外部代播。
+  - **幂等**：广播恰好一次。`Start` 每个组件实例只跑一次，禁用 / 重新激活都不会再触发；`MarkInitComplete` 自身另有开关守卫。
+  - `OnDestroy` 末尾清空订阅链，不再持有已失效订阅者的引用；`_isInitComplete` 不重置——对一个已销毁的组件，这个问句没有意义。
+- **`AnimatorBase.OnAnimatorStart()`（`protected virtual`）**：子类的 `Start` 扩展点，在基类应用完皮肤与初始状态之后、广播就绪信号之前调用。
+
+### 破坏性变更
+
+- **`AnimatorBase.Start()` 由 `protected virtual` 改为非虚的 `protected`。** 子类的 `Start` 扩展一律改为 override 新增的 `OnAnimatorStart()`。
+  - **起因**：就绪信号必须在「基类 + 子类」两段初始化**都**跑完之后才广播。子类若能 override 掉 `Start`，广播点就会落到子类工作的前面——`Live2DAnimator` 原本正是 `base.Start()` 打头、自己一行收尾，订阅者拿到信号时 `HasUpdateController` 还没赋值。「override 必须最后调 `base`」这条约定没有任何类型系统保障，故改用模板方法从结构上锁死顺序。
+  - 保留 `protected` 而非收成 `private`：子类再写一个同名 `Start` 会得到 CS0108 隐藏告警，不至于静默把基类这一份顶掉——Unity 的消息派发只认最派生的那一个。
+  - ⚠️ **下游若有自有的 `AnimatorBase` 子类 override 了 `Start`，升级后会得到 CS0506 编译错误**（无法重写继承成员，因为它不是虚拟的）。这是刻意的硬失败——把 `override void Start` 改成 `override void OnAnimatorStart` 并删掉其中的 `base.Start();` 即可。**不会静默改变时序。**
+  - 包内 `Live2DAnimator` 已同步改为 `OnAnimatorStart`；`SpineAnimator` 与 `UnityAnimator` 本就没有 override `Start`，不受影响。
+
+### 已知限制
+
+- **`AnimActor.OnInitComplete` 的迟到补发仍是旧写法，本版未动。** 它的 setter 在已完成时触发的是**整条委托链**而非本次新增的那一个，因此第二个订阅者一挂上，第一个就会被重播一次（`AnimSimulatorManager` 用的正是 `+=`）。新的 `AnimatorBase.OnInitComplete` 不存在这个问题。改动 `AnimActor` 会影响既有订阅者的回调次数，留待单独一版处理。
+
 ## [2.4.0] - 2026-08-13
 
 **新增第三个动画后端：Unity 自带动画（`Animator` + `AnimationClip`）。** 上层配置一字未改——`AnimActor`、`AnimActionPlayer`、动作 / 皮肤组配置、轨道与混合权重、进度驱动的拖拽 / 旋转 / 按压，对新后端全部原样成立。换后端只需把角色预制体上的动画控制器组件换掉。
