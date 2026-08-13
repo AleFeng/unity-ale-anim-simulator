@@ -430,6 +430,12 @@ namespace Ale.AnimSimulatorSystem
                 if (animData == null) continue;
                 int trackIndex = animData.AnimTrack;
 
+                // 取消 挂起中的起播延时与单次完成计时。此前只有 StopAnim 会做这两步，本方法漏了：
+                // 状态被移除时，若它的某条动画还在等起播延时，延时照样会到点触发把动画播出来，
+                // 而那个状态早已不在场；单次完成计时同理，会在状态移除之后才回调。
+                CancelAnimStartDelay(animData);
+                CancelOnceComplete(animData);
+
                 // 如果是循环动画，移除去重记录
                 if (animData.isLoop)
                     _dicTrackToAnimNameLooping.Remove(trackIndex);

@@ -17,7 +17,7 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// </summary>
     public class AnimSimulatorWelcomeWindow : EditorWindow
     {
-        private const string Version = "2.5.0";
+        private const string Version = "2.5.1";
 
         // 打开时的初始高宽；窗口可手动调整（见 OpenWindow），缩放下限为 MinWindowSize。
         private static readonly Vector2 WindowSize    = new Vector2(540f, 660f);

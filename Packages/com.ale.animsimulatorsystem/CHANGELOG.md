@@ -4,6 +4,14 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.5.1] - 2026-08-13
+
+### 修复
+
+- **`RemoveAnimState` 现在会取消被移除状态的「挂起中起播延时」与「单次播放完成计时」。** 此前这两步只有 `StopAnim` 会做，`RemoveAnimState` 漏了——它直接调后端的 `StopAnimOnRenderer`，绕过了 `_animStartDelayHandleMap` / `_animOnceCompleteHandleMap` 这两张簿记表。
+  - **后果**：状态被移除时，若它的某条动画还在等 `startDelayTime`，延时照样会到点触发把动画播出来，而那个状态早已不在场；单次完成计时同理，会在状态移除之后才回调。`SwitchAnimStateArray` 的差集移除走的正是 `RemoveAnimState`，因此这条影响所有用状态列表切换的调用方。
+  - 只配置 `startDelayTime: 0`（默认值）的工程不受影响。
+
 ## [2.5.0] - 2026-08-13
 
 **`AnimatorBase` 新增初始化完成信号，上层不必再靠猜帧序等待动画后端就绪。** 起因是一个真实的对接场景：只持有 `AnimatorBase`、不使用 `AnimActor` 的上层（视觉小说的剧情演出系统即是这种用法），拿不到任何「我准备好了」的通知——`Awake` 时皮肤表与状态表都还没建，`Start` 里才 `InitSkin()` + `SwitchAnimStateArray(stateInitList)`，此前在 `Start` 之前下发的状态切换会被它整个盖掉，皮肤操作更会把皮肤表永久锁成空表。上层只能靠 `yield return null` 猜帧序绕过去。本版把这个信号补进基类，`AnimActor` 独占 `OnInitComplete` 的局面就此结束。
