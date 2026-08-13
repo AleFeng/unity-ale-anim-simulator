@@ -8,7 +8,7 @@ namespace Ale.AnimSimulatorSystem.Editor
 {
     /// <summary>
     /// 动画模拟器系统 欢迎窗口。承载本插件的<b>快捷入口</b>与<b>动画后端宏开关</b>
-    /// （<c>ASS_SPINE</c> / <c>ASS_LIVE2D</c>）。
+    /// （<c>ASS_SPINE</c> / <c>ASS_LIVE2D</c> / <c>ASS_UNITY_ANIM</c>）。
     /// 每次 Unity 会话启动时自动弹出一次（可通过页脚「启动时自动显示」关闭）。
     /// 通过菜单 <c>Tools &gt; Ale Toolkit &gt; Anim Simulator System &gt; Welcome</c> 手动打开。
     ///
@@ -26,6 +26,8 @@ namespace Ale.AnimSimulatorSystem.Editor
         // 内部 UI 状态
         private bool _spineEnabled,  _spineInstalled;
         private bool _live2DEnabled, _live2DInstalled;
+        // Unity 后端没有「装没装」这一维（引擎内置），故只有启用状态，没有 _unityAnimInstalled
+        private bool _unityAnimEnabled;
         private bool _autoShow;
         private bool _initialized;
         private bool _pendingRecompile;
@@ -90,6 +92,7 @@ namespace Ale.AnimSimulatorSystem.Editor
             _spineInstalled  = AnimSimulatorDefines.IsSpinePackageInstalled();
             _live2DEnabled   = AnimSimulatorDefines.IsLive2DEnabled();
             _live2DInstalled = AnimSimulatorDefines.IsLive2DPackageInstalled();
+            _unityAnimEnabled = AnimSimulatorDefines.IsUnityAnimEnabled();
             _autoShow        = EditorPrefs.GetBool(AnimSimulatorEditorPrefs.WelcomeAutoShow, true);
         }
 
@@ -175,7 +178,7 @@ namespace Ale.AnimSimulatorSystem.Editor
             }
 
             EditorGUILayout.LabelField($"Anim Simulator System  v{Version}", headerStyle);
-            EditorGUILayout.LabelField(Tr("基于 Spine / Live2D 的 2D 动画模拟器"), subStyle);
+            EditorGUILayout.LabelField(Tr("基于 Spine / Live2D / Unity 动画的 2D 动画模拟器"), subStyle);
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndVertical();
         }
@@ -215,8 +218,9 @@ namespace Ale.AnimSimulatorSystem.Editor
         {
             EditorGUILayout.LabelField(Tr("插件支持（编译宏）"), EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
-                Tr("按项目实际使用的动画运行时启用。两者可同时启用——一个工程里 Spine 与 Live2D 角色并存，" +
-                   "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2DAnimator 决定。"),
+                Tr("按项目实际使用的动画运行时启用。三者可同时启用——一个工程里三种角色并存，" +
+                   "具体用哪个后端由角色预制体上挂的是 SpineAnimator、Live2DAnimator 还是 UnityAnimator 决定。" +
+                   "Unity 动画后端为引擎内置，无需安装任何外部运行时。"),
                 EditorStyles.wordWrappedMiniLabel);
             EditorGUILayout.Space(2);
 
@@ -236,6 +240,18 @@ namespace Ale.AnimSimulatorSystem.Editor
                 Tr("  ⚠ {0} 未导入（非 UPM 包，需从官网下载 .unitypackage 导入）"),
                 Tr("尚未检测到 Live2D Cubism SDK。\n启用宏后，Live2DAnimator 将无法编译。\n\n确定要继续启用吗？"),
                 DrawLive2DInstallHint);
+
+            EditorGUILayout.Space(2);
+
+            // runtimeName / missingLabel / warnDialog 对本后端都没有意义：引擎内置，不存在「没装」这一状态。
+            // 传 hasRuntimeDependency: false 让状态行与确认弹窗整体让位——渲染一行
+            // 「✓ UnityEngine.AnimationModule 已安装」只会误导读者去找一个并不存在的包。
+            DrawMacroToggle("Unity Animation", AnimSimulatorDefines.UnityAnim, null,
+                ref _unityAnimEnabled, true,
+                Tr("启用后 UnityAnimator 参与编译，可用 Unity 自带的 AnimationClip 播放动画、按物体显隐换装。" +
+                   "适用于 2D 精灵 / 逐帧动画、3D 模型与 UGUI。"),
+                null, null,
+                DrawUnityAnimHint, hasRuntimeDependency: false);
         }
 
         /// <summary>
@@ -276,6 +292,23 @@ namespace Ale.AnimSimulatorSystem.Editor
         }
 
         /// <summary>
+        /// Unity 宏方块下的说明。与另两个后端不同，这里<b>没有可跳转的安装页</b>——
+        /// <c>Animator</c> / <c>AnimationClip</c> / Playables 都是引擎内置类型。说明要讲的是另外两件
+        /// 在 Inspector 上看不出来、却最容易卡住人的事：不需要 AnimatorController，以及动画要登记进查找表。
+        /// </summary>
+        private static void DrawUnityAnimHint()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                Tr("引擎内置，无需安装任何外部运行时。角色只要有一个 Animator 组件作为输出目标即可，" +
+                   "Controller 栏留空——状态机在本系统这一层，再叠一层 AnimatorController 会两边争写同一条动画流" +
+                   "（默认会自动置空并告警）。要播放的 AnimationClip 需在 UnityAnimator 的「Unity 动画查找表」" +
+                   "中登记，动画名留空则用剪辑的资产名。"),
+                EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.EndVertical();
+        }
+
+        /// <summary>
         /// 动画后端宏开关的绘制。Toggle 操作 PlayerSettings 宏（经 <see cref="DefineUtils.ApplyDefine"/>），
         /// 运行时未安装时勾选会弹确认对话框。
         ///
@@ -291,9 +324,16 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// <param name="missingLabel">未安装时的状态行模板（含 {0}）。</param>
         /// <param name="warnDialog">未安装却勾选时的确认对话框正文。</param>
         /// <param name="drawAdditionalFields">宏方块下的额外内容（如安装说明）。</param>
+        /// <param name="hasRuntimeDependency">
+        /// 该后端是否依赖外部运行时。<c>false</c>（Unity 内置动画）时<b>整块跳过安装状态行与启用前的确认弹窗</b>——
+        /// 这两样都建立在「可能没装」之上，而引擎模块不存在这一状态。
+        /// 此时 <paramref name="runtimeName"/> / <paramref name="missingLabel"/> /
+        /// <paramref name="warnDialog"/> 均不被读取，可传 <c>null</c>。
+        /// </param>
         private void DrawMacroToggle(string titleName, string define, string runtimeName,
             ref bool enabled, bool runtimeInstalled, string description,
-            string missingLabel, string warnDialog, Action drawAdditionalFields = null)
+            string missingLabel, string warnDialog, Action drawAdditionalFields = null,
+            bool hasRuntimeDependency = true)
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
@@ -303,7 +343,7 @@ namespace Ale.AnimSimulatorSystem.Editor
                 $"{titleName}  ({define})", enabled, EditorStyles.boldLabel);
             if (EditorGUI.EndChangeCheck())
             {
-                if (newEnabled && !runtimeInstalled)
+                if (hasRuntimeDependency && newEnabled && !runtimeInstalled)
                 {
                     if (!EditorUtility.DisplayDialog(Tr("警告"), warnDialog, Tr("确定"), Tr("取消")))
                         newEnabled = false;
@@ -318,10 +358,14 @@ namespace Ale.AnimSimulatorSystem.Editor
             EditorGUILayout.EndHorizontal();
 
             EnsureStyles();
-            if (runtimeInstalled)
-                EditorGUILayout.LabelField(Fmt("  ✓ {0} 已安装", runtimeName), _styleOk);
-            else
-                EditorGUILayout.LabelField(string.Format(missingLabel, runtimeName), _styleWarn);
+            // 无外部运行时依赖的后端不画安装状态行，说明块里直接讲「引擎内置」即可
+            if (hasRuntimeDependency)
+            {
+                if (runtimeInstalled)
+                    EditorGUILayout.LabelField(Fmt("  ✓ {0} 已安装", runtimeName), _styleOk);
+                else
+                    EditorGUILayout.LabelField(string.Format(missingLabel, runtimeName), _styleWarn);
+            }
 
             EditorGUILayout.LabelField(description, EditorStyles.wordWrappedMiniLabel);
 

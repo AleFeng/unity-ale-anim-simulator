@@ -14,9 +14,9 @@ namespace Ale.AnimSimulatorSystem.Editor
             Add("Anim Simulator 动画模拟器系统",
                 "Anim Simulator System",
                 "アニメーションシミュレーターシステム");
-            Add("基于 Spine / Live2D 的 2D 动画模拟器",
-                "A 2D animation simulator built on Spine / Live2D",
-                "Spine / Live2D ベースの 2D アニメーションシミュレーター");
+            Add("基于 Spine / Live2D / Unity 动画的 2D 动画模拟器",
+                "A 2D animation simulator built on Spine / Live2D / Unity animation",
+                "Spine / Live2D / Unity アニメーションベースの 2D アニメーションシミュレーター");
 
             // ── 全局设置跳转 ──────────────────────────────────────────────────────
             Add("打开 Ale Toolkit 设置（语言 / 插件宏）",
@@ -43,14 +43,17 @@ namespace Ale.AnimSimulatorSystem.Editor
                 "ドキュメントファイルが見つかりませんでした：\n{0}");
 
             // ── 宏开关区 ──────────────────────────────────────────────────────────
-            Add("按项目实际使用的动画运行时启用。两者可同时启用——一个工程里 Spine 与 Live2D 角色并存，" +
-                "具体用哪个后端由角色预制体上挂的是 SpineAnimator 还是 Live2DAnimator 决定。",
-                "Enable the ones matching the animation runtimes your project actually uses. Both can be enabled at once — " +
-                "Spine and Live2D actors coexist in one project, and which backend an actor uses is decided by whether its " +
-                "prefab carries a SpineAnimator or a Live2DAnimator.",
-                "プロジェクトで実際に使用するアニメーションランタイムに合わせて有効にしてください。両方を同時に有効にできます——" +
-                "1 つのプロジェクトで Spine と Live2D のキャラクターが共存でき、どちらのバックエンドを使うかは" +
-                "キャラクタープレハブに SpineAnimator と Live2DAnimator のどちらが付いているかで決まります。");
+            Add("按项目实际使用的动画运行时启用。三者可同时启用——一个工程里三种角色并存，" +
+                "具体用哪个后端由角色预制体上挂的是 SpineAnimator、Live2DAnimator 还是 UnityAnimator 决定。" +
+                "Unity 动画后端为引擎内置，无需安装任何外部运行时。",
+                "Enable the ones matching the animation runtimes your project actually uses. All three can be enabled at once — " +
+                "the three kinds of actor coexist in one project, and which backend an actor uses is decided by whether its " +
+                "prefab carries a SpineAnimator, a Live2DAnimator or a UnityAnimator. " +
+                "The Unity animation backend is built into the engine and needs no external runtime.",
+                "プロジェクトで実際に使用するアニメーションランタイムに合わせて有効にしてください。3 つを同時に有効にできます——" +
+                "1 つのプロジェクトで 3 種類のキャラクターが共存でき、どのバックエンドを使うかは" +
+                "キャラクタープレハブに SpineAnimator・Live2DAnimator・UnityAnimator のどれが付いているかで決まります。" +
+                "Unity アニメーションバックエンドはエンジン内蔵で、外部ランタイムのインストールは不要です。");
 
             // Spine
             Add("启用后 SpineAnimator 参与编译，可播放 Spine 动画、按皮肤名组合换装。" +
@@ -103,6 +106,29 @@ namespace Ale.AnimSimulatorSystem.Editor
             Add("打开 Live2D 官方下载页",
                 "Open the Live2D download page",
                 "Live2D 公式ダウンロードページを開く");
+
+            // Unity 内置动画（无安装状态行、无确认弹窗，故只有两条）
+            Add("启用后 UnityAnimator 参与编译，可用 Unity 自带的 AnimationClip 播放动画、按物体显隐换装。" +
+                "适用于 2D 精灵 / 逐帧动画、3D 模型与 UGUI。",
+                "When enabled, UnityAnimator is compiled in, playing Unity's own AnimationClips and composing outfits by " +
+                "toggling GameObjects. Works for 2D sprite / frame-by-frame animation, 3D models and UGUI.",
+                "有効にすると UnityAnimator がコンパイルされ、Unity 標準の AnimationClip の再生と、" +
+                "オブジェクトの表示切り替えによる着せ替えが可能になります。" +
+                "2D スプライト / コマ送りアニメーション、3D モデル、UGUI に対応します。");
+            Add("引擎内置，无需安装任何外部运行时。角色只要有一个 Animator 组件作为输出目标即可，" +
+                "Controller 栏留空——状态机在本系统这一层，再叠一层 AnimatorController 会两边争写同一条动画流" +
+                "（默认会自动置空并告警）。要播放的 AnimationClip 需在 UnityAnimator 的「Unity 动画查找表」" +
+                "中登记，动画名留空则用剪辑的资产名。",
+                "Built into the engine — no external runtime to install. The actor only needs an Animator component as the " +
+                "output target, with its Controller field left empty: the state machine lives in this system, and stacking an " +
+                "AnimatorController on top makes the two fight over the same animation stream (by default it is cleared " +
+                "automatically with a warning). AnimationClips to be played must be registered in UnityAnimator's " +
+                "\"Unity Anim Clips\" lookup table; leaving the animation name blank falls back to the clip's asset name.",
+                "エンジン内蔵のため、外部ランタイムのインストールは不要です。キャラクターには出力先として Animator " +
+                "コンポーネントが 1 つあれば十分で、Controller 欄は空のままにしてください——ステートマシンは本システム側にあり、" +
+                "AnimatorController を重ねると同じアニメーションストリームを奪い合います（既定では自動的に空にし、警告を出します）。" +
+                "再生する AnimationClip は UnityAnimator の「Unity 動画検索テーブル」に登録が必要です。" +
+                "アニメーション名を空にすると、クリップのアセット名が使われます。");
         }
     }
 }

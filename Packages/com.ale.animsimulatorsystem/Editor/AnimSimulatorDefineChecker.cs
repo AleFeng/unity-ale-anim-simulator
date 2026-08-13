@@ -51,12 +51,19 @@ namespace Ale.AnimSimulatorSystem.Editor
                     "Live2DAnimator 将无法编译。它不是 UPM 包，需从官网下载 .unitypackage 导入，" +
                     "或在欢迎窗口中关闭该宏。\n（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
 
-            // 两个后端都没开：插件的动画播放能力整体不可用，值得提示一次。
-            if (!AnimSimulatorDefines.IsSpineEnabled() && !AnimSimulatorDefines.IsLive2DEnabled())
+            // Unity 后端没有「装没装」这一维（引擎内置），故不需要与上面两条对应的一致性检查。
+
+            // 三个后端都没开：插件的动画播放能力整体不可用，值得提示一次。
+            if (!AnimSimulatorDefines.IsSpineEnabled()
+                && !AnimSimulatorDefines.IsLive2DEnabled()
+                && !AnimSimulatorDefines.IsUnityAnimEnabled())
                 Debug.LogWarning(
                     "[Anim Simulator System] 尚未启用任何动画后端宏" +
-                    $"（'{AnimSimulatorDefines.Spine}' / '{AnimSimulatorDefines.Live2D}'）。\n" +
+                    $"（'{AnimSimulatorDefines.Spine}' / '{AnimSimulatorDefines.Live2D}' / " +
+                    $"'{AnimSimulatorDefines.UnityAnim}'）。\n" +
                     "角色动画将无法播放。请在欢迎窗口中按实际使用的动画运行时启用对应的宏。\n" +
+                    $"（用 Unity 自带的 Animator / AnimationClip 时启用 '{AnimSimulatorDefines.UnityAnim}' 即可，" +
+                    "它不需要安装任何外部运行时。）\n" +
                     "（Tools > Ale Toolkit > Anim Simulator System > Welcome）");
         }
 
