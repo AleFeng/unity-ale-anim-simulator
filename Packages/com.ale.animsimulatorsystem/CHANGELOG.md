@@ -4,6 +4,30 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.6.1] - 2026-08-15
+
+**资源地址改为与磁盘路径解耦，并补上一键登记。** 背景 / 角色的地址前缀此前默认为空、Demo 里填的是资产路径本身（`Assets/Demo/Assets/...`），换个目录或换个工程就得逐字改。改为相对地址后，「资源放在哪」与「按什么地址取」彻底分开，前者随项目组织，后者只由 Addressables 的条目地址决定。
+
+### 变更
+
+- **`AnimSimulatorConfig` 的两个地址前缀默认值改为相对地址**：`backgroundAddressableFolder` = `AnimSimulator/Assets/Backgrounds/`、`actorAddressableFolder` = `AnimSimulator/Assets/Actors/`（原先均为空串）。
+  - 仅影响**新建**的配置资产；已有资产里序列化的值不会变，需要的话请自行改或按下面的按钮对齐。
+  - 包内 Demo 的配置资产（`Assets/Demo/Config/AnimSimulatorConfig.asset`）已同步切到新前缀。⚠️ 它需要配合下面的一键登记才能取到资源——`Assets/Demo` 在 Addressables 里的条目地址得是 `AnimSimulator`。
+- **欢迎窗口的版本号改为从 `package.json` 动态读取**，不再写死常量。写死的那个已经脱节过一次（窗口停在 2.3.1 而包已是 2.3.2）。
+
+### 新增
+
+- **欢迎窗口新增「演示样例（Addressables 登记）」区块**：一键把演示样例的文件夹登记到 Addressables 的默认分组，并把条目地址设为 `AnimSimulator`——与上面两个前缀的默认值正好对上，省去「手工拖进分组再改地址」。
+  - 幂等：已登记且地址正确时什么都不做。已登记但分组不同时**只改地址、不搬分组**（使用者可能特意放在别处）。
+  - 写入前弹确认框，并预先报出「此前被单独登记过、因而不会跟着改地址」的资源——这类资源会被文件夹条目静默跳过，不报的话只会表现为「个别资源加载不到」而毫无线索。
+  - 样例目录**不按路径名认**，必须同时含有 `Assets/Actors` 与 `Assets/Backgrounds` 两个子目录才算数。否则使用者工程里一个无关的 `Assets/Demo` 会被登记成 `AnimSimulator`，平白改掉别人的资产配置。
+  - 实现放在新程序集 **`Ale.AnimSimulatorSystem.Addressables.Editor`**，受 `ATK_ADDRESSABLE` + `ASS_HAS_ADDRESSABLES`（由 `versionDefines` 从 `com.unity.addressables` 自动推出）双重门控。欢迎窗口对 Addressables **零引用**，只持两个 `Func<string>` 钩子（`AnimSimulatorWelcomeWindow.RegisterDemoAddressables` / `.DescribeDemoAddressables`），宏一关子程序集不参与编译、钩子保持 null，那一整块界面自动消失。
+
+### 修复
+
+- **欢迎窗口的 Logo 与「查看使用文档」在非内嵌安装下失效。** 两处都写死了 `Packages/com.ale.animsimulatorsystem/…` 再 `Path.GetFullPath`，那是纯字符串拼接、只有内嵌包才碰巧成立；本包经 git URL 分发时位于 `Library/PackageCache/<name>@<hash>/`，该路径根本不存在。现统一经 `PackageInfo.resolvedPath` 解析。
+- **README「资源文件路径」一节把这两个字段当成了磁盘路径**（原文写「格式以 Assets 开头」）。它们其实是 **Addressable 地址**，与资产在磁盘上的位置可以毫无关系。已改写，并补上「地址 = 文件夹条目地址 + 文件夹内相对路径」的拼接规则与一键登记按钮的说明。
+
 ## [2.6.0] - 2026-08-13
 
 **收拾 `AnimActor` 上的两笔旧账。** 一是 2.5.0 里点名、当时留待单独一版处理的 `OnInitComplete` 补发缺陷；二是注释写着「计划在 2.2.0 删除」、实际拖到 2.5.1 仍在的 legacy 迁移装置。两者都只影响 `AnimActor`，`AnimatorBase` 与三个后端一字未动。

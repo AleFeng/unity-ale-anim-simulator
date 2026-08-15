@@ -143,7 +143,7 @@
   - 首先需要将 美术制作好的Spine或Live2D的动画资源，导入到Unity中，并制作成 预制体。
   - Spine或Live2D 动画资源的导入 与 预制体的制作方法，见下面的 [资源导入](#资源导入) 一节。
     ![alt text](Docs~/image-62.png)
-  - 动画角色的预制体，需要放置在 AnimSimulatorConfig(动画模拟器配置)的 `ActorAddressableFolder` 所指的文件夹中——Demo 里是 `Assets\Demo\Assets\Actors\`，正式项目建议改到 `Assets\ProductAssets\AnimSimulator\Actors\`，改法见下面的 [资源文件路径](#资源文件路径) 一节。
+  - 动画角色的预制体，需要能按 AnimSimulatorConfig(动画模拟器配置)的 `ActorAddressableFolder` 这个 **Addressable 地址前缀**取到——演示样例登记后是 `AnimSimulator/Assets/Actors/`（欢迎窗口有一键登记按钮），正式项目改成自己资产的地址即可，改法见下面的 [资源文件路径](#资源文件路径) 一节。
   - 动画资源的文件 一般会有很多，建议在 Actors 文件夹中 再新建一个文件夹，放置每个角色的 动画资源与预制体，并按照 角色的分类进行 命名与整理。
 
 ![alt text](Docs~/image-64.png)
@@ -463,12 +463,13 @@ Unity **没有「按名查找剪辑」的 API**（`RuntimeAnimatorController.ani
 
 ![alt text](Docs~/image-72.png)
 
-- 背景、角色、可以在AnimSimulatorConfig中，修改文件夹的路径。只有放置到 指定文件夹中的 美术资源，才可以在 动画模拟器系统中 进行配置与使用。
-  - BackgroundAddressableFolder：背景，文件夹路径。
-  - ActorAddressableFolder：角色，文件夹路径。
-- 文件夹路径 的格式为 Assets/ProductAssets/AnimSimulator/Actors/，以Assets开头，文件夹后面使用“/”隔开，所以 最后也需要使用“/”进行结尾。
-  - 建议将资源文件夹都放置在 Assets/ProductAssets/文件夹中，根据不同的系统，进行分类整理。
-  - 例如，角色的预制体 可以防止在 Assets/ProductAssets/AnimSimulator/Actors/ 文件夹中，背景的预制体 可以放置在 Assets/ProductAssets/AnimSimulator/Backgrounds/ 文件夹中。
+- 背景、角色的资源位置，在 AnimSimulatorConfig 中配置。只有登记在 指定地址下的 美术资源，才可以在 动画模拟器系统中 进行配置与使用。
+  - BackgroundAddressableFolder：背景资产的 **Addressable 地址前缀**。
+  - ActorAddressableFolder：角色资产的 **Addressable 地址前缀**。
+- ⚠️ 这两项填的是 **Addressable 地址**，不是磁盘上的资产路径。加载时按 `前缀 + 名称 + .prefab` 拼成完整地址去取，**因此必须以 `/` 结尾**。
+  - 地址与资产路径可以毫无关系：把一个文件夹登记进 Addressables 时，它的条目地址就是这个文件夹下所有资源地址的前缀。例如把演示样例的文件夹登记为地址 `AnimSimulator`，那么它里面的 `Assets/Actors/Koharu/Koharu.prefab` 的地址就是 `AnimSimulator/Assets/Actors/Koharu/Koharu.prefab`——于是前缀写 `AnimSimulator/Assets/Actors/` 即可。
+  - 演示样例的这一步有现成按钮：欢迎窗口（菜单 `Tools > Ale Toolkit > Anim Simulator System > Welcome`）的 **[登记样例到 Addressables]**，它会把样例文件夹登记到 Addressables 的默认分组并把地址设成 `AnimSimulator`，与两个字段的默认值正好对上。该区块仅在启用了 `ATK_ADDRESSABLE` 且装了 Addressables 时出现。
+  - 正式项目按自己的规划来即可。建议资源本身放在 `Assets/ProductAssets/AnimSimulator/{Actors,Backgrounds}/` 下分类整理，再把这两个文件夹各自登记进 Addressables，把这里的前缀改成对应的地址。
 
 ## 动画动作播放器 配置
 
