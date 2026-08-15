@@ -4,6 +4,24 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.6.2] - 2026-08-15
+
+**比较符改用 toolkit 的公共实现，移除本地副本。** 判定结果逐位不变；最低 toolkit 版本提至 1.8.0。
+
+### 变更
+
+- **删除 `AnimSimCompare`**（本包 `internal` 的比较符工具），两个判定器改用 toolkit 1.8.0 的 `Ale.Condition.ConditionCompare`。它是 `internal`，**不构成对外 API 破坏**。
+  - 这份工具此前在生态里有 4 份副本（toolkit 内置、角色系统、本包、Fs 游戏框架），且已经漂移：形参顺序有两种、「等于」的容差分成了 `1e-6` 与 `1e-9` 两派。根因是 toolkit 的 `OpLabels` 是 `private`，下游想复用够不着；现已在 1.8.0 公开。
+  - **本包是纯改名，零实参重排**——`AnimSimCompare.Eval(value, amount, op)` 与 `ConditionCompare.Compare(value, amount, op)` 的形参顺序本就一致。
+  - `Labels` 的文本与索引顺序逐字不变，**已配置的条件资产不受影响**。
+- **行为等价性已逐组核对**：迁移前后在 366 组输入上（等级 0~5 × 阈值 0~5 × 5 个比较符 + 未知 op；进度值含 `10.1f` / `0.30000001f` 等非整数与容差边界）结果完全一致，fail-closed 的两条路径（无数据源 / 查不到进度条）也不变。
+  - 等级路径（`int` 对 `long`）现在绑到 `Compare(long, long, int)` 的精确重载，此前走的是浮点重载 + `1e-6`；对整数而言 `|a-b| < 1e-6` 与 `a == b` 等价，故结果不变。
+  - 进度值路径（`float`）仍走浮点重载，容差仍是默认的 `1e-6`。
+
+### 依赖
+
+- ⚠️ **最低 `com.ale.toolkit` 版本由 1.7.8 提至 1.8.0**（`package.json` 的说明文字已同步）。本包的 asmdef 硬引用 `Ale.Condition.Core`，版本不足时会直接编译报错（提示找不到 `ConditionCompare`），升级 toolkit 即可。
+
 ## [2.6.1] - 2026-08-15
 
 **资源地址改为与磁盘路径解耦，并补上一键登记。** 背景 / 角色的地址前缀此前默认为空、Demo 里填的是资产路径本身（`Assets/Demo/Assets/...`），换个目录或换个工程就得逐字改。改为相对地址后，「资源放在哪」与「按什么地址取」彻底分开，前者随项目组织，后者只由 Addressables 的条目地址决定。
