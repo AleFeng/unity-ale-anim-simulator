@@ -18,31 +18,6 @@ namespace Ale.AnimSimulatorSystem
         bool TryGetProgressValue(string progressName, out float value);
     }
 
-    /// <summary>本包判定器共用的比较符。下拉里存的是索引，取值与 <see cref="Labels"/> 一一对应。</summary>
-    internal static class AnimSimCompare
-    {
-        public const int Greater        = 0; // 大于
-        public const int GreaterOrEqual = 1; // 大于等于
-        public const int Equal          = 2; // 等于
-        public const int LessOrEqual    = 3; // 小于等于
-        public const int Less           = 4; // 小于
-
-        public static readonly string[] Labels = { "大于", "大于等于", "等于", "小于等于", "小于" };
-
-        public static bool Eval(double value, double amount, int op)
-        {
-            switch (op)
-            {
-                case Greater:        return value >  amount;
-                case GreaterOrEqual: return value >= amount;
-                case Equal:          return System.Math.Abs(value - amount) < 1e-6;
-                case LessOrEqual:    return value <= amount;
-                case Less:           return value <  amount;
-                default:             return value >= amount;
-            }
-        }
-    }
-
     /// <summary>
     /// 判定器：等级进度条的<b>等级</b>与给定值比较。键 <c>AnimSim.LevelProgress</c>。
     ///
@@ -56,7 +31,7 @@ namespace Ale.AnimSimulatorSystem
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("progress", ConditionParamType.String, false, "等级进度条名称"),
-            new ConditionParamDef("op",       ConditionParamType.Int,    false, "比较", null, AnimSimCompare.Labels),
+            ConditionCompare.CreateOpParam(),
             new ConditionParamDef("level",    ConditionParamType.Int,    false, "等级"),
         };
 
@@ -81,8 +56,10 @@ namespace Ale.AnimSimulatorSystem
             if (!source.TryGetLevel(progressName, out int level)) return false;
 
             long required = parameters.Find("level")?.GetInt() ?? 0L;
-            int op = (int)(parameters.Find("op")?.GetInt() ?? AnimSimCompare.GreaterOrEqual);
-            return AnimSimCompare.Eval(level, required, op);
+            int op = ConditionCompare.ReadOp(parameters);
+            // level 是 int、required 是 long —— 绑到 Compare(long, long, int) 的精确重载。
+            // 此前走的是浮点重载 + 1e-6 容差；对整数而言 |a-b| < 1e-6 与 a == b 等价，结果不变。
+            return ConditionCompare.Compare(level, required, op);
         }
     }
 
@@ -96,7 +73,7 @@ namespace Ale.AnimSimulatorSystem
         private static readonly ConditionParamDef[] Schema =
         {
             new ConditionParamDef("progress", ConditionParamType.String, false, "进度条名称"),
-            new ConditionParamDef("op",       ConditionParamType.Int,    false, "比较", null, AnimSimCompare.Labels),
+            ConditionCompare.CreateOpParam(),
             new ConditionParamDef("value",    ConditionParamType.Float,  false, "进度值"),
         };
 
@@ -121,8 +98,9 @@ namespace Ale.AnimSimulatorSystem
             if (!source.TryGetProgressValue(progressName, out float value)) return false;
 
             double required = parameters.Find("value")?.GetFloat() ?? 0d;
-            int op = (int)(parameters.Find("op")?.GetInt() ?? AnimSimCompare.GreaterOrEqual);
-            return AnimSimCompare.Eval(value, required, op);
+            int op = ConditionCompare.ReadOp(parameters);
+            // value 是 float —— 绑到浮点重载，容差取默认的 1e-6，与迁移前一致。
+            return ConditionCompare.Compare(value, required, op);
         }
     }
 }
