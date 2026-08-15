@@ -11,12 +11,16 @@ namespace Ale.AnimSimulatorSystem
     public class AnimSimulatorConfig : ScriptableObject
     {
         [Header("背景")]
-        [Tooltip("背景资产 的 Addressable 地址前缀：加载时按 『前缀 + 背景名 + .prefab』 组合地址。请按项目中背景资产的 Addressable 地址填写（示例见 Samples~/Demo/Assets/Backgrounds/）。")]
-        public string backgroundAddressableFolder = "";
+        [Tooltip("背景资产 的 Addressable 地址前缀：加载时按 『前缀 + 背景名 + .prefab』 组合地址。\n" +
+                 "默认值对应演示样例的登记地址（欢迎窗口的「登记样例到 Addressables」按钮会把样例文件夹登记为 AnimSimulator）。\n" +
+                 "正式项目请按自己资产的 Addressable 地址填写。")]
+        public string backgroundAddressableFolder = "AnimSimulator/Assets/Backgrounds/";
 
         [Header("角色")]
-        [Tooltip("角色资产 的 Addressable 地址前缀：加载时按 『前缀 + 角色名 + .prefab』 组合地址。请按项目中角色资产的 Addressable 地址填写（示例见 Samples~/Demo/Assets/Actors/）。")]
-        public string actorAddressableFolder = "";
+        [Tooltip("角色资产 的 Addressable 地址前缀：加载时按 『前缀 + 角色名 + .prefab』 组合地址。\n" +
+                 "默认值对应演示样例的登记地址（欢迎窗口的「登记样例到 Addressables」按钮会把样例文件夹登记为 AnimSimulator）。\n" +
+                 "正式项目请按自己资产的 Addressable 地址填写。")]
+        public string actorAddressableFolder = "AnimSimulator/Assets/Actors/";
         
         [Header("动画动作播放器 配置")]
         [Tooltip("动画动作播放器 UI列表：用于在 动画角色 身上的各个 动画动作播放器 的位置，显示动画动作的 UI列表。")]

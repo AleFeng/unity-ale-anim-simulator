@@ -17,7 +17,27 @@ namespace Ale.AnimSimulatorSystem.Editor
     /// </summary>
     public class AnimSimulatorWelcomeWindow : EditorWindow
     {
-        private const string Version = "2.6.0";
+        // 包内相对路径。绝对路径一律经 PackageInfo.resolvedPath 拼出，不要写死 "Packages/…"——
+        // 那是纯字符串拼接，只有内嵌包才碰巧成立；经 git URL 安装时包位于
+        // Library/PackageCache/<name>@<hash>/，写死的路径根本不存在。而 Docs~ 带 ~ 后缀、
+        // 不进 AssetDatabase，也没法用 AssetDatabase 那套 API 解析。
+        private const string ReadmePath = "README.md";
+        private const string LogoPath   = "Docs~/Images/AnimSimulatorSystem_Logo.png";
+
+        /// <summary>
+        /// 「把样例登记进 Addressables」的注入钩子。默认 null，对应的区块也就不绘制。
+        ///
+        /// <para>本程序集对 Addressables <b>零引用</b>：实现在独立的
+        /// <c>Ale.AnimSimulatorSystem.Addressables.Editor</c> 里，由它的 <c>[InitializeOnLoad]</c> 赋值。
+        /// 该程序集受 <c>ATK_ADDRESSABLE</c> + <c>ASS_HAS_ADDRESSABLES</c> 双重门控，
+        /// 宏一关就不参与编译，按钮随之自动消失。</para>
+        ///
+        /// <para>返回值是给用户看的结果描述；抛异常由调用方兜住。</para>
+        /// </summary>
+        public static Func<string> RegisterDemoAddressables;
+
+        /// <summary>登记按钮上方显示的现状说明。同样由 Addressables 子程序集注入。</summary>
+        public static Func<string> DescribeDemoAddressables;
 
         // 打开时的初始高宽；窗口可手动调整（见 OpenWindow），缩放下限为 MinWindowSize。
         private static readonly Vector2 WindowSize    = new Vector2(540f, 660f);
@@ -116,6 +136,9 @@ namespace Ale.AnimSimulatorSystem.Editor
             DrawQuickActions();
             DrawSeparator();
 
+            // 钩子为空（未启用 ATK_ADDRESSABLE，或没装 Addressables）时整块跳过，连分隔线都不画
+            if (DrawSampleSection()) DrawSeparator();
+
             DrawMacroSection();
 
             EditorGUILayout.EndScrollView();
@@ -204,7 +227,7 @@ namespace Ale.AnimSimulatorSystem.Editor
             // 使用文档就是包根的 README——原先那份 Docs~/AnimSimulatorSystem/AnimSimulatorSystem.md
             // 已并入其中，旁边那个「查看 README」按钮因此与本按钮完全重复，一并去掉。
             if (GUILayout.Button(Tr("查看使用文档"), GUILayout.Height(28)))
-                OpenDoc("Packages/com.ale.animsimulatorsystem/README.md");
+                OpenDoc(ReadmePath);
 
             EditorGUILayout.EndHorizontal();
 
@@ -212,6 +235,65 @@ namespace Ale.AnimSimulatorSystem.Editor
                 Tr("示例场景经 Package Manager > Anim Simulator System > Samples > Import 导入后，" +
                    "位于 Assets/Samples/ 下。"),
                 EditorStyles.wordWrappedMiniLabel);
+        }
+
+        // 上一次登记的结果文案。null 表示还没点过。
+        private string _sampleResult;
+
+        /// <summary>
+        /// 绘制「演示样例（Addressables 登记）」区块。返回是否真的绘制了——钩子为 null
+        /// （未启用 <c>ATK_ADDRESSABLE</c>，或没装 Addressables）时整块跳过。
+        /// </summary>
+        private bool DrawSampleSection()
+        {
+            if (RegisterDemoAddressables == null) return false;
+
+            EnsureStyles();
+
+            EditorGUILayout.LabelField(Tr("演示样例"), EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(
+                Tr("启用 ATK_ADDRESSABLE 后，演示样例的文件夹需要登记进 Addressables，并把地址改成 " +
+                   "AnimSimulator——AnimSimulatorConfig 上的背景 / 角色两个地址前缀就是按这个短地址写的" +
+                   "（AnimSimulator/Assets/Backgrounds/ 与 AnimSimulator/Assets/Actors/）。下面的按钮代劳这一步。"),
+                EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.Space(2);
+
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+
+            var status = DescribeDemoAddressables != null ? DescribeDemoAddressables() : null;
+            if (!string.IsNullOrEmpty(status))
+                EditorGUILayout.LabelField(status, status.StartsWith("  ✓") ? _styleOk : _styleWarn);
+
+            EditorGUILayout.Space(4);
+            if (GUILayout.Button(Tr("登记样例到 Addressables"), GUILayout.Height(22)))
+            {
+                // 不在 OnGUI 里直接弹对话框 / 改资产：会打乱本帧的控件计数。推到下一次编辑器 tick。
+                EditorApplication.delayCall += RunRegisterDemoAddressables;
+            }
+
+            if (!string.IsNullOrEmpty(_sampleResult))
+                EditorGUILayout.LabelField(_sampleResult, EditorStyles.wordWrappedMiniLabel);
+
+            EditorGUILayout.EndVertical();
+            return true;
+        }
+
+        private void RunRegisterDemoAddressables()
+        {
+            EditorApplication.delayCall -= RunRegisterDemoAddressables;
+            if (RegisterDemoAddressables == null) return;
+
+            try
+            {
+                _sampleResult = RegisterDemoAddressables();
+            }
+            catch (Exception e)
+            {
+                // 写 Addressables 配置失败不该把编辑器搞崩，转成可读结果并把细节留在控制台。
+                _sampleResult = Fmt("登记失败：{0}", e.Message);
+                Debug.LogException(e);
+            }
+            Repaint();
         }
 
         private void DrawMacroSection()
@@ -409,6 +491,60 @@ namespace Ale.AnimSimulatorSystem.Editor
             EditorGUILayout.Space(2);
         }
 
+        #endregion
+
+        #region 包信息
+
+        private static UnityEditor.PackageManager.PackageInfo _packageInfo;
+        private static bool _packageInfoQueried;
+
+        private static UnityEditor.PackageManager.PackageInfo PackageInfo
+        {
+            get
+            {
+                if (_packageInfoQueried) return _packageInfo;
+                _packageInfoQueried = true;
+                _packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(
+                    typeof(AnimSimulatorWelcomeWindow).Assembly);
+                return _packageInfo;
+            }
+        }
+
+        /// <summary>
+        /// 包在磁盘上的实际根目录。内嵌包是 <c>Packages/com.ale.animsimulatorsystem</c>，
+        /// 经 git URL 安装时是 <c>Library/PackageCache/com.ale.animsimulatorsystem@&lt;hash&gt;</c>。
+        /// 所有包内文件路径都必须从这里拼，不能写死 <c>Packages/…</c>。
+        /// </summary>
+        private static string PackageRoot => PackageInfo != null ? PackageInfo.resolvedPath : null;
+
+        /// <summary>
+        /// 版本号。<b>从 <c>package.json</c> 动态读取，不写死常量</b>——写死的那个迟早会与包脱节，
+        /// 此前就出现过窗口停在 2.3.1 而包已经是 2.3.2 的情况。
+        /// </summary>
+        private static string Version
+        {
+            get
+            {
+                var packageInfo = PackageInfo;
+                return packageInfo != null && !string.IsNullOrEmpty(packageInfo.version)
+                    ? packageInfo.version
+                    : "?";
+            }
+        }
+
+        /// <summary>把包内相对路径解析为磁盘绝对路径。取不到包信息时返回 <c>null</c>。</summary>
+        private static string ResolvePackagePath(string packageRelativePath)
+        {
+            string root = PackageRoot;
+            return string.IsNullOrEmpty(root)
+                ? null
+                : System.IO.Path.GetFullPath(System.IO.Path.Combine(root, packageRelativePath));
+        }
+
+        #endregion
+
+        #region Logo
+
         /// <summary>
         /// FilterMode.Point 确保放大时像素边缘保持锐利清晰。结果缓存，避免每帧重复 I/O。
         /// Logo 文件不存在时静默跳过绘制（<c>Docs~</c> 不被 AssetDatabase 索引，走文件系统读取）。
@@ -420,10 +556,8 @@ namespace Ale.AnimSimulatorSystem.Editor
 
             _logoLoadAttempted = true;
 
-            string logoPath = System.IO.Path.GetFullPath(
-                "Packages/com.ale.animsimulatorsystem/Docs~/Images/AnimSimulatorSystem_Logo.png");
-
-            if (!System.IO.File.Exists(logoPath)) return null;
+            string logoPath = ResolvePackagePath(LogoPath);
+            if (string.IsNullOrEmpty(logoPath) || !System.IO.File.Exists(logoPath)) return null;
 
             byte[] bytes = System.IO.File.ReadAllBytes(logoPath);
             var tex = new Texture2D(64, 64, TextureFormat.RGBA32, false, false)
@@ -470,9 +604,9 @@ namespace Ale.AnimSimulatorSystem.Editor
         /// </summary>
         private static void OpenDoc(string packageRelativePath)
         {
-            string absolutePath = System.IO.Path.GetFullPath(packageRelativePath);
+            string absolutePath = ResolvePackagePath(packageRelativePath);
 
-            if (System.IO.File.Exists(absolutePath))
+            if (!string.IsNullOrEmpty(absolutePath) && System.IO.File.Exists(absolutePath))
             {
                 Application.OpenURL("file:///" + absolutePath.Replace('\\', '/'));
             }
