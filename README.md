@@ -63,6 +63,7 @@ Spine 与 Live2D 只负责把动画**播出来**，而「玩家摸一下角色�
 | --- | --- |
 | 三后端并存 | **Spine、Live2D 与 Unity 自带动画可在同一工程内同时启用**，用哪个由角色预制体上挂 `SpineAnimator`、`Live2DAnimator` 还是 `UnityAnimator` 决定。后端无关的机制（状态机、轨道播放栈、计时、皮肤名册、淡入淡出）都在抽象基类 `AnimatorBase` 里，上层的 `AnimActor` / `AnimActionPlayer` 对具体后端无感。 |
 | 四种光标操作 | **点击 / 拖拽 / 旋转 / 按压**。后三种把光标的位移、角度、按压时长换算成动画播放进度（可配交互范围、方向、阻尼、旋转角度范围、按压涨落速度）。 |
+| 操作提示动画 | 按下动作时按其操作类型播**一次**手指提示（2.7.0 起），**方向跟随动作已有的配置**——拖拽箭头按 `Action Direction` 摆角度，旋转按 `Is Anti Clockwise` 决定顺 / 逆时针。进度条驱动的自动播放不提示。 |
 | 三类动作播放器 | `Operate`（悬停铺开列表，玩家滚动挑一条）/ `Random`（**只淡入点击提示，点击时按权重随机抽一条**）/ `ProgressBar`（不接受点击，由进度条驱动）。 |
 | 多轨道与混合权重 | 轨道号 = `主轨道 × 10 + 子轨道`，**`EAnimTrack` 枚举值大的轨道覆盖枚举值小的**；`Anim Track Blend Weight`（0~1，默认 1.0）决定覆盖强度。Spine 落到 `TrackEntry.Alpha`，Live2D 落到 `CubismMotionController.SetLayerWeight`，Unity 落到层混合器输入的 `SetInputWeight`。 |
 | 等级进度条 | 经验 → 等级，等级作为动作与皮肤的解锁条件。经验曲线可按**等级区间**分段配置 `Linear`（线性）/ `Exponent`（指数）两种增长。 |
