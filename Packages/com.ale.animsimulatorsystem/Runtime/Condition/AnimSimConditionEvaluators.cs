@@ -53,7 +53,11 @@ namespace Ale.AnimSimulatorSystem
             string progressName = parameters.Find("progress")?.GetString();
             if (string.IsNullOrEmpty(progressName)) return false;
 
-            if (!source.TryGetLevel(progressName, out int level)) return false;
+            if (!source.TryGetLevel(progressName, out int level))
+            {
+                AnimSimConditionWarn.UnknownProgress(nameof(AnimSimLevelProgressEvaluator), progressName, "等级进度条");
+                return false;
+            }
 
             long required = parameters.Find("level")?.GetInt() ?? 0L;
             int op = ConditionCompare.ReadOp(parameters);
@@ -95,12 +99,42 @@ namespace Ale.AnimSimulatorSystem
             string progressName = parameters.Find("progress")?.GetString();
             if (string.IsNullOrEmpty(progressName)) return false;
 
-            if (!source.TryGetProgressValue(progressName, out float value)) return false;
+            if (!source.TryGetProgressValue(progressName, out float value))
+            {
+                AnimSimConditionWarn.UnknownProgress(nameof(AnimSimProgressValueEvaluator), progressName, "进度条");
+                return false;
+            }
 
             double required = parameters.Find("value")?.GetFloat() ?? 0d;
             int op = ConditionCompare.ReadOp(parameters);
             // value 是 float —— 绑到浮点重载，容差取默认的 1e-6，与迁移前一致。
             return ConditionCompare.Compare(value, required, op);
+        }
+    }
+
+    /// <summary>
+    /// 两个判定器共用的「查无此进度条」告警，按名去重。
+    ///
+    /// <para><b>为什么这条值得单独报</b>：判定器一律「失败即关」——查不到进度条就判不满足。
+    /// 这是刻意的设计（免得配错的条件静默失效、动作凭空解锁），但它同时意味着<b>名字打错与
+    /// 条件真的不满足，表现完全一样</b>：动作就是不出现在列表里，没有任何其它线索。
+    /// 报出来才能把「配错了」和「还没达标」区分开。</para>
+    ///
+    /// <para><b>必须去重</b>：条件在每次进度条读数变化时都会重新求值，不去重会刷屏。
+    /// 去重表随程序域存活，域重载（改代码、进退播放模式）后重新计数。</para>
+    /// </summary>
+    internal static class AnimSimConditionWarn
+    {
+        private static readonly HashSet<string> Warned = new HashSet<string>();
+
+        /// <summary>就某个判定器引用了不存在的进度条名告警一次。</summary>
+        public static void UnknownProgress(string evaluatorName, string progressName, string kindLabel)
+        {
+            if (!Warned.Add(evaluatorName + "|" + progressName)) return;
+            AnimSimLog.Warn(evaluatorName,
+                $"条件引用的{kindLabel} '{progressName}' 不存在，本条件按「不满足」处理——" +
+                $"该动作不会出现在动画动作列表里。请核对条件参数与 AnimSimulatorConfig 里的进度条名称是否一致。" +
+                $"（同名只报一次）");
         }
     }
 }

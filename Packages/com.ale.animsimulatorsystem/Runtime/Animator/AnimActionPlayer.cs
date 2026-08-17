@@ -30,6 +30,51 @@ namespace Ale.AnimSimulatorSystem
         }
 
         /// <summary>
+        /// 选中时额外画出<b>点击范围</b>（<see cref="SphereCollider"/>）。
+        ///
+        /// <para><b>为什么单独画这一个球</b>：本组件有两个「范围」，语义完全不同却极易混为一谈——
+        /// <list type="bullet">
+        ///   <item>点击范围＝<c>SphereCollider.radius</c>，决定<b>点不点得到</b>；</item>
+        ///   <item>交互行程＝动作上的 <c>actionRange</c>，只在拖拽 / 旋转里把光标位移映射成播放进度，
+        ///         与能否点中<b>毫无关系</b>，而且它是<b>直径</b>。</item>
+        /// </list>
+        /// 而此前 Gizmos <b>只画了后者</b>，于是「照着线框调半径却怎么都点不准」成了高频困惑。
+        /// 把两者用不同颜色一起画出来并标注，这个误解就不成立了——比写在文档里管用。</para>
+        ///
+        /// <para>放在 <c>OnDrawGizmosSelected</c> 而非 <c>OnDrawGizmos</c>：角色身上通常有好几个播放器，
+        /// 常驻绘制会把场景糊满，选中时才画既够用又干净。</para>
+        /// </summary>
+        private void OnDrawGizmosSelected()
+        {
+            var sphere = GetComponent<SphereCollider>();
+            if (!sphere) return;
+
+            Vector3 center = transform.TransformPoint(sphere.center);
+            float radius = WorldRadiusOf(sphere);
+
+            // 橙色，与动作交互范围的青色明显区分
+            var colorClick = new Color(1f, 0.55f, 0.1f, 1f);
+            Gizmos.matrix = Matrix4x4.identity;
+            Gizmos.color = colorClick;
+            Gizmos.DrawWireSphere(center, radius);
+
+            Handles.color = colorClick;
+            Handles.Label(center + Vector3.up * radius, $"点击范围 {radius:F3}（SphereCollider）");
+
+            // 顺带标注同处的交互行程，让两个球当场对得上号。取第一条开了 Gizmos 的动作即可——
+            // 它们共用同一个中心点，逐条标注会互相压字。
+            if (animActions == null) return;
+            foreach (var animAction in animActions)
+            {
+                if (animAction == null || animAction.showGizmos == false) continue;
+                Handles.color = Color.cyan;
+                Handles.Label(center - Vector3.up * (animAction.actionRange * 0.5f),
+                    $"交互行程 {animAction.actionRange}（actionRange，直径，仅拖拽/旋转用）");
+                break;
+            }
+        }
+
+        /// <summary>
         /// 绘制 动画动作组的Gizmos可视化
         /// </summary>
         private void OnDrawGizmosAnimActionGroup()
@@ -276,6 +321,128 @@ namespace Ale.AnimSimulatorSystem
             // 动作播放器通常挂在角色的子物体上，播放器本体又不带动画组件，
             // 所以 FindFor 的「自身 → 子树 → 父级链」里真正命中的一般是最后一段。
             if (!animator) animator = AnimatorBase.FindFor(this);
+
+            ValidateConfig();
+        }
+
+        /// <summary>
+        /// 编辑期配置体检。
+        ///
+        /// <para><b>为什么这些要在运行前报</b>：本组件的配置错误几乎全部是<b>静默失效</b>——
+        /// 不抛异常、不打日志，只是「点了没反应」或「拖了不动」。而症状出现的位置离配错的位置很远
+        /// （例如轨道混合权重配在播放器上、失效却表现在某一条动作的观感上），单靠玩一遍很难回溯到配置项。
+        /// 这里把每一条都在 Inspector 改动的当下就报出来，并在文案里写明<b>配错后的具体症状</b>，
+        /// 免得使用者拿着「没反应」这个唯一线索去大海捞针。</para>
+        ///
+        /// <para>一律只提示、<b>绝不改写</b>使用者填的值——自动纠正会让人以为自己配对了。</para>
+        /// </summary>
+        private void ValidateConfig()
+        {
+            // 名称是注册进管理器字典的 Key。留空则以空串注册，多个空名播放器互相覆盖，
+            // 且进度条配置里的 Action Player Name 永远匹配不上它。
+            if (string.IsNullOrEmpty(actionPlayerName))
+                AnimSimLog.Warn(this, $"「动画动作播放器 名称」为空：它是注册进管理器的唯一 Key，" +
+                                      $"留空会与其它空名播放器互相覆盖，进度条配置也无法指向它。" +
+                                      $"GameObject={gameObject.name}");
+
+            // 点击范围由 SphereCollider 决定，不是 actionRange。半径为 0 的碰撞体射线打不中，
+            // 表现为「这个播放器怎么点都没反应」，而 Gizmos 画的却是 actionRange，看上去一切正常。
+            var sphere = GetComponent<SphereCollider>();
+            if (sphere && sphere.radius <= 0f)
+                AnimSimLog.Warn(this, $"SphereCollider 的 Radius 为 {sphere.radius}：" +
+                                      $"点击范围由它决定（不是「动作的交互范围」），半径不为正则永远点不到本播放器。" +
+                                      $"GameObject={gameObject.name}");
+
+            ValidateAnimActions();
+            ValidateColliderOverlap(sphere);
+        }
+
+        /// <summary>逐条动作的编辑期体检。</summary>
+        private void ValidateAnimActions()
+        {
+            if (animActions == null) return;
+
+            // 轨道混合权重只作用于「原生播放」通道。拖拽 / 旋转 / 按压由玩家写入进度，
+            // 走的是逐帧采样通道，不经过各后端的层混合器，权重对它们<b>完全无效</b>且不报错——
+            // 于是「把权重调小让动作轻一点」这个意图会静默落空。
+            bool hasNonClickAction = false;
+
+            foreach (var animAction in animActions)
+            {
+                if (animAction == null) continue;
+
+                if (animAction.actionOperationType != EAnimActionOperationType.Click)
+                    hasNonClickAction = true;
+
+                // 动画名是三个后端统一的查找键。留空则直到运行期真去播时才报，
+                // 而那时错误信息里只有一个空名字，回不到是哪一条动作配漏了。
+                if (string.IsNullOrEmpty(animAction.animName))
+                    AnimSimLog.Warn(this, $"动作 '{animAction.actionName}' 的「动画名称」为空：" +
+                                          $"该动作触发时找不到动画，直到运行期才会暴露。" +
+                                          $"GameObject={gameObject.name}");
+
+                // 拖拽 / 旋转把光标位移映射成播放进度时，动作向量的长度取自 actionRange * 0.5。
+                // 长度为 0 时映射恒等于 0，表现为「按下去了但怎么拖 / 怎么转动画都不动」，全程无任何报错。
+                bool needsRange = animAction.actionOperationType == EAnimActionOperationType.Drag
+                               || animAction.actionOperationType == EAnimActionOperationType.Rotate;
+                if (needsRange && animAction.actionRange <= 0f)
+                    AnimSimLog.Warn(this, $"动作 '{animAction.actionName}' 是 " +
+                                          $"{animAction.actionOperationType} 型，但「动作的交互范围」为 {animAction.actionRange}：" +
+                                          $"交互向量长度为 0，播放进度会恒为 0，拖不动也转不动。一般设为 2 左右。" +
+                                          $"GameObject={gameObject.name}");
+            }
+
+            if (hasNonClickAction && animTrackBlendWeight < 1f)
+                AnimSimLog.Warn(this, $"「轨道混合权重」为 {animTrackBlendWeight}，但本播放器含" +
+                                      $"拖拽 / 旋转 / 按压型动作：这三种由玩家驱动进度，走逐帧采样通道、" +
+                                      $"不经层混合器，权重对它们无效（仅对点击型生效）。" +
+                                      $"GameObject={gameObject.name}");
+        }
+
+        /// <summary>
+        /// 同级播放器的命中球重叠体检。
+        ///
+        /// <para>命中判定取射线的<b>第一个</b>命中体，两个球重叠时落在交叠区的点击归谁完全取决于
+        /// 物理系统的返回顺序——表现为「点某个部位有时触发 A、有时触发 B」，是最难复现的一类问题。</para>
+        /// </summary>
+        private void ValidateColliderOverlap(SphereCollider selfSphere)
+        {
+            if (!selfSphere || selfSphere.radius <= 0f) return;
+            var parent = transform.parent;
+            if (!parent) return;
+
+            Vector3 selfCenter = transform.TransformPoint(selfSphere.center);
+            float selfRadius = WorldRadiusOf(selfSphere);
+
+            foreach (Transform sibling in parent)
+            {
+                if (sibling == transform) continue;
+                var other = sibling.GetComponent<AnimActionPlayer>();
+                if (!other) continue;
+                // 每对只报一次，否则两侧各报一条、控制台里成双出现
+                if (GetInstanceID() > other.GetInstanceID()) continue;
+
+                var otherSphere = other.GetComponent<SphereCollider>();
+                if (!otherSphere || otherSphere.radius <= 0f) continue;
+
+                Vector3 otherCenter = other.transform.TransformPoint(otherSphere.center);
+                float otherRadius = WorldRadiusOf(otherSphere);
+                float gap = Vector3.Distance(selfCenter, otherCenter) - (selfRadius + otherRadius);
+                if (gap >= 0f) continue;
+
+                AnimSimLog.Warn(this, $"命中球与 '{other.gameObject.name}' 重叠（相交 {(-gap):F3} 米）：" +
+                                      $"射线只取第一个命中体，交叠区域的点击归属不确定。" +
+                                      $"请拉开两者距离或调小 SphereCollider 的 Radius。" +
+                                      $"GameObject={gameObject.name}");
+            }
+        }
+
+        /// <summary>SphereCollider 的世界半径。Unity 按 lossyScale 三轴绝对值的最大值缩放球体。</summary>
+        private static float WorldRadiusOf(SphereCollider sphere)
+        {
+            Vector3 scale = sphere.transform.lossyScale;
+            float maxScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Max(Mathf.Abs(scale.y), Mathf.Abs(scale.z)));
+            return sphere.radius * maxScale;
         }
 #endif
 

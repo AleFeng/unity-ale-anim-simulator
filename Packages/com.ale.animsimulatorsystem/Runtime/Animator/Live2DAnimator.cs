@@ -5,6 +5,7 @@ using UnityEngine;
 #if ASS_LIVE2D
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Motion;
+using Live2D.Cubism.Framework.MotionFade;
 using Live2D.Cubism.Rendering;
 #endif
 
@@ -70,6 +71,95 @@ namespace Ale.AnimSimulatorSystem
         }
 
         private void OnValidate()
+        {
+            ValidateCubismPrerequisites();
+            ValidateAnimClipTable();
+            ValidateTrackLayers();
+        }
+
+        /// <summary>
+        /// Cubism 播放前提体检。
+        ///
+        /// <para><b>为什么这三项必须在运行前报</b>：它们缺任何一个，<c>CubismMotionController.OnEnable</c>
+        /// 都会提前 return、把自己置为未激活，此后每次播放只在控制台留下一句笼统的
+        /// <c>can't start motion.</c>——那句话既不说是哪个模型、也不说缺的是什么，
+        /// 而真正的原因在三个不同的组件上，靠它根本回溯不到。</para>
+        /// </summary>
+        private void ValidateCubismPrerequisites()
+        {
+            // 常规播放全部经由 MotionController，缺了它动作一条都播不出来。
+            if (!live2DMotionController)
+            {
+                AnimSimLog.Warn(this, $"「Live2D Motion Controller」未指定：常规动作播放全部经由它，" +
+                                      $"留空则任何动作都播不出来。请在模型根物体上添加 CubismMotionController 并指到这里。" +
+                                      $"GameObject={gameObject.name}");
+            }
+            else
+            {
+                // MotionController 在 OnEnable 里会去读同物体 FadeController 的动作淡入淡出列表，
+                // 读不到就直接罢工。该列表由 Cubism 导入 motion3.json 时生成，但当 motion3.json
+                // 平铺在模型目录下（而非官方约定的子文件夹）时，它会被生成到<b>上一级目录</b>且不会自动指派——
+                // 于是资产明明存在、字段却是空的，这是最容易漏掉的一处。
+                var fade = live2DMotionController.GetComponent<CubismFadeController>();
+                if (!fade)
+                    AnimSimLog.Warn(this, $"CubismMotionController 所在物体上没有 CubismFadeController：" +
+                                          $"前者依赖后者提供动作淡入淡出数据，缺失则动作播放不会启动。" +
+                                          $"GameObject={gameObject.name}");
+                else if (!fade.CubismFadeMotionList)
+                    AnimSimLog.Warn(this, $"CubismFadeController 的 CubismFadeMotionList 为空：" +
+                                          $"CubismMotionController 启动时读不到它会直接停用，之后每次播放只报 " +
+                                          $"「can't start motion.」。该列表资产通常已随 motion3.json 导入生成，" +
+                                          $"但可能落在模型目录的上一级，找到后指派即可。" +
+                                          $"GameObject={gameObject.name}");
+            }
+
+            // Animator 上挂了 AnimatorController 会让 MotionController 认为「你要走 Animator 那条路」而主动让位。
+            // 而 Cubism 导入模型时<b>会自动生成一个空的 controller 资产</b>，手滑拖上去就中招。
+            var animatorComponent = GetComponent<Animator>();
+            if (animatorComponent && animatorComponent.runtimeAnimatorController)
+                AnimSimLog.Warn(this, $"同物体的 Animator 挂了 Animator Controller " +
+                                      $"'{animatorComponent.runtimeAnimatorController.name}'：" +
+                                      $"CubismMotionController 检测到它就会停用自己，本系统的动作播放整条链路失效。" +
+                                      $"走本系统时该栏应留空。GameObject={gameObject.name}");
+
+            // CubismUpdateController 只登记<b>同物体</b>上的 ICubismUpdatable。挂到别处时本组件会退回自身的
+            // LateUpdate，与 Cubism 各组件的先后顺序变成未定义——表现为拖拽/按压时姿势被 Cubism 盖回起始帧。
+            if (!GetComponent<CubismModel>())
+                AnimSimLog.Warn(this, $"本组件与 CubismModel 不在同一个物体上：" +
+                                      $"CubismUpdateController 只调度同物体的 ICubismUpdatable，" +
+                                      $"分开挂会让拖拽 / 旋转 / 按压的逐帧采样被 Cubism 覆盖回起始帧。" +
+                                      $"请把本组件挂到模型根物体上。GameObject={gameObject.name}");
+        }
+
+        /// <summary>
+        /// 动作查找表体检。
+        /// <para>Cubism 没有按名找动作的 API，这张表是动作名的唯一来源；表里配歪了，
+        /// 动作要到运行期真去播时才报，且只报「查不到某个名字」，回不到是哪一行配错。</para>
+        /// </summary>
+        private void ValidateAnimClipTable()
+        {
+            if (live2DAnimClips == null) return;
+
+            var seen = new HashSet<string>();
+            foreach (var entry in live2DAnimClips)
+            {
+                if (!entry.clip)
+                {
+                    AnimSimLog.Warn(this, $"动作查找表里有一行的「剪辑」为空（动画名 '{entry.animName}'）：" +
+                                          $"该行无效。GameObject={gameObject.name}");
+                    continue;
+                }
+
+                // 动画名留空时按约定用剪辑资产名兜底，重名判断也要基于兜底后的实际键。
+                string key = string.IsNullOrEmpty(entry.animName) ? entry.clip.name : entry.animName;
+                if (!seen.Add(key))
+                    AnimSimLog.Warn(this, $"动作查找表里的动画名 '{key}' 重复：后一条会被忽略，" +
+                                          $"按该名播放时拿到的始终是第一条。GameObject={gameObject.name}");
+            }
+        }
+
+        /// <summary>轨道映射的层索引越界体检。</summary>
+        private void ValidateTrackLayers()
         {
             // 层索引越界在运行前就报出来：越界的动作会被静默钳到别的层上，表现为「动画互相覆盖」，极难排查。
             if (!live2DMotionController || live2DTrackLayers == null) return;

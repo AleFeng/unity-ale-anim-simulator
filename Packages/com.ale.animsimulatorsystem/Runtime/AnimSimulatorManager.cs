@@ -869,6 +869,9 @@ namespace Ale.AnimSimulatorSystem
         private UIProgressBarView _uiProgressBarViewInstance;
         // 进度条实例 字典（Key：进度条名称）
         private Dictionary<string, UIBaseProgressBar> _progressBarInstanceDic = new Dictionary<string, UIBaseProgressBar>();
+        // 已就「查无此进度条」告警过的名称。进度条修改是高频调用（每完成一次动作都会来一遍），
+        // 不去重会把控制台刷爆，反而淹掉真正有用的信息。
+        private readonly HashSet<string> _unknownProgressNameWarned = new HashSet<string>();
 
         #region 初始化
         /// <summary>
@@ -978,7 +981,17 @@ namespace Ale.AnimSimulatorSystem
         public void ModifyProgressBars(string progressName, float valueModify)
         {
             // 获取 进度条实例
-            if (!_progressBarInstanceDic.TryGetValue(progressName, out var progressBarInstance)) return;
+            if (!_progressBarInstanceDic.TryGetValue(progressName, out var progressBarInstance))
+            {
+                // 此前这里是静默 return。名字打错一个字的后果是「进度条永远不动」，而动作照播、
+                // 不报任何错——使用者只能看到「攒了半天没反应」，无从判断是配置错了还是逻辑没走到。
+                // 名字来自动作的「进度条 配置组」，是纯手填字符串，拼错是常态，必须报出来。
+                if (_unknownProgressNameWarned.Add(progressName))
+                    AnimSimLog.Warn(this, $"进度条 '{progressName}' 不存在，本次修改（{valueModify:+0.##;-0.##;0}）已丢弃。" +
+                                          $"请核对动作的「进度条 配置组」与 AnimSimulatorConfig 里的进度条名称是否一致。" +
+                                          $"（同名只报一次）");
+                return;
+            }
 
             // 修改 进度值
             progressBarInstance.ModifyProgressValue(valueModify);
