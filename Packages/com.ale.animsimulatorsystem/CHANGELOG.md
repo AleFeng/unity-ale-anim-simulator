@@ -4,6 +4,26 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.6.4] - 2026-08-17
+
+**修正动作列表 UI 的定位：此前把播放器的世界坐标当成画布坐标用了。** 换算所需的相机从没交给过 UI 那一侧——`UIUtility` 只能自己去猜 `Camera.main`。场景相机没打 MainCamera 标签时（Overlay 画布的 `worldCamera` 本就恒为空）两个来源同时落空，换算退化成「世界坐标当屏幕像素」，于是**所有提示圈塌到屏幕左下角一小撮里、彼此相差不到一个像素**。
+
+> ⚠️ **最低 toolkit 版本升至 `com.ale.toolkit` ≥ 1.9.0**（用到新增的 `UIUtility.PositionAtWorldPos`）。
+
+### 修复
+
+- **动作列表 UI 现在按玩家相机投影定位。** 管理器把 `playerCamera`（为空时回退 `Camera.main`）连同 `uiCanvas` 一起下发给 `UIAnimActionList`，两者都必须在 `SetAnimActionPlayer` 之前交出去——那一步内部立刻就会定位一次。从空闲列表复用来的实例也要重设：相机可能在这期间换过。
+- **换算基准改为列表 UI 的父级**（经 `UIUtility.PositionAtWorldPos`）。赋的是 `localPosition`，基准就得是父级；此前基准是 Canvas 自己，只在「动画动作列表 UI 根节点恰好与 Canvas 原点重合」时才碰巧正确，根节点一带偏移就整体错位。
+
+### 新增
+
+- **`UIAnimActionList.WorldCamera`**：把播放器世界坐标投影到屏幕所用的相机，由管理器统一下发。**必须与射线检测用的是同一台**，否则提示圈会飘到射线打不到的地方——看着能点，点下去没反应。
+- **`AnimSimulatorManager` 启动时检查「玩家相机」与「UI Canvas」**：缺任一个，动作列表 UI 的定位都会静默退化成上面那种塌角。相机同时还是射线检测的前提，缺了则任何点击都收不到命中。
+
+### 变更
+
+- **散在三处的 `playerCamera ? playerCamera : Camera.main` 收成一个 `PlayerCamera` 属性。** 射线检测与 UI 定位共用同一个来源是硬性要求：两侧取到不同相机时，UI 会飘到射线打不到的位置。而这两处此前是各算各的——UI 那侧甚至是在 `UIUtility` 内部算的，管理器完全不知情。
+
 ## [2.6.3] - 2026-08-17
 
 **把一批「配错了不报错」的配置问题变成告警。** 这些问题此前一律静默失效——不抛异常、不打日志，只表现为「点了没反应」或「拖了不动」，而症状出现的位置离配错的位置很远，只能靠通读文档回溯。本版把它们在 `OnValidate` 或首次命中时报出来，并在文案里写明**配错后的具体症状**。纯新增告警，**不改变任何运行行为**。

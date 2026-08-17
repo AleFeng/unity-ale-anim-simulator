@@ -31,6 +31,14 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         public Canvas UICanvas { get; set; }
 
+        /// <summary>
+        /// 把 <see cref="AnimActionPlayer"/> 的世界坐标投影到屏幕所用的相机。
+        ///
+        /// <para>必须与 <see cref="AnimSimulatorManager"/> 做射线检测的那台是同一个，
+        /// 否则提示圈会飘到射线打不到的地方——看着能点，点下去没反应。由管理器统一下发。</para>
+        /// </summary>
+        public Camera WorldCamera { get; set; }
+
         // 当前关联的 AnimActionPlayer 组件
         private AnimActionPlayer _animActionPlayerCurrent;
         // 动画动作数据 列表。作为滚动列表的数据源，索引与列表条目一一对应——
@@ -70,7 +78,7 @@ namespace Ale.AnimSimulatorSystem
                 // 动画机 淡入。
                 FadeAnimActionList(true);
                 // 设置 UI空间的位置
-                rectTrans.localPosition = UIUtility.WorldPosToUILocalPos(_animActionPlayerCurrent.transform.position, UICanvas);
+                SetToCanvasSpacePosition(_animActionPlayerCurrent.transform.position);
                 // 填充 列表的数据内容
                 RebuildListContents();
                 // 订阅 焦点变化监听
@@ -327,11 +335,14 @@ namespace Ale.AnimSimulatorSystem
         
         /// <summary>
         /// 设置 UI空间的位置。
+        ///
+        /// <para>换算基准是 <c>rectTrans</c> 的<b>父级</b>（由 <see cref="UIUtility.PositionAtWorldPos"/> 内部取），
+        /// 不是 Canvas——赋的是 <c>localPosition</c>，原点得跟父级走。</para>
         /// </summary>
         /// <param name="worldPos"></param>
         public void SetToCanvasSpacePosition(Vector3 worldPos)
         {
-            rectTrans.localPosition = UIUtility.WorldPosToUILocalPos(worldPos, UICanvas);
+            UIUtility.PositionAtWorldPos(rectTrans, worldPos, UICanvas, WorldCamera);
         }
         #endregion
         

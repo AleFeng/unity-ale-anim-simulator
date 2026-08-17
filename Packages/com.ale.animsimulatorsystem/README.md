@@ -455,6 +455,19 @@ Unity **没有「按名查找剪辑」的 API**（`RuntimeAnimatorController.ani
   - 将创建好的 AnimSimulatorConfig(动画模拟管理器配置)文件，拖拽到 AnimSimulatorManager预制体的 Inspector面板中的AnimSimulatorConfig栏中，作为它的 配置文件 进行使用。
 - 不过，AnimSimulatorManager 预制体上 已经做好了相关的配置，如无需要 <span style="color: rgb(255, 255, 0);">**<可不进行修改>**</span>。
 
+### ⚠️ 玩家相机（Player Camera）
+
+**这一项必须指向渲染角色的那台相机**，它同时决定两件事：
+
+1. **点击射线从哪台相机发出**——取不到相机时任何点击都收不到命中，全场没反应。
+2. **动画动作列表 UI（提示圈）摆在哪**——播放器的世界坐标要经这台相机投影到屏幕，再换算进画布空间。
+
+留空时回退到 `Camera.main`，也就是**场景里打了 `MainCamera` 标签的那台**。标签漏打时两个来源同时落空，此时坐标换算会退化成「把世界坐标当屏幕像素」——2D 工程的世界坐标通常是个位数，于是**所有提示圈塌到屏幕左下角一小撮里、彼此相差不到一个像素**。
+
+这个症状极像「UI 预制体的锚点 / 轴心配错了」，很容易往错的方向查，故 2.6.4 起：管理器启动时若两个来源都空会直接告警，`com.ale.toolkit` 也会就该 Canvas 报一次。**遇到「提示圈全堆在角落」先看这里，不要先去动 UI 预制体。**
+
+> 多相机 / 分屏 / RenderTexture 的工程更要显式指定：`Camera.main` 只会挑到打了标签的那一台，未必是渲染角色的那台。
+
 ![alt text](Docs~/image-71.png)
 
 - 场景中的所有物体 会显示在 Hierarchy 面板中，蓝色的物体代表是预制体，鼠标右键 场景中的预制体，点击操作菜单中的[Prefab > Select Asset]就能在 Project 面板中，快速找到并选中 预制体的源文件。

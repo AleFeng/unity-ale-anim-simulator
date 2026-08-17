@@ -87,6 +87,16 @@ namespace Ale.AnimSimulatorSystem
             if (!animSimulatorConfig)
                 AnimSimLog.Warn(this, "AnimSimulatorConfig 未设置，动画模拟器系统 无法正常工作！");
 
+            // 「玩家相机」与「UI Canvas」缺一个，动作列表 UI 的定位就会静默退化成把世界坐标当屏幕像素用，
+            // 于是所有提示圈塌到屏幕左下角一小撮里。两者同时也是射线检测与 UI 淡入淡出的前提，故在此一并检查。
+            if (!PlayerCamera)
+                AnimSimLog.Warn(this, "「玩家相机」未设置，且场景中没有打了 MainCamera 标签的相机：" +
+                                      "点击射线检测收不到任何命中，动作列表 UI 也无法换算到正确位置。" +
+                                      $"请给本组件的 playerCamera 赋值。GameObject={gameObject.name}");
+            if (!uiCanvas)
+                AnimSimLog.Warn(this, "「UI Canvas」未设置：动作列表 UI 的世界坐标 → UI 坐标换算会原样返回世界坐标，" +
+                                      $"提示圈会全部堆在画布左下角。GameObject={gameObject.name}");
+
             // 初始化 UI设置
             InitUI();
             // 初始化 进度条管理器
@@ -130,7 +140,16 @@ namespace Ale.AnimSimulatorSystem
         [SerializeField] private AnimSimulatorConfig animSimulatorConfig;
         [Tooltip("玩家相机 组件（若为空则使用 主相机）")]
         [SerializeField] private Camera playerCamera;
-        
+
+        /// <summary>
+        /// 实际生效的玩家相机：<see cref="playerCamera"/> 优先，为空时回退 <see cref="Camera.main"/>。
+        ///
+        /// <para><b>射线检测与动作列表 UI 的定位必须共用这一个来源。</b>此前 UI 那侧是由
+        /// <c>UIUtility</c> 内部自己去猜 <c>Camera.main</c> 的，两侧一旦取到不同的相机（分屏、
+        /// 多相机、或本字段指了另一台），提示圈就会飘到射线打不到的位置——看着能点，点下去没反应。</para>
+        /// </summary>
+        private Camera PlayerCamera => playerCamera ? playerCamera : Camera.main;
+
         private bool _isAnimSimulatorStarted; // 动画模拟器 是否已开始
         
         /// <summary>
@@ -211,7 +230,7 @@ namespace Ale.AnimSimulatorSystem
         /// <returns></returns>
         private Vector3 ScreenToWorld(Vector2 screenPos)
         {
-            Camera cam = playerCamera ? playerCamera : Camera.main;
+            Camera cam = PlayerCamera;
             if (cam)
             {
                 Vector3 sp = new Vector3(screenPos.x, screenPos.y, Mathf.Abs(cam.transform.position.z));
@@ -232,11 +251,7 @@ namespace Ale.AnimSimulatorSystem
             hitWorldPos = Vector3.zero;
             
             // 获取相机
-            Camera cam = playerCamera;
-            if (!cam)
-            {
-                cam = Camera.main;
-            }
+            Camera cam = PlayerCamera;
             if (!cam) return null;
 
             // 使用相机的像素矩形将屏幕坐标映射到相机视口（支持 RenderTexture / 局部显示）
@@ -648,7 +663,11 @@ namespace Ale.AnimSimulatorSystem
             // 关联 动画动作播放器 与 列表UI实例
             if (uiAnimActionListInstance)
             {
+                // 换算世界坐标 → UI 坐标要用到的两样：画布（决定 RenderMode 与换算基准）与相机（决定投影）。
+                // 两者都必须在 SetAnimActionPlayer 之前交出去——那一步内部就会立刻定位一次。
+                // 空闲列表复用来的实例也要重设：相机可能在这期间换过。
                 uiAnimActionListInstance.UICanvas = uiCanvas;
+                uiAnimActionListInstance.WorldCamera = PlayerCamera;
                 // 设置 动画动作播放器
                 uiAnimActionListInstance.SetAnimActionPlayer(animActionPlayer);
                 // 添加到 使用中列表
