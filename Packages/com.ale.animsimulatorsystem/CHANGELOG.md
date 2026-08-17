@@ -4,6 +4,30 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.7.0] - 2026-08-17
+
+**动作列表 UI 新增操作提示。** 玩家按下、动作真正开始的那一刻，按该动作的 `Action Operation Type` 播一次对应的手指提示动画（点击 / 拖拽 / 旋转 / 按压），并且方向跟随动作已有的配置。此前操作类型这个信息只存在于 `AnimActionPlayer` 内部（起播分派、停止分派、Gizmos），UI 层完全看不见——玩家把光标移上去只看到一个转圈的提示环，看不出这条动作该点、该拖、该转还是该长按。
+
+### 新增
+
+- **`UIAnimActionList.PlayOperationTip(AnimAction)`**：按操作类型播一次提示动画。由 `AnimSimulatorManager.PlayOperationTip(player, animAction)` 转发，后者与 `FadeAnimActionList` / `OpenCloseAnimActionList` 同形，走 `_animActionPlayerToUIListDic` 找到该播放器的 UI 实例。
+- **`AnimActionPlayer.AnimActionCurrent`（只读属性）**：当前正在播放的动作。供 UI 读取本次播放的操作类型与方向配置——`Random` 类型是当场随机抽的，不等于列表里选中的那条，只能由播放器自己报。
+- **Demo UI 预制体新增 `OperationTip` 子树**（与 `CircularScrollingList`、`CircleClickTip` 平级）+ 控制器 `AC_OperationTip` + 四段一次性剪辑 `A_TipClick` / `A_TipDrag` / `A_TipRotate` / `A_TipPress`（外加全灭态 `A_TipIdle`）。
+- **六张纯白提示图标**（`Assets/Demo/Assets/UI/Images/`）：`tip_finger` / `tip_arrow` / `tip_arrow_curve` / `tip_dot` / `tip_dash_line` / `tip_dash_circle`。沿用工程既有约定——RGB 恒为纯白、形状全部由 alpha 承载，运行时靠 `Image.Color` 上色。点击波纹与长按圈**复用现有的 `btn_circle_line`**，不新增资产。
+
+### 说明
+
+- **提示为什么是独立的一套 Animator**：动作一开始，管理器就调 `FadeAnimActionList(player, false)` 把列表淡出，而 `A_FadeOut` 会把 `CircularScrollingList` 与 `CircleClickTip` 两个 CanvasGroup 的 alpha 一起压到 0。提示恰恰要在这一刻播，挂在那两个节点下面会刚播出来就跟着淡没，故另起一个平级节点跑自己的控制器。
+- **四个提示分组各有各的手指**：一只手指没法同时挂在拖拽与旋转两个方向根节点下。
+- **每段剪辑都写全四个分组的 alpha**（自己那组做动画、另外三组按住 0）：状态的 Write Defaults 关着，不写的属性会停在上一次的值，只写自己那组会让上一组残留可见。
+- **拖拽方向在屏幕空间取角**，与旋转操作在运行期的判定口径一致；透视相机下世界空间的角度会与玩家看到的对不上。
+- **不播提示的两种场合**：进度条驱动的自动播放（没有操作者），以及动作起播失败（受最小间隔限制、或没有选中动作）。
+
+### 兼容
+
+- **沿用旧 UI 预制体不会报错**：`Operation Tip Animator` 没接时按下动作只是不播提示，并在首次发生时告警一次。要启用这套提示，把 Demo 的 `UIAnimActionList.prefab` 更新过去即可。
+- `Rotate Mode Angle Range Max` 不参与提示——提示固定画一段示意弧，只表达「往哪个方向转」，不表达「要转多少度」。
+
 ## [2.6.4] - 2026-08-17
 
 **修正动作列表 UI 的定位：此前把播放器的世界坐标当成画布坐标用了。** 换算所需的相机从没交给过 UI 那一侧——`UIUtility` 只能自己去猜 `Camera.main`。场景相机没打 MainCamera 标签时（Overlay 画布的 `worldCamera` 本就恒为空）两个来源同时落空，换算退化成「世界坐标当屏幕像素」，于是**所有提示圈塌到屏幕左下角一小撮里、彼此相差不到一个像素**。

@@ -1063,6 +1063,15 @@ namespace Ale.AnimSimulatorSystem
         
         // 当前正在播放的 动画动作
         private AnimAction _animActionCurrent;
+
+        /// <summary>
+        /// 当前正在播放的动画动作；没有在播则为 <c>null</c>。
+        ///
+        /// <para>供 UI 层读取本次播放的操作类型与方向配置（动作列表 UI 的操作提示就靠它）。
+        /// 本字段在起播的类型分派<b>之前</b>就已赋值，而 <c>PlayAnimAction</c> 只有走到最后才返回
+        /// <c>true</c>——故调用方在「起播成功」分支里读到的必定是本次这一条。</para>
+        /// </summary>
+        public AnimAction AnimActionCurrent => _animActionCurrent;
         // 当前正在播放的 动画数据
         private AnimData _animDataCurrent;
         // 顺序播放时，当前的 动画动作索引

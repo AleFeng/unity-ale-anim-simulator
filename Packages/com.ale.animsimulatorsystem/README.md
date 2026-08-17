@@ -50,6 +50,7 @@
     - [动画动作列表](#动画动作列表)
     - [动画动作列表UI 制作与排错](#动画动作列表ui-制作与排错)
       - [预制体结构](#预制体结构)
+      - [操作提示](#操作提示)
       - [配置要点](#配置要点)
       - [排错速查](#排错速查)
       - [运行期自检片段](#运行期自检片段)
@@ -816,8 +817,10 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 ├─ CircularScrollingList      ← CanvasGroup + ScrollRect + UIAnimActionScrollList
 │  └─ Viewport                ← RectMask2D + 透明 Image（必需，见要点 ②）
 │     └─ Content              ← 空 RectTransform，格子由脚本实例化到此
-└─ CircleClickTip             ← 纯视觉的点击提示，不参与射线
-   └─ ImgCircleClickTip
+├─ CircleClickTip             ← 纯视觉的点击提示，不参与射线
+│  └─ ImgCircleClickTip
+└─ OperationTip               ← 操作提示（2.7.0 起），**独立 Animator**，见下面的[操作提示](#操作提示)
+   ├─ ClickGroup / DragGroup / RotateGroup / PressGroup
 ```
 
 - `CircularScrollingList` 这个**节点名是历史遗留**（2.0.0 之前挂的是同名的第三方组件），现在挂的是 Unity 原生 ScrollRect。不要改名——5 个动画剪辑（`A_FadeIn` / `A_FadeOut` / `A_ListOpen` / `A_ListClose` / `A_TipOnly`）的曲线是**按节点路径名绑定**的，改名会让整套开合动画失配。同理，`CircleClickTip` 也不要挪层级。
@@ -842,6 +845,39 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 
   > **自制 UI 预制体要补上这个状态。** 沿用旧预制体（没有 `TriggerTipOnly` 参数）时插件不会报错，Random 类型的提示圈会停在「已淡入但未展开」的形态，并在首次发生时告警一次。
 - 格子预制体（`UIAnimActionListBox.prefab`）挂在 `UIAnimActionScrollList` 的 `Cell Prefab` 上，不要作为子物体预先摆进 Content —— 格子由虚拟滚动按需实例化与复用。
+
+#### 操作提示
+
+**2.7.0 起**：玩家按下、动作真正开始的那一刻，会按该动作的 **Action Operation Type** 播**一次**对应的手指提示动画——点击 / 拖拽 / 旋转 / 按压各一段，告诉玩家「这条动作接下来该怎么操作」。
+
+**为什么它必须是独立的一套 Animator。** 动作一开始，管理器就把整个列表淡出了（`FadeAnimActionList(player, false)`），而 `A_FadeOut` 会把 `CircularScrollingList` **和** `CircleClickTip` 两个 CanvasGroup 的 alpha 一起压到 0。提示恰恰要在这一刻播，挂在那两个节点下面就会刚播出来就跟着淡没。所以 `OperationTip` 是与它们平级的第三个分支，跑自己的 `AC_OperationTip`——与 `ImgCircleClickTip` 用自己的 `AC_CircleClickTip` 是同一个道理。
+
+```
+OperationTip                  ← CanvasGroup + Animator(AC_OperationTip)
+├─ ClickGroup                 ← Ripple(btn_circle_line) / Dot / Finger
+├─ DragGroup                  ← DashLine / ArrowFore / ArrowBack / Finger   ← 代码按拖拽方向转 Z
+├─ RotateGroup                ← DashCircle / RotateOrbit(ArrowCurve + Finger)  ← 逆时针时按 X 镜像
+└─ PressGroup                 ← Ring(btn_circle_line) / Dot / Finger
+```
+
+- 状态机是 `A_TipIdle`（默认，四组 alpha 全 0）+ 四个一次性状态，各自**从 AnyState** 经 `TriggerTipClick` / `TriggerTipDrag` / `TriggerTipRotate` / `TriggerTipPress` 进入，播完自动回 `A_TipIdle`。用 AnyState 是因为四段提示互不相干、随时可被打断重放；`AC_UIAnimActionList` 那五个态互为持续状态，所以一条 AnyState 都没有。
+- 四个分组**各有各的手指**。一只手指没法同时挂在拖拽和旋转两个方向根节点下面，分开反而让四段动画彼此完全隔离、互不干扰。
+- 每段剪辑都把**四个分组的 alpha 全写死**（自己那组做动画，另外三组按住 0）。状态的 Write Defaults 是关着的，不写的属性会停在上一次的值——只写自己那组，切换提示类型时上一组会残留可见。
+
+**方向跟随动作配置：**
+
+- **拖拽**：方向取 `Quaternion.Euler(Action Direction X/Y/Z) * Vector3.up`（与 `AnimActionPlayer` 内部算拖拽轴的是同一条公式，基准方向即 **+Y**），投到**屏幕空间**后取角度，赋给 `DragGroup` 的 Z 旋转。`tip_arrow` 这张图本身就是朝 +Y 画的，所以「向上拖」对应 0°，不需要额外偏移。
+  > 取屏幕空间而不是世界空间，是为了与旋转操作在运行期的判定口径一致（那边就是屏幕空间的）；透视相机下世界空间的角度会与玩家看到的对不上。
+- **旋转**：`Is Anti Clockwise` 为真时把 `RotateGroup` 按 X 镜像，手指便沿反方向绕行；**同时把该组里的手指自身再镜像一次**，否则手形会翻成左手。
+  > `Rotate Mode Angle Range Max` **不参与**提示——提示固定画一段示意弧，只表达「往哪个方向转」，不表达「要转多少度」。
+- **点击 / 按压**：无方向，不做任何摆位。
+
+**不会播提示的场合：**
+
+- **由进度条自动触发的动作**。提示是给正在操作的人看的，自动播放没有操作者，画一只手反而困惑。实现上触发点就放在管理器的鼠标按下分支里，天然不覆盖自动播放。
+- **动作起播失败时**（受最小间隔限制、或没有选中动作）。提示跟着「真的播起来了」走。
+
+> **沿用旧 UI 预制体不会报错。** `Operation Tip Animator` 没接时按下动作只是不播提示，并在首次发生时**告警一次**。要补上这套提示，把 Demo 的 `UIAnimActionList.prefab` 更新过去即可。
 
 #### 配置要点
 
@@ -960,6 +996,11 @@ UIAnimActionList              ← Animator（淡入淡出 / 开合动画）+ UIA
 | Random 播放器的点击提示不放大、不旋转，比 Operate 的"小一号" | UI 预制体缺 `A_TipOnly` 状态与 `TriggerTipOnly` 参数 | 看控制台是否有「没有 TriggerTipOnly 参数」的告警 |
 | Random 播放器悬停时列表也铺开了 | `A_TipOnly` 里 `CircularScrollingList` 的两条曲线没归 0 | 查该剪辑的 `CanvasGroup.Alpha` / `BlocksRaycasts` 是否恒 0 |
 | 光标一离开，某个播放器的提示圈就整个消失（别的还在） | 关闭分支把它判成了「不接受点击」 | 查该播放器的 `Anim Action Player Type` 是不是 ProgressBar |
+| 按下动作时完全不播操作提示 | UI 预制体上 `Operation Tip Animator` 没接 | 看控制台是否有「没有接『操作提示 Animator』」的告警；更新 UI 预制体 |
+| 只有某一种操作类型不播提示 | `AC_OperationTip` 缺对应的触发器或状态 | 查控制器上 `TriggerTipClick/Drag/Rotate/Press` 四个参数是否齐全 |
+| 提示播了，但上一次的那组图形还留在屏幕上 | 剪辑没把其余三组的 alpha 按住 0（状态 Write Defaults 是关着的） | 四段剪辑都必须写全四个分组的 `CanvasGroup.Alpha` |
+| 拖拽提示的箭头方向与实际拖拽方向对不上 | 动作的 `Action Direction X/Y/Z` 与预期不符 | 基准方向是 **+Y**；`Euler(X,Y,Z) * up` 算出来的才是实际拖拽轴 |
+| 旋转提示的手变成了左手 | `Operation Tip Rotate Finger` 没接 | 逆时针会镜像整组，手指需反向再镜像一次才不翻手形 |
 
 #### 运行期自检片段
 

@@ -575,6 +575,9 @@ namespace Ale.AnimSimulatorSystem
                         // 记录 当前正在播放的模块
                         if (_animActionPlayerPlayingList.Contains(_animActionPlayerHover) == false)
                             _animActionPlayerPlayingList.Add(_animActionPlayerHover);
+                        // 按操作类型 播一次操作提示。必须在淡出之前取——
+                        // 提示读的是本次真正播放的那一条（Random 类型是当场随机抽的，不等于列表选中项）。
+                        PlayOperationTip(_animActionPlayerHover, _animActionPlayerHover.AnimActionCurrent);
                         // 淡出 动画动作列表
                         FadeAnimActionList(_animActionPlayerHover, false);
                     }
@@ -804,6 +807,27 @@ namespace Ale.AnimSimulatorSystem
                 animActionListInstance.FadeAnimActionList(isFadeIn, isForceFadeIn);
         }
         
+        /// <summary>
+        /// 按动作的操作类型，在该播放器的动作列表 UI 上播一次操作提示动画。
+        ///
+        /// <para><b>只在玩家真正按下时调用</b>（见 <c>OnLeftClick</c> 的按下分支）。刻意不放在
+        /// <c>AnimActionPlayer</c> 内部的起播汇合点上——那里也会被进度条驱动的自动播放走到，
+        /// 而自动播放没有操作者，画一只手反而令人困惑。</para>
+        /// </summary>
+        /// <param name="animActionPlayer"></param>
+        /// <param name="animAction">本次真正播放的那一条动作。</param>
+        public void PlayOperationTip(AnimActionPlayer animActionPlayer, AnimAction animAction)
+        {
+            if (!animActionPlayer || animAction == null) return;
+
+            // 获取 对应的 动画动作播放器 列表实例
+            if (_animActionPlayerToUIListDic == null ||
+                !_animActionPlayerToUIListDic.TryGetValue(animActionPlayer, out var animActionListInstance)) return;
+
+            if (animActionListInstance)
+                animActionListInstance.PlayOperationTip(animAction);
+        }
+
         /// <summary>
         /// 打开或关闭 动画动作列表
         /// </summary>

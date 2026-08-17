@@ -26,6 +26,19 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("动画动作 列表组件")]
         [SerializeField] private UIAnimActionScrollList animActionList;
 
+        [Header("操作提示")]
+        [Tooltip("操作提示 Animator 组件：独立于本界面的主 Animator。\n" +
+                 "动作一开始，管理器就会把整个列表淡出，而提示恰恰要在那一刻播——" +
+                 "所以它必须挂在不参与淡出的独立节点上，用自己的控制器。")]
+        [SerializeField] private Animator operationTipAnimator;
+        [Tooltip("拖拽提示的分组根节点：按动作的方向配置绕 Z 旋转。")]
+        [SerializeField] private RectTransform operationTipDragRoot;
+        [Tooltip("旋转提示的分组根节点：逆时针的动作会把它按 X 镜像。")]
+        [SerializeField] private RectTransform operationTipRotateRoot;
+        [Tooltip("旋转提示分组里的那只手指：分组被镜像时，它要反向再镜像一次，免得手形翻成左手。\n" +
+                 "四个提示分组各有各的手指，故这里只需要指旋转分组的那一只。")]
+        [SerializeField] private RectTransform operationTipRotateFinger;
+
         /// <summary>
         /// 获取 UI Canvas 组件
         /// </summary>
@@ -344,6 +357,131 @@ namespace Ale.AnimSimulatorSystem
         {
             UIUtility.PositionAtWorldPos(rectTrans, worldPos, UICanvas, WorldCamera);
         }
+        #endregion
+
+        #region 操作提示
+
+        // 操作提示的触发器。它们在**独立的** operationTipAnimator 上，故不进 AnimatorTriggersAll、
+        // 也不走 SetTriggerExclusive / TrySetTrigger——那几样都是绑在主 animator 上的。
+        private static readonly int AnimatorTriggerTipClick = Animator.StringToHash("TriggerTipClick");
+        private static readonly int AnimatorTriggerTipDrag = Animator.StringToHash("TriggerTipDrag");
+        private static readonly int AnimatorTriggerTipRotate = Animator.StringToHash("TriggerTipRotate");
+        private static readonly int AnimatorTriggerTipPress = Animator.StringToHash("TriggerTipPress");
+
+        private bool _operationTipMissingWarned;
+
+        /// <summary>
+        /// 按动作的操作类型播一次操作提示动画（点击 / 拖拽 / 旋转 / 按压）。
+        ///
+        /// <para>由 <see cref="AnimSimulatorManager"/> 在<b>玩家按下、动作真正开始</b>的那一刻调用。
+        /// 刻意不放在 <c>AnimActionPlayer</c> 内部的起播汇合点上——那里也会被进度条驱动的自动播放走到，
+        /// 而自动播放没有操作者，画一只手反而令人困惑。</para>
+        ///
+        /// <para>提示的方向跟随动作已有的配置：拖拽按 <c>actionDirectionX/Y/Z</c> 摆角度，
+        /// 旋转按 <c>isAntiClockwise</c> 决定顺 / 逆时针。</para>
+        /// </summary>
+        public void PlayOperationTip(AnimAction animAction)
+        {
+            if (animAction == null) return;
+
+            // 旧 UI 预制体没有这棵子树。告警一次即可，不必每次操作都刷。
+            if (!operationTipAnimator)
+            {
+                if (!_operationTipMissingWarned)
+                {
+                    _operationTipMissingWarned = true;
+                    AnimSimLog.Warn(this,
+                        "动作列表 UI 上没有接「操作提示 Animator」，按下动作时不会播放操作提示动画。" +
+                        "请更新动作列表 UI 预制体（新增 OperationTip 子树与 AC_OperationTip 控制器）。" +
+                        $"GameObject={gameObject.name}");
+                }
+                return;
+            }
+
+            switch (animAction.actionOperationType)
+            {
+                case EAnimActionOperationType.Drag:
+                    ApplyTipDragDirection(animAction);
+                    operationTipAnimator.SetTrigger(AnimatorTriggerTipDrag);
+                    break;
+
+                case EAnimActionOperationType.Rotate:
+                    ApplyTipRotateDirection(animAction);
+                    operationTipAnimator.SetTrigger(AnimatorTriggerTipRotate);
+                    break;
+
+                case EAnimActionOperationType.Press:
+                    operationTipAnimator.SetTrigger(AnimatorTriggerTipPress);
+                    break;
+
+                default: // Click
+                    operationTipAnimator.SetTrigger(AnimatorTriggerTipClick);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 把拖拽方向摆到提示上。
+        ///
+        /// <para>方向的算法与 <c>AnimActionPlayer.GetCursorAndActionDirection</c> 一致：
+        /// <c>Quaternion.Euler(X, Y, Z) * Vector3.up</c>，即基准方向是 <b>+Y</b>——
+        /// <c>tip_arrow</c> 这张图也正是朝 +Y 画的，于是 0° 就等于「向上拖」，不需要额外偏移。</para>
+        ///
+        /// <para><b>在屏幕空间取角度</b>，不是世界空间：旋转操作在运行期就是按屏幕空间判定的
+        /// （见 <c>AnimActionPlayer.PlayAnimRotateMode</c>），提示跟着屏幕空间走才与实际手感一致；
+        /// 而且 UI 本就画在屏幕上，透视相机下世界空间的角度会与玩家看到的对不上。</para>
+        /// </summary>
+        private void ApplyTipDragDirection(AnimAction animAction)
+        {
+            if (!operationTipDragRoot) return;
+
+            float angleDeg = 0f;
+            var player = _animActionPlayerCurrent;
+            if (player && WorldCamera)
+            {
+                Vector3 dirWs = Quaternion.Euler(
+                    animAction.actionDirectionX,
+                    animAction.actionDirectionY,
+                    animAction.actionDirectionZ) * Vector3.up;
+
+                Vector3 originSs = WorldCamera.WorldToScreenPoint(player.transform.position);
+                Vector3 targetSs = WorldCamera.WorldToScreenPoint(player.transform.position + dirWs);
+                Vector2 deltaSs = (Vector2)(targetSs - originSs);
+
+                // 方向在屏幕上退化成一个点（正对/背对相机）时保持默认的向上，别让 Atan2 返回随机角
+                if (deltaSs.sqrMagnitude > 0.0001f)
+                    angleDeg = Mathf.Atan2(deltaSs.y, deltaSs.x) * Mathf.Rad2Deg - 90f;
+            }
+
+            operationTipDragRoot.localEulerAngles = new Vector3(0f, 0f, angleDeg);
+        }
+
+        /// <summary>
+        /// 把旋转方向摆到提示上。
+        ///
+        /// <para>逆时针时把整条轨迹按 X 镜像，手指便沿反方向走；<b>同时把手指自身再镜像一次</b>，
+        /// 否则镜像会把手形翻成左手。<c>rotateModeAngleRangeMax</c> 不参与——提示固定画一段示意弧，
+        /// 它只表达「往哪个方向转」，不表达「要转多少度」。</para>
+        /// </summary>
+        private void ApplyTipRotateDirection(AnimAction animAction)
+        {
+            float mirror = animAction.isAntiClockwise ? -1f : 1f;
+
+            if (operationTipRotateRoot)
+            {
+                var scale = operationTipRotateRoot.localScale;
+                scale.x = Mathf.Abs(scale.x) * mirror;
+                operationTipRotateRoot.localScale = scale;
+            }
+
+            if (operationTipRotateFinger)
+            {
+                var scale = operationTipRotateFinger.localScale;
+                scale.x = Mathf.Abs(scale.x) * mirror;
+                operationTipRotateFinger.localScale = scale;
+            }
+        }
+
         #endregion
         
         #region 列表 选中项目监听

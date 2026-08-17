@@ -1,6 +1,6 @@
 {
   "name": "com.ale.animsimulatorsystem",
-  "version": "2.6.4",
+  "version": "2.7.0",
   "displayName": "Anim Simulator System",
   "description": "基于 Spine / Live2D / Unity 自带动画的 2D 动画模拟器系统：用光标进行点击/拖拽/旋转/按压操作驱动动画动作，配合等级进度条与动作进度条实现解锁与自动播放，并支持可分组的自定义换装。三个动画后端可在同一工程内同时启用，动画与皮肤均按字符串名配置、命名规则通用。基于 Ale Toolkit（com.ale.toolkit ≥ 1.9.0）构建，无其它第三方运行时依赖。【安装顺序】toolkit 经 git URL 分发，而 UPM 不支持在 dependencies 里写 git URL，故此处 dependencies 留空、无法自动拉取——必须先装 toolkit 再装本包，颠倒会报「找不到 Ale.Toolkit.*」。【动画运行时】Spine 经 Package Manager 安装；Live2D Cubism SDK 非 UPM 包，需从官网下载 .unitypackage 手动导入；Unity 后端为引擎内置，无需安装。详见 README 的『动画后端』章节。",
   "unity": "2022.3",
