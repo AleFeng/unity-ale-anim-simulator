@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 // 输入绑定器所在程序集同样受 ATK_INPUT_SYSTEM 约束，宏关闭时该命名空间不存在，故 using 也须一并门控。
 using Ale.Toolkit.Runtime.InputSupport;
 #endif
-#if UNITY_EDITOR && ATK_ADDRESSABLE
+#if ATK_ADDRESSABLE
 // 仅供「测试用」字段直接挂载资产引用，非运行期依赖。
 using UnityEngine.AddressableAssets;
 #endif
@@ -109,8 +109,7 @@ namespace Ale.AnimSimulatorSystem
         {
             // 订阅输入事件
             OnEnableInput();
-
-#if UNITY_EDITOR
+            
             // 测试用：直接加载配置好的 角色 与 背景。
             //
             // 两者是**各自独立**的：只配了背景（或只配了角色）都应当生效，故这里的门开在
@@ -125,7 +124,6 @@ namespace Ale.AnimSimulatorSystem
                 if (HasTestActor) ReloadTestActor();
                 if (HasTestBackground) ReloadTestBackground();
             }
-#endif
         }
 
         private void OnDisable()
@@ -1086,7 +1084,6 @@ namespace Ale.AnimSimulatorSystem
         #endregion
 
         #region 背景 管理
-#if UNITY_EDITOR
         [Header("背景-测试用")]
         [Tooltip("背景名称-测试用。按 AnimSimulatorConfig 的背景文件夹拼出地址。")]
         [SerializeField] private string testBackgroundName;
@@ -1125,7 +1122,6 @@ namespace Ale.AnimSimulatorSystem
 #endif
             BackgroundSlot.LoadByName(testBackgroundName);
         }
-#endif
         
         // 背景 资产槽
         private AnimAssetSlot _backgroundSlot;
@@ -1135,7 +1131,6 @@ namespace Ale.AnimSimulatorSystem
         #endregion
         
         #region 角色 管理
-#if UNITY_EDITOR
         [Header("角色-测试用")]
         [Tooltip("角色名称-测试用。按 AnimSimulatorConfig 的角色文件夹拼出地址。")]
         [SerializeField] private string testActorName;
@@ -1173,7 +1168,6 @@ namespace Ale.AnimSimulatorSystem
 #endif
             ActorSlot.LoadByName(testActorName);
         }
-#endif
         
         // 角色 资产槽。比背景多两件事：角色初始化完成后、以及角色卸载后，都要刷新皮肤组列表 UI。
         private AnimAssetSlot _actorSlot;
