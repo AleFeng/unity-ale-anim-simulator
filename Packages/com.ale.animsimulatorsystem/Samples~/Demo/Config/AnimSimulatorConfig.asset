@@ -16,6 +16,7 @@ MonoBehaviour:
   actorAddressableFolder: AnimSimulator/Assets/Actors/
   uiAnimActionListPrefab: {fileID: 8422216555664299035, guid: ed73cd2655660574192ea056969208e8, type: 3}
   uiAnimActorSkinGroupListPrefab: {fileID: 1432011802789687979, guid: c644d2702e393c84da56034ad6333cf1, type: 3}
+  uiDisplayConfigPanelPrefab: {fileID: 7938211690387313211, guid: ea830213c80e54c4bbb03495a3d7ca78, type: 3}
   uiProgressBarViewPrefab: {fileID: 3478702868834902606, guid: 8d0d613335ff6b5408ff152bec4a14e2, type: 3}
   uiLevelProgressBarDefault: {fileID: 7396662508602496163, guid: 63c45947ad8a91546a54a442fc167443, type: 3}
   levelExpCurveConfigsDefault:

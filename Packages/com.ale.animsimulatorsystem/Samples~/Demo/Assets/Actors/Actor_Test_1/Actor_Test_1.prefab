@@ -51,8 +51,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Fs.GameFramework.Gameplay.AnimSimulatorSystem.AnimActor
   animator: {fileID: 2864865959808424917}
-  stateInitListLegacy: []
-  baseSkinsLegacy: []
   animActorSkinGroups:
   - skinGroupName: "\u8863\u670D"
     skinGroupIcon: {fileID: 21300000, guid: 80b399b9cc45c3a46adc0bfbfcb97fc0, type: 3}
@@ -727,8 +725,16 @@ PrefabInstance:
       value: 360
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.fallback
+      value: "\u7A7A\u95F2-\u5FAA\u73AF"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].conditions.groups.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.fallback
+      value: "\u8D70\u8DEF-\u5FAA\u73AF"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
@@ -857,6 +863,22 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].key
       value: AnimSim.LevelProgress
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[1].conditions.groups.Array.data[0].items.Array.data[0].parameters.Array.size
@@ -1085,6 +1107,14 @@ PrefabInstance:
       value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.fallback
+      value: "\u8DF3\u821E-\u81EA\u52A8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.fallback
+      value: "\u6253\u91CF-\u81EA\u52A8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -1195,6 +1225,22 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[1].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1355,6 +1401,10 @@ PrefabInstance:
       value: 360
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.fallback
+      value: "\u8DF3\u821E-\u65CB\u8F6C"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -1465,6 +1515,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[3].progressBarConfigs.Array.data[2].progressModifyValue
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1653,6 +1711,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.fallback
+      value: "\u4E0B\u8E72-\u62D6\u62FD"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -1711,6 +1773,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[2].progressBarConfigs.Array.data[1].progressModifyValue
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
@@ -1803,6 +1873,10 @@ PrefabInstance:
       value: "\u6253\u91CF-\u70B9\u51FB"
       objectReference: {fileID: 0}
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.fallback
+      value: "\u6253\u91CF-\u70B9\u51FB"
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -1829,6 +1903,14 @@ PrefabInstance:
     - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: animActions.Array.data[0].progressBarConfigs.Array.data[2].progressModifyValue
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableEntryReference.m_KeyId
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 633311464242064930, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
+      propertyPath: animActions.Array.data[0].uiDisplayActionName.localized.m_TableReference.m_TableCollectionName
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2812122926332334409, guid: a0f2640e73bde5649bba2352bed36eea, type: 3}
       propertyPath: m_Name
