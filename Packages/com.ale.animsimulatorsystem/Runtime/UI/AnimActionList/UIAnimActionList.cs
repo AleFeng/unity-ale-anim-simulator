@@ -64,9 +64,6 @@ namespace Ale.AnimSimulatorSystem
             // 隐藏 动画动作 列表
             if (animActionListCanvasGroup)
                 animActionListCanvasGroup.alpha = 0f;
-            // 隐藏 点击提示
-            if (clickTipCanvasGroup)
-                clickTipCanvasGroup.alpha = 0f;
         }
 
         /// <summary>
@@ -77,7 +74,7 @@ namespace Ale.AnimSimulatorSystem
         {
             // animActionPlayer为空时，隐藏列表 并清空数据
             _animActionPlayerCurrent = animActionPlayer;
-            if (_animActionPlayerCurrent == null)
+            if (!_animActionPlayerCurrent)
             {
                 // 动画机 淡出
                 FadeAnimActionList(false);
@@ -446,7 +443,7 @@ namespace Ale.AnimSimulatorSystem
 
                 Vector3 originSs = WorldCamera.WorldToScreenPoint(player.transform.position);
                 Vector3 targetSs = WorldCamera.WorldToScreenPoint(player.transform.position + dirWs);
-                Vector2 deltaSs = (Vector2)(targetSs - originSs);
+                Vector2 deltaSs = (targetSs - originSs);
 
                 // 方向在屏幕上退化成一个点（正对/背对相机）时保持默认的向上，别让 Atan2 返回随机角
                 if (deltaSs.sqrMagnitude > 0.0001f)
