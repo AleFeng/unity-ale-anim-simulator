@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8834536551045761799}
   - component: {fileID: 7653049898207066023}
+  - component: {fileID: 5434110675008397162}
   m_Layer: 5
   m_Name: OperationTip
   m_TagString: Untagged
@@ -62,6 +63,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!225 &5434110675008397162
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047215846762978563}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &1267943877374693862
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,12 +130,14 @@ MonoBehaviour:
   animator: {fileID: 795029617346439167}
   rectTrans: {fileID: 1561243374176093758}
   clickTipCanvasGroup: {fileID: 1849645481108626066}
+  clickTipIdleRoot: {fileID: 2914792673799177640}
   animActionListCanvasGroup: {fileID: 5377109151842931917}
   animActionList: {fileID: 6033273637169959594}
   operationTipAnimator: {fileID: 7653049898207066023}
   operationTipDragRoot: {fileID: 7038468072046367348}
   operationTipRotateRoot: {fileID: 8852055385901894998}
   operationTipRotateFinger: {fileID: 6071744342474113228}
+  operationTipCanvasGroup: {fileID: 5434110675008397162}
 --- !u!95 &795029617346439167
 Animator:
   serializedVersion: 7

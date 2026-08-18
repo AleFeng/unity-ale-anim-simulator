@@ -103,6 +103,8 @@ namespace Ale.AnimSimulatorSystem
             InitProgressBar();
             // 初始化 角色管理器
             InitActor();
+            // 初始化 UI显示配置面板
+            InitDisplayConfigPanel();
         }
 
         private void OnEnable()
@@ -306,6 +308,9 @@ namespace Ale.AnimSimulatorSystem
         /// </summary>
         private void InitUI()
         {
+            // 先读回玩家的显示配置：下面的淡入淡出会拿 UiDisplayAlpha 当目标值。
+            LoadUiDisplayConfig();
+
             // 初始化 UI设置
             // UI画布 初始化非激活。等待其他系统 调用打开。
             if (uiCanvasGroup)
@@ -322,7 +327,11 @@ namespace Ale.AnimSimulatorSystem
         {
             if (_isUiFadeIn) return; // 已经是淡入状态则不重复执行
             _isUiFadeIn = true;
-            
+
+            // 玩家自己把 UI 关掉时不强行拉起来——那是他的选择，等他点一下屏幕再回来。
+            // 系统级可见（_isUiFadeIn）与用户级可见（UiDisplayOn）是两层正交状态，两者皆真才显示。
+            if (!UiDisplayOn) return;
+
             // 淡入 UI
             if (uiCanvasGroup)
             {
@@ -331,8 +340,9 @@ namespace Ale.AnimSimulatorSystem
                     uiCanvas.gameObject.SetActive(true);
                 // 打断在途的淡出：否则那条淡出的完成回调会在稍后触发，把刚激活的 UI 又关掉。
                 ToolkitTween.Kill(uiCanvasGroup);
-                // 淡入动画
-                ToolkitTween.FadeCanvasGroup(uiCanvasGroup, 1f, UiFadeDuration);
+                // 淡入动画。目标是**玩家设定的透明度**而非恒定的 1——写死 1 会让透明度滑条
+                // 每次淡入都被抹回不透明。
+                ToolkitTween.FadeCanvasGroup(uiCanvasGroup, UiDisplayAlpha, UiFadeDuration);
             }
             else if (uiCanvas)
             {
@@ -369,7 +379,197 @@ namespace Ale.AnimSimulatorSystem
             }
         }
         #endregion
-        
+
+        #region UI显示配置
+        /// <summary>
+        /// UI 显示配置已变化（显示开关 / 透明度）。
+        ///
+        /// <para><b>为什么是广播而不是由管理器遍历下发</b>：动作列表 UI 的实例分两处存放——在用的在
+        /// <c>_animActionPlayerToUIListDic</c> 里，回收的躺在 <c>_animActionListInstanceListFree</c> 里。
+        /// 遍历字典会漏掉池中实例，等它被 <see cref="RegisterAnimActionPlayer"/> 复用出来，就是一个
+        /// 带着旧设置的僵尸；要遍历就得同时扫两个集合、再在复用处补一次，三处都不能漏。
+        /// 池中实例是 enabled 的，广播能覆盖到，只需订阅方在 <c>OnEnable</c> 自己拉一次即可。</para>
+        ///
+        /// <para>与 <see cref="OnConditionInputsChanged"/> 同形。</para>
+        /// </summary>
+        public static event Action OnUiDisplayConfigChanged;
+
+        // PlayerPrefs 键。本包此前零持久化，这套是新建的；统一带前缀，免得与宿主工程自己的设置撞名。
+        private const string PrefKeyUiOn = "AnimSim.Display.Ui.On";
+        private const string PrefKeyUiAlpha = "AnimSim.Display.Ui.Alpha";
+        private const string PrefKeyClickTipOn = "AnimSim.Display.ClickTip.On";
+        private const string PrefKeyClickTipAlpha = "AnimSim.Display.ClickTip.Alpha";
+        private const string PrefKeyOperationTipOn = "AnimSim.Display.OperationTip.On";
+        private const string PrefKeyOperationTipAlpha = "AnimSim.Display.OperationTip.Alpha";
+
+        /// <summary>
+        /// 「UI」这一条透明度的<b>下限</b>。
+        ///
+        /// <para><b>不能允许调到 0。</b>那样根 Canvas 还激活着（<see cref="UiDisplayOn"/> 仍为真），
+        /// 而「点击任意处恢复」只认<b>用户级关闭</b>——那条退路根本不会触发；与此同时配置面板自己
+        /// 也一起看不见了，玩家只能凭记忆盲点右下角那个按钮才有救。留一成的底，界面始终隐约可见。</para>
+        ///
+        /// <para>只有「UI」这一条需要下限：操作点与操作提示调到全透明时，配置面板仍然看得见，随时能调回来。</para>
+        /// </summary>
+        public const float UiDisplayAlphaMin = 0.1f;
+
+        /// <summary>根 Canvas 是否显示（玩家设置）。与系统级的淡入淡出正交，两者皆真才可见。</summary>
+        public bool UiDisplayOn { get; private set; } = true;
+        /// <summary>根 Canvas 的透明度（玩家设置）。同时是淡入动画的目标值。</summary>
+        public float UiDisplayAlpha { get; private set; } = 1f;
+        /// <summary>操作点（点击提示圈）在空闲态是否显示。关闭时悬停放大的表现不变。</summary>
+        public bool ClickTipDisplayOn { get; private set; } = true;
+        /// <summary>操作点的透明度。</summary>
+        public float ClickTipDisplayAlpha { get; private set; } = 1f;
+        /// <summary>操作提示（按下时的手指提示）是否显示并播放。</summary>
+        public bool OperationTipDisplayOn { get; private set; } = true;
+        /// <summary>操作提示的透明度。</summary>
+        public float OperationTipDisplayAlpha { get; private set; } = 1f;
+
+        /// <summary>
+        /// UI 正在独占输入：为真时左键不再派发给角色。
+        ///
+        /// <para>本系统的悬停判定是<b>相机物理射线</b>（见 <c>OnPointMove</c>），不经 GraphicRaycaster，
+        /// 所以点在 UI 上的操作会照样穿透到后面的角色身上。配置面板展开时置位它，免得点开关、
+        /// 拖滑条的动作被当成对角色的操作——拖滑条尤其危险，会被识别成拖拽型动作。</para>
+        /// </summary>
+        public bool IsUiCapturingInput { get; set; }
+
+        /// <summary>从 PlayerPrefs 读回显示配置。缺键时回落到默认值（全开、全不透明）。</summary>
+        private void LoadUiDisplayConfig()
+        {
+            UiDisplayOn = PlayerPrefs.GetInt(PrefKeyUiOn, 1) != 0;
+            // 钳到下限：历史存档或手改过的键可能低于它。
+            UiDisplayAlpha = Mathf.Clamp(PlayerPrefs.GetFloat(PrefKeyUiAlpha, 1f), UiDisplayAlphaMin, 1f);
+            ClickTipDisplayOn = PlayerPrefs.GetInt(PrefKeyClickTipOn, 1) != 0;
+            ClickTipDisplayAlpha = Mathf.Clamp01(PlayerPrefs.GetFloat(PrefKeyClickTipAlpha, 1f));
+            OperationTipDisplayOn = PlayerPrefs.GetInt(PrefKeyOperationTipOn, 1) != 0;
+            OperationTipDisplayAlpha = Mathf.Clamp01(PlayerPrefs.GetFloat(PrefKeyOperationTipAlpha, 1f));
+        }
+
+        /// <summary>
+        /// 设置「UI」的显示配置：直接控制根 Canvas。
+        /// </summary>
+        /// <param name="isOn">是否显示。关闭后点击屏幕任意处即可恢复（见 <c>OnLeftClick</c>）。</param>
+        /// <param name="alpha">透明度。会被钳到 <see cref="UiDisplayAlphaMin"/> 以上，同时成为下一次淡入的目标值。</param>
+        public void SetUiDisplay(bool isOn, float alpha)
+        {
+            // 下限是硬保证：面板那侧的滑条最小值只是让手感一致，配错了也不能真把界面调没。
+            alpha = Mathf.Clamp(alpha, UiDisplayAlphaMin, 1f);
+            // 开关刚翻转时走补间，只拖动滑条时直接写——否则拖动的每一帧都会起一条新补间。
+            bool isSwitchChanged = UiDisplayOn != isOn;
+
+            UiDisplayOn = isOn;
+            UiDisplayAlpha = alpha;
+            PlayerPrefs.SetInt(PrefKeyUiOn, isOn ? 1 : 0);
+            PlayerPrefs.SetFloat(PrefKeyUiAlpha, alpha);
+
+            ApplyUiDisplay(isSwitchChanged);
+            RaiseUiDisplayConfigChanged();
+        }
+
+        /// <summary>设置「操作点」（所有动作列表 UI 的点击提示圈）的显示配置。</summary>
+        /// <param name="isOn">空闲态是否显示。关闭时空闲缩至消失，悬停放大与快速旋转不受影响。</param>
+        /// <param name="alpha">透明度。</param>
+        public void SetClickTipDisplay(bool isOn, float alpha)
+        {
+            ClickTipDisplayOn = isOn;
+            ClickTipDisplayAlpha = Mathf.Clamp01(alpha);
+            PlayerPrefs.SetInt(PrefKeyClickTipOn, isOn ? 1 : 0);
+            PlayerPrefs.SetFloat(PrefKeyClickTipAlpha, ClickTipDisplayAlpha);
+
+            RaiseUiDisplayConfigChanged();
+        }
+
+        /// <summary>设置「操作提示」（所有动作列表 UI 的手指提示动画）的显示配置。</summary>
+        /// <param name="isOn">是否显示并播放。关闭后按下动作不再播提示。</param>
+        /// <param name="alpha">透明度。</param>
+        public void SetOperationTipDisplay(bool isOn, float alpha)
+        {
+            OperationTipDisplayOn = isOn;
+            OperationTipDisplayAlpha = Mathf.Clamp01(alpha);
+            PlayerPrefs.SetInt(PrefKeyOperationTipOn, isOn ? 1 : 0);
+            PlayerPrefs.SetFloat(PrefKeyOperationTipAlpha, OperationTipDisplayAlpha);
+
+            RaiseUiDisplayConfigChanged();
+        }
+
+        /// <summary>
+        /// 把「UI」这一条的配置落到根 Canvas 上。
+        ///
+        /// <para>系统级可见性（<c>_isUiFadeIn</c>，由 <see cref="StartAnimSimulator"/> /
+        /// <see cref="StopAnimSimulator"/> 控制）与用户级可见性（<see cref="UiDisplayOn"/>）正交：
+        /// 系统级关着时这里什么都不做，等 <see cref="FadeInUI"/> 来接手。</para>
+        /// </summary>
+        /// <param name="animate">开关刚翻转时为真，走淡入补间；仅改透明度时为假，直接写。</param>
+        private void ApplyUiDisplay(bool animate)
+        {
+            if (!uiCanvas || !_isUiFadeIn) return;
+
+            if (UiDisplayOn)
+            {
+                if (!uiCanvas.gameObject.activeSelf)
+                    uiCanvas.gameObject.SetActive(true);
+
+                if (uiCanvasGroup)
+                {
+                    ToolkitTween.Kill(uiCanvasGroup);
+                    if (animate) ToolkitTween.FadeCanvasGroup(uiCanvasGroup, UiDisplayAlpha, UiFadeDuration);
+                    else uiCanvasGroup.alpha = UiDisplayAlpha;
+                }
+            }
+            else
+            {
+                // 关闭立刻见效，不走淡出：玩家关 UI 就是为了当场把画面让出来，拖半秒反而碍事。
+                if (uiCanvasGroup) ToolkitTween.Kill(uiCanvasGroup);
+                uiCanvas.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>触发显示配置变化广播。</summary>
+        private static void RaiseUiDisplayConfigChanged()
+        {
+            var handler = OnUiDisplayConfigChanged;
+            if (handler != null) handler.Invoke();
+        }
+        #endregion
+
+        #region UI显示配置面板 管理
+        [Header("UI显示配置面板")]
+        [Tooltip("UI显示配置面板 根节点：面板实例会实例化到这个节点下。")]
+        [SerializeField] private RectTransform uiDisplayConfigRoot;
+
+        // UI显示配置面板 实例
+        private UIDisplayConfigPanel _uiDisplayConfigPanelInstance;
+
+        /// <summary>
+        /// 初始化 UI显示配置面板。形状与 <see cref="InitActorSkin"/> / <see cref="InitProgressBar"/> 一致：
+        /// 销毁旧实例 → 缺配置则告警 → 实例化到专属根节点下。
+        /// </summary>
+        private void InitDisplayConfigPanel()
+        {
+            // 销毁 旧的实例
+            if (_uiDisplayConfigPanelInstance)
+            {
+                Destroy(_uiDisplayConfigPanelInstance.gameObject);
+                _uiDisplayConfigPanelInstance = null;
+            }
+
+            // 没配预制体就是不需要这个面板，静默跳过——它是可选功能，不该为此刷告警。
+            if (!animSimulatorConfig || !animSimulatorConfig.uiDisplayConfigPanelPrefab) return;
+
+            if (!uiDisplayConfigRoot)
+            {
+                AnimSimLog.Warn(this, "「UI显示配置面板 根节点」未设置，但配置里指定了面板预制体：" +
+                                      $"面板不会被创建。GameObject={gameObject.name}");
+                return;
+            }
+
+            _uiDisplayConfigPanelInstance =
+                Instantiate(animSimulatorConfig.uiDisplayConfigPanelPrefab, uiDisplayConfigRoot);
+        }
+        #endregion
+
         #region 操作输入
         [Header("操作输入")]
         [Tooltip("输入动作映射名称")]
@@ -511,8 +711,8 @@ namespace Ale.AnimSimulatorSystem
                 // 处理拖拽移动
                 if (cursorDeltaDirSs.sqrMagnitude > Mathf.Epsilon || cursorDeltaDirWs.sqrMagnitude > Mathf.Epsilon)
                 {
-                    // 播放中的模块 处理拖拽移动
-                    if (_isDragging && _animActionPlayerPlayingList.Count > 0)
+                    // 播放中的模块 处理拖拽移动。配置面板展开时不派发——拖透明度滑条会被识别成拖拽型动作。
+                    if (_isDragging && !IsUiCapturingInput && _animActionPlayerPlayingList.Count > 0)
                     {
                         foreach (var animActionPlayer in SnapshotPlayingList())
                         {
@@ -545,7 +745,22 @@ namespace Ale.AnimSimulatorSystem
                 
                 // 开始拖拽
                 _isDragging = true;
-                
+
+                // 玩家自己把 UI 关掉之后，这一次点击只用来把 UI 唤回来，**不派发给角色**——
+                // 否则「想清屏看看画面」的那一下会顺手触发一个动作。
+                //
+                // 只认用户级关闭（UiDisplayOn）：StopAnimSimulator() 关掉的 UI 是系统级的，
+                // 不该被随便一次点击唤回来。
+                if (!UiDisplayOn)
+                {
+                    SetUiDisplay(true, UiDisplayAlpha);
+                    return;
+                }
+
+                // 配置面板展开时挂起角色交互：本系统的悬停判定是物理射线、不经 GraphicRaycaster，
+                // 点在 UI 上会照样穿透到后面的角色身上。见 IsUiCapturingInput 的说明。
+                if (IsUiCapturingInput) return;
+
                 // 通知模块开始拖拽
                 if (_animActionPlayerHover)
                 {

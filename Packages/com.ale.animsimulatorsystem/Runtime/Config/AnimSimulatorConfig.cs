@@ -29,6 +29,11 @@ namespace Ale.AnimSimulatorSystem
         [Header("动画角色皮肤组 配置")]
         [Tooltip("动画角色皮肤组 UI列表：用于将 动画角色 上配置的 皮肤组，显示在UI列表中 供用户选择。")]
         public UIAnimActorSkinGroupList uiAnimActorSkinGroupListPrefab;
+
+        [Header("UI显示配置 配置")]
+        [Tooltip("UI显示配置 面板预制体：画面右下角的眼睛按钮，点开可逐项配置 UI / 操作点 / 操作提示的显示与透明度。\n" +
+                 "留空则不创建该面板——它是可选功能。")]
+        public UIDisplayConfigPanel uiDisplayConfigPanelPrefab;
         
         [Header("进度条 配置")]
         [Tooltip("进度条UI视口 预制体：用于在UI画布中 显示进度条。")]

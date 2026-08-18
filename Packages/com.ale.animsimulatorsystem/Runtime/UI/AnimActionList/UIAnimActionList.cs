@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Ale.Toolkit.Runtime;
 using Ale.Toolkit.Runtime.UI;
 
 namespace Ale.AnimSimulatorSystem
@@ -17,8 +18,14 @@ namespace Ale.AnimSimulatorSystem
         [SerializeField] private RectTransform rectTrans;
         
         [Header("点击提示")]
-        [Tooltip("点击提示 CanvasGroup组件")]
+        [Tooltip("点击提示 CanvasGroup组件：整个提示圈的透明度，由「操作点」显示配置驱动。\n" +
+                 "动画从不写这个 alpha（淡入淡出走的是子物体 Image 的 m_Color.a），故这条通道归代码独占。")]
         [SerializeField] private CanvasGroup clickTipCanvasGroup;
+        [Tooltip("点击提示 空闲缩放根节点：指向提示圈内的图片节点（ImgCircleClickTip）。\n" +
+                 "「操作点」关掉显示时缩到 0，让它在空闲态消失；悬停展开时照常放大。\n" +
+                 "为什么是图片节点而不是提示圈本身：提示圈的 localScale 被动画占着" +
+                 "（A_FadeIn/Out、A_ListOpen/Close、A_TipOnly 都写），代码写进去当帧就被覆盖。")]
+        [SerializeField] private RectTransform clickTipIdleRoot;
         
         [Header("动画动作")]
         [Tooltip("动画动作 列表 CanvasGroup组件")]
@@ -38,6 +45,9 @@ namespace Ale.AnimSimulatorSystem
         [Tooltip("旋转提示分组里的那只手指：分组被镜像时，它要反向再镜像一次，免得手形翻成左手。\n" +
                  "四个提示分组各有各的手指，故这里只需要指旋转分组的那一只。")]
         [SerializeField] private RectTransform operationTipRotateFinger;
+        [Tooltip("操作提示 根节点的 CanvasGroup：整套提示的透明度，由「操作提示」显示配置驱动。\n" +
+                 "四个分组各自的 CanvasGroup 由剪辑逐帧写死，只有根节点这一层是空的，故加在这里。")]
+        [SerializeField] private CanvasGroup operationTipCanvasGroup;
 
         /// <summary>
         /// 获取 UI Canvas 组件
@@ -132,8 +142,19 @@ namespace Ale.AnimSimulatorSystem
             else                animActionList.SetItems(_animActionContentList);
         }
 
-        private void OnEnable()  { AnimSimulatorManager.OnConditionInputsChanged += OnConditionInputsChanged; }
-        private void OnDisable() { AnimSimulatorManager.OnConditionInputsChanged -= OnConditionInputsChanged; }
+        private void OnEnable()
+        {
+            AnimSimulatorManager.OnConditionInputsChanged += OnConditionInputsChanged;
+            AnimSimulatorManager.OnUiDisplayConfigChanged += PullUiDisplayConfig;
+            // 本实例可能是刚从空闲池里复用出来的，期间配置或许已经变过；进场先自己拉一次。
+            PullUiDisplayConfig();
+        }
+
+        private void OnDisable()
+        {
+            AnimSimulatorManager.OnConditionInputsChanged -= OnConditionInputsChanged;
+            AnimSimulatorManager.OnUiDisplayConfigChanged -= PullUiDisplayConfig;
+        }
 
         /// <summary>
         /// 条件所依赖的输入（进度条读数 / 等级）发生变化：重新求值一遍，条数变了就刷新列表。
@@ -317,6 +338,8 @@ namespace Ale.AnimSimulatorSystem
                 if (!TrySetTrigger((CanExpandList || isForceOpen) ? AnimatorTriggerListOpen : AnimatorTriggerTipOnly))
                     return;
                 _isOpen = true;
+                // 展开态要盖过「空闲隐藏」：否则关掉「操作点」后悬停放大会被缩放归零抵消。
+                RefreshClickTipIdleScale();
             }
             // 关闭列表
             else
@@ -327,6 +350,8 @@ namespace Ale.AnimSimulatorSystem
                 {
                     TrySetTrigger(AnimatorTriggerListClose);
                     _isOpen = false;
+                    // 收回展开态，重新回到「空闲隐藏」的管辖范围
+                    RefreshClickTipIdleScale();
                 }
 
                 // 光标离开后停在 idle 形态（A_ListClose：提示圈缩回 1.0 倍、子物体继续慢转），
@@ -380,6 +405,10 @@ namespace Ale.AnimSimulatorSystem
         public void PlayOperationTip(AnimAction animAction)
         {
             if (animAction == null) return;
+
+            // 「操作提示」被玩家关掉：不播，也不摆方向。透明度压到 0 也能看不见，
+            // 但那样动画仍在跑、方向仍在算——关掉就该是真的不做事。
+            if (!_operationTipShow) return;
 
             // 旧 UI 预制体没有这棵子树。告警一次即可，不必每次操作都刷。
             if (!operationTipAnimator)
@@ -480,7 +509,105 @@ namespace Ale.AnimSimulatorSystem
         }
 
         #endregion
-        
+
+        #region 显示配置
+        // 「操作点」是否在空闲态显示。关闭后空闲时缩到看不见，悬停展开仍照常放大。
+        private bool _clickTipShowOnIdle = true;
+        // 「操作提示」是否显示并播放。
+        private bool _operationTipShow = true;
+
+        // 缺组件的一次性告警旗标。照本类既有的 _tipOnlyMissingWarned / _operationTipMissingWarned 那套。
+        private bool _clickTipIdleRootMissingWarned;
+        private bool _operationTipCanvasGroupMissingWarned;
+
+        // 空闲显隐的缩放时长（秒）。比展开动画（0.333 秒转一圈）短，收放不拖泥带水。
+        private const float ClickTipIdleScaleDuration = 0.15f;
+
+        /// <summary>
+        /// 从管理器拉一次当前的显示配置。
+        ///
+        /// <para>订阅 <see cref="AnimSimulatorManager.OnUiDisplayConfigChanged"/> 而不是由管理器遍历下发，
+        /// 是因为**回收进空闲池的实例不在管理器的字典里**——遍历字典会漏掉它们，等它们被复用出来
+        /// 就是一个带着旧设置的僵尸。池中实例是 enabled 的，广播能覆盖到。</para>
+        /// </summary>
+        private void PullUiDisplayConfig()
+        {
+            var manager = AnimSimulatorManager.Instance;
+            // 管理器尚未 Awake（Instance 不做惰性创建）时保持默认值，等它起来后的第一次广播来补。
+            if (!manager) return;
+
+            ApplyClickTipDisplay(manager.ClickTipDisplayOn, manager.ClickTipDisplayAlpha);
+            ApplyOperationTipDisplay(manager.OperationTipDisplayOn, manager.OperationTipDisplayAlpha);
+        }
+
+        /// <summary>
+        /// 应用「操作点」（点击提示圈）的显示配置。
+        /// </summary>
+        /// <param name="isShowOnIdle">空闲态是否显示。关闭时空闲缩至消失，<b>悬停放大与快速旋转不受影响</b>。</param>
+        /// <param name="alpha">整个提示圈的透明度。</param>
+        public void ApplyClickTipDisplay(bool isShowOnIdle, float alpha)
+        {
+            _clickTipShowOnIdle = isShowOnIdle;
+
+            // 透明度是**相乘**的：A_FadeIn 会把圈图自身的 m_Color.a 压到 0.78，这里的 alpha 叠在它上面。
+            // 所以滑条 1.0 = 维持现有观感，而不是「变成全不透明」。
+            if (clickTipCanvasGroup)
+                clickTipCanvasGroup.alpha = Mathf.Clamp01(alpha);
+
+            RefreshClickTipIdleScale();
+        }
+
+        /// <summary>
+        /// 按当前的空闲显隐设置与展开状态，重算提示圈图片的缩放。
+        ///
+        /// <para>展开态（<c>_isOpen</c>）一律显示——「关掉操作点」关的是空闲时的常驻提示，
+        /// 不是悬停时的反馈。</para>
+        /// </summary>
+        private void RefreshClickTipIdleScale()
+        {
+            if (!clickTipIdleRoot)
+            {
+                // 关着的时候没接引用才值得报：开着（默认值）时本方法什么都不需要做。
+                if (!_clickTipShowOnIdle && !_clickTipIdleRootMissingWarned)
+                {
+                    _clickTipIdleRootMissingWarned = true;
+                    AnimSimLog.Warn(this,
+                        "动作列表 UI 上没有接「点击提示 空闲缩放根节点」，关闭「操作点」显示时提示圈不会在空闲态消失。" +
+                        "请更新动作列表 UI 预制体（把该字段指向 CircleClickTip/ImgCircleClickTip）。" +
+                        $"GameObject={gameObject.name}");
+                }
+                return;
+            }
+
+            float target = (_clickTipShowOnIdle || _isOpen) ? 1f : 0f;
+            ToolkitTween.Kill(clickTipIdleRoot);
+            ToolkitTween.ScaleTransform(clickTipIdleRoot, Vector3.one * target, ClickTipIdleScaleDuration);
+        }
+
+        /// <summary>
+        /// 应用「操作提示」（按下时的手指提示）的显示配置。
+        /// </summary>
+        /// <param name="isShow">是否显示并播放。关闭后 <see cref="PlayOperationTip"/> 直接不做事。</param>
+        /// <param name="alpha">整套提示的透明度。</param>
+        public void ApplyOperationTipDisplay(bool isShow, float alpha)
+        {
+            _operationTipShow = isShow;
+
+            if (operationTipCanvasGroup)
+            {
+                operationTipCanvasGroup.alpha = Mathf.Clamp01(alpha);
+            }
+            else if (!_operationTipCanvasGroupMissingWarned)
+            {
+                _operationTipCanvasGroupMissingWarned = true;
+                AnimSimLog.Warn(this,
+                    "动作列表 UI 上没有接「操作提示 根节点的 CanvasGroup」，操作提示的透明度设置不会生效" +
+                    "（显示开关仍然有效）。请更新动作列表 UI 预制体（给 OperationTip 节点加一个 CanvasGroup）。" +
+                    $"GameObject={gameObject.name}");
+            }
+        }
+        #endregion
+
         #region 列表 选中项目监听
         // 是否 已订阅焦点变化事件
         private bool _isFocusListenerSubscribed;
