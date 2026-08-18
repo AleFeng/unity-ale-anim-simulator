@@ -16,6 +16,7 @@
 - **`UIDisplayConfigPanel` / `UIDisplayConfigRow`**（`Runtime/UI/DisplayConfig/`）+ Demo 预制体 `Assets/UI/DisplayConfig/UIDisplayConfigPanel.prefab`。预制体引用配在 `AnimSimulatorConfig.uiDisplayConfigPanelPrefab` 上，**留空则不创建该面板**。
 - **关掉「UI」后点击屏幕任意处即可恢复。** 那一次点击会被**吃掉**，不派发给角色——否则「想清屏看看画面」的那一下会顺手触发一个动作。
 - **`AnimSimulatorManager.IsUiCapturingInput`**：配置面板展开期间挂起角色交互。
+- **配置列表展开时，点面板以外的任意位置即可收起它**（`UIDisplayConfigPanel.TryCollapseByOutsideClick`），那一次点击同样被消费掉、不派发给角色。**眼睛按钮算「面板之内」**——否则它会与按钮自己的 `onClick` 打架，一边收起一边又切换，净效果取决于两者执行先后，表现为「按钮时灵时不灵」。
 - **PlayerPrefs 持久化**，六个键，前缀 `AnimSim.Display.`。本包此前零持久化，这套是新建的。
 - **「UI」透明度设有 10% 的下限**（`AnimSimulatorManager.UiDisplayAlphaMin`）。调到全透明会把自己锁死：根 Canvas 仍激活着（显示开关还是开的），而「点击任意处恢复」**只认显示开关**、对透明度不生效；与此同时配置面板自己也一起看不见了，玩家只能凭记忆盲点右下角才有救。留一成的底，界面始终隐约可见。钳制在管理器侧（写入与读取都钳），面板那侧的滑条最小值只是让手感一致。**操作点与操作提示不设下限**——它们归零时配置面板仍看得见，随时能调回来。
 

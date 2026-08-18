@@ -1,4 +1,5 @@
 using Ale.Toolkit.Runtime;
+using Ale.Toolkit.Runtime.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -73,6 +74,45 @@ namespace Ale.AnimSimulatorSystem
         public void Collapse()
         {
             if (_isExpanded) ApplyExpanded(false, animate: true);
+        }
+
+        /// <summary>
+        /// 屏幕上发生了一次点击：落在面板<b>之外</b>就收起配置列表。「点空白处关掉浮层」是这类面板的通用预期。
+        ///
+        /// <para>由 <see cref="AnimSimulatorManager"/> 在左键按下时调用——它直接吃 Input System 的事件、
+        /// 不经 GraphicRaycaster，所以点在哪里都收得到，包括没有任何 UI 的空白处。</para>
+        ///
+        /// <para><b>眼睛按钮算「面板之内」</b>：否则点它会与按钮自己的 onClick 打架——
+        /// 一边收起一边又切换，净效果取决于两者的执行先后，表现为「按钮时灵时不灵」。</para>
+        /// </summary>
+        /// <param name="screenPos">点击的屏幕坐标。</param>
+        /// <returns>是否因此收起了列表。为 <c>true</c> 时调用方应把这次点击<b>消费掉</b>，不再派发给角色。</returns>
+        public bool TryCollapseByOutsideClick(Vector2 screenPos)
+        {
+            if (!_isExpanded) return false;
+            if (IsInsidePanel(screenPos)) return false;
+
+            ApplyExpanded(false, animate: true);
+            return true;
+        }
+
+        /// <summary>屏幕坐标是否落在眼睛按钮或配置列表的矩形内。</summary>
+        private bool IsInsidePanel(Vector2 screenPos)
+        {
+            // Overlay 画布必须传 null 相机；其余渲染模式取画布自己的相机。
+            var canvas = UIUtility.ResolveRootCanvas(this);
+            Camera cam = canvas && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+
+            if (btnToggle)
+            {
+                var rtButton = btnToggle.transform as RectTransform;
+                if (rtButton && RectTransformUtility.RectangleContainsScreenPoint(rtButton, screenPos, cam))
+                    return true;
+            }
+
+            return listRoot && RectTransformUtility.RectangleContainsScreenPoint(listRoot, screenPos, cam);
         }
 
         private void OnBtnToggleClick()

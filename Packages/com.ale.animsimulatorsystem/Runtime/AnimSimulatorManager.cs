@@ -577,6 +577,19 @@ namespace Ale.AnimSimulatorSystem
             _uiDisplayConfigPanelInstance =
                 Instantiate(animSimulatorConfig.uiDisplayConfigPanelPrefab, uiDisplayConfigRoot);
         }
+
+        /// <summary>
+        /// 把一次左键按下转给配置面板：落在面板之外就收起配置列表。
+        ///
+        /// <para>放在这里而不是内联进 <c>OnLeftClick</c>，是因为那个方法整个在
+        /// <c>ATK_INPUT_SYSTEM</c> 宏里，而本方法用到的字段在宏外——分开写两种宏配置都编得过。</para>
+        /// </summary>
+        /// <returns>列表是否因此被收起。为 <c>true</c> 时这次点击已被消费。</returns>
+        private bool TryCollapseDisplayConfigPanelByClick()
+        {
+            return _uiDisplayConfigPanelInstance &&
+                   _uiDisplayConfigPanelInstance.TryCollapseByOutsideClick(_cursorScreenPos);
+        }
         #endregion
 
         #region 操作输入
@@ -765,6 +778,13 @@ namespace Ale.AnimSimulatorSystem
                     SetUiDisplay(true, UiDisplayAlpha);
                     return;
                 }
+
+                // 配置列表展开时，点在面板之外就把它收起，并把这一次点击**消费掉**——
+                // 「点空白处关掉浮层」的那一下不该顺带触发一个动作。
+                //
+                // 必须排在下面那道守卫之前：列表展开期间 IsUiCapturingInput 恒为真，
+                // 放在它后面就永远轮不到这里。
+                if (TryCollapseDisplayConfigPanelByClick()) return;
 
                 // 配置面板展开时挂起角色交互：本系统的悬停判定是物理射线、不经 GraphicRaycaster，
                 // 点在 UI 上会照样穿透到后面的角色身上。见 IsUiCapturingInput 的说明。
