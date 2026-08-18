@@ -4,6 +4,39 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.8.0] - 2026-08-18
+
+**新增 UI 显示配置面板。** 画面右下角一个眼睛按钮，点开是一列配置项，每行「功能名称 + 显示开关 + 透明度滑条」，逐项控制 UI / 操作点 / 操作提示的显示。此前这套系统的 UI 是**全有或全无**的——只有 `StartAnimSimulator()` / `StopAnimSimulator()` 两级总开关，玩家想把界面收干净点看画面、想把提示圈调淡一些，一个都做不到。
+
+### 新增
+
+- **`AnimSimulatorManager` 的三组显示配置**：`UiDisplayOn/Alpha`、`ClickTipDisplayOn/Alpha`、`OperationTipDisplayOn/Alpha`，各配一个 setter。改动经 **`OnUiDisplayConfigChanged`（静态事件）**广播，`UIAnimActionList` 在 `OnEnable`/`OnDisable` 订阅。
+- **`UIAnimActionList.ApplyClickTipDisplay(bool, float)` / `ApplyOperationTipDisplay(bool, float)`**：前者控制提示圈在空闲态的显隐与整体透明度，后者控制操作提示的播放与透明度。
+- **`UIDisplayConfigPanel` / `UIDisplayConfigRow`**（`Runtime/UI/DisplayConfig/`）+ Demo 预制体 `Assets/UI/DisplayConfig/UIDisplayConfigPanel.prefab`。预制体引用配在 `AnimSimulatorConfig.uiDisplayConfigPanelPrefab` 上，**留空则不创建该面板**。
+- **关掉「UI」后点击屏幕任意处即可恢复。** 那一次点击会被**吃掉**，不派发给角色——否则「想清屏看看画面」的那一下会顺手触发一个动作。
+- **`AnimSimulatorManager.IsUiCapturingInput`**：配置面板展开期间挂起角色交互。
+- **PlayerPrefs 持久化**，六个键，前缀 `AnimSim.Display.`。本包此前零持久化，这套是新建的。
+- **「UI」透明度设有 10% 的下限**（`AnimSimulatorManager.UiDisplayAlphaMin`）。调到全透明会把自己锁死：根 Canvas 仍激活着（显示开关还是开的），而「点击任意处恢复」**只认显示开关**、对透明度不生效；与此同时配置面板自己也一起看不见了，玩家只能凭记忆盲点右下角才有救。留一成的底，界面始终隐约可见。钳制在管理器侧（写入与读取都钳），面板那侧的滑条最小值只是让手感一致。**操作点与操作提示不设下限**——它们归零时配置面板仍看得见，随时能调回来。
+
+### 修复
+
+- **拖拽进度漏除了一次交互半径，`Action Range` 被整个约掉。** 原式 `Clamp01(dot(cursor, actionDir) / |actionDir|)` 里，`|actionDir|` 恰好**就是**交互半径，约分后只剩「投影的绝对长度（米）」——于是无论把这个值填成多少，都固定拖满 **1 米**才涨到 100%。默认值 2.0（半径 1 米）下两种算法恰好等价，所以这处失效一直没有暴露。**此前把它改成非 2.0 的拖拽动作，手感会随之改变，需要重新确认一遍。**
+- 同时修正了 `Action Range` 的 Tooltip：原文「在交互范围内的操作 会影响动画动作的播放」暗示存在范围内外的门控，而**四种操作类型都不存在这种门控**，它也不是点击范围（点不点得到由 `SphereCollider` 决定）。
+
+### 说明
+
+- **为什么提示圈的两条通道是 CanvasGroup 的 alpha 与图片节点的 scale**：`CircleClickTip` 完全没有 C# 参与，全靠动画驱动。逐条比对五个剪辑的曲线绑定后确认——动画写的是 `CircleClickTip` 的 `m_LocalScale`/`localEulerAnglesRaw` 与 `ImgCircleClickTip` 的 `localEulerAnglesRaw`/`m_Color.a`，恰好**没写**前者的 CanvasGroup alpha 与后者的 scale。这两条空通道正好够用，且不与动画抢写。
+- **透明度是相乘的**：`A_FadeIn` 会把提示圈图自身的 `m_Color.a` 压到 0.78，滑条的值叠在它上面。所以滑条 1.0 = **维持现有观感**，而不是「变成全不透明」。
+- **关掉「操作点」只关空闲态**：悬停时的放大与快速旋转照旧——那是操作反馈，不是常驻提示。判据是列表的展开状态（`_isOpen`）。
+- **为什么广播而不是遍历字典**：动作列表 UI 的实例分两处存放，在用的在 `_animActionPlayerToUIListDic` 里，回收的躺在 `_animActionListInstanceListFree` 里。遍历字典会漏掉池中实例，等它被复用出来就是一个带着旧设置的僵尸。池中实例是 enabled 的，静态事件能覆盖到。
+- **系统级与用户级可见性正交**：`_isUiFadeIn`（由 `Start/StopAnimSimulator` 控制）与 `UiDisplayOn`（玩家设置）两者皆真才显示。淡入的目标值改为 `UiDisplayAlpha` 而非写死的 1，否则滑条设的值每次淡入都会被抹回不透明。「点击恢复」只认后者——`StopAnimSimulator()` 关掉的 UI 不该被随便一次点击唤回来。
+- **配置面板展开时挂起角色交互**：本系统的悬停判定是**相机物理射线**、不经 GraphicRaycaster，点在 UI 上会照样穿透到后面的角色身上，拖透明度滑条尤其危险——会被识别成拖拽型动作。
+
+### 兼容
+
+- **沿用旧 UI 预制体不会报错**：`Click Tip Idle Root` 与 `Operation Tip Canvas Group` 没接时，对应的那一半功能静默失效（前者只在真去关闭时告警一次，后者告警一次），显示开关本身仍然有效。要完整启用，把 Demo 的 `UIAnimActionList.prefab` 更新过去即可。
+- `AnimSimulatorConfig.uiDisplayConfigPanelPrefab` 留空时不创建面板，老工程升级上来不会凭空多出一个按钮。
+
 ## [2.7.0] - 2026-08-17
 
 **动作列表 UI 新增操作提示。** 玩家按下、动作真正开始的那一刻，按该动作的 `Action Operation Type` 播一次对应的手指提示动画（点击 / 拖拽 / 旋转 / 按压），并且方向跟随动作已有的配置。此前操作类型这个信息只存在于 `AnimActionPlayer` 内部（起播分派、停止分派、Gizmos），UI 层完全看不见——玩家把光标移上去只看到一个转圈的提示环，看不出这条动作该点、该拖、该转还是该长按。
