@@ -684,10 +684,27 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
                          
-            // 光标向量 在 动作向量 上的投影长度（像素）
-            float projection = Vector2.Dot(cursorDirWs, actionDirWs);
+            // 交互半径：actionRange 是<b>直径</b>，从中心拖到球边缘算满进度（与 Gizmos 画的青色线框一致）。
+            float actionHalfRange = _animActionCurrent.actionRange * 0.5f;
+            if (actionHalfRange <= Mathf.Epsilon)
+            {
+                // 半径不为正时映射无从谈起，进度恒为 0（OnValidate 已就此告警）
+                SetAnimProgress(0f);
+                return;
+            }
+
+            // 动作轴在 XY 平面上的单位方向。本系统的操作都发生在 XY 平面上，Z 分量不参与
+            // （与旋转模式同一口径）；动作轴整个指向屏幕深处时它退化为零向量，投影随之为 0。
+            Vector2 actionAxis = ((Vector2)actionDirWs).normalized;
+            // 光标向量 在 动作轴 上的投影长度（单位：米）
+            float projection = Vector2.Dot(cursorDirWs, actionAxis);
             // 将投影长度规范化到 [0,1]（负值裁剪为 0，超过半径裁剪为 1）
-            float progress = Mathf.Clamp01(projection / actionDirWs.magnitude);
+            //
+            // <b>必须除以交互半径，不能除以动作向量的模</b>：动作向量的模恰好就是交互半径，
+            // 除以它等于先把动作向量归一化，得到的是投影的绝对长度（米），actionRange 被整个约掉——
+            // 表现为无论把「动作的交互范围」调成多少，都固定拖满 1 米才涨到 100%。
+            // 而默认值 2（半径 1）下两种算法恰好等价，所以这处失效一直没有暴露。
+            float progress = Mathf.Clamp01(projection / actionHalfRange);
             
             // 播放 动画-拖拽模式。设置动画进度值，带阻尼效果, 非循环模式
             SetAnimProgress(progress, false, _animActionCurrent.isReverse, _animActionCurrent.dampingTime);
@@ -1707,7 +1724,10 @@ namespace Ale.AnimSimulatorSystem
 #endif
         [FormerlySerializedAs("actionType")] [Tooltip("动作类型：操作交互的类型")] 
         public EAnimActionOperationType actionOperationType = EAnimActionOperationType.Click;
-        [Tooltip("动作交互范围：球形交互范围的直径。(单位：米)在交互范围内的操作 会影响动画动作的播放。")] 
+        [Tooltip("动作的交互范围：拖拽行程的直径（单位：米）。它不是点击范围——点不点得到由 SphereCollider 决定。\n" +
+                 "拖拽：沿动作方向从中心拖到球边缘（即行程的一半）时，动画进度涨到 100%。\n" +
+                 "旋转：进度由转过的角度决定（见「允许的角度范围」），本值只需大于 0。\n" +
+                 "点击 / 按压：不使用本值。")]
         public float actionRange = 2f;
         [Tooltip("动作交互方向 X轴：动作交互区域的朝向，X轴的旋转角度。(单位：度)"), Range(0f, 360f)]
         public float actionDirectionX;
