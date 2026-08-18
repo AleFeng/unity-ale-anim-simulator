@@ -10,6 +10,7 @@
 
 ### 新增
 
+- **「UI」的显示开关走 alpha 而不是停用物体**：关掉时把根 `CanvasGroup` 的 Alpha 归 0 并把 `Blocks Raycasts` 置为 false，**不动 Canvas 物体的激活态**。停用物体会把它下面所有组件的 `Update` 与协程一并停掉、还会走一遍 `OnDisable`/`OnEnable`，某些组件的状态会因此错乱；alpha 归零 + 停止拦截射线同样达到「看不见且点不着」，而组件照常运转。**激活态只由 `FadeInUI` / `FadeOutUI`（即 `StartAnimSimulator` / `StopAnimSimulator`）负责**，两层各管各的。
 - **`AnimSimulatorManager` 的三组显示配置**：`UiDisplayOn/Alpha`、`ClickTipDisplayOn/Alpha`、`OperationTipDisplayOn/Alpha`，各配一个 setter。改动经 **`OnUiDisplayConfigChanged`（静态事件）**广播，`UIAnimActionList` 在 `OnEnable`/`OnDisable` 订阅。
 - **`UIAnimActionList.ApplyClickTipDisplay(bool, float)` / `ApplyOperationTipDisplay(bool, float)`**：前者控制提示圈在空闲态的显隐与整体透明度，后者控制操作提示的播放与透明度。
 - **`UIDisplayConfigPanel` / `UIDisplayConfigRow`**（`Runtime/UI/DisplayConfig/`）+ Demo 预制体 `Assets/UI/DisplayConfig/UIDisplayConfigPanel.prefab`。预制体引用配在 `AnimSimulatorConfig.uiDisplayConfigPanelPrefab` 上，**留空则不创建该面板**。
@@ -29,7 +30,7 @@
 - **透明度是相乘的**：`A_FadeIn` 会把提示圈图自身的 `m_Color.a` 压到 0.78，滑条的值叠在它上面。所以滑条 1.0 = **维持现有观感**，而不是「变成全不透明」。
 - **关掉「操作点」只关空闲态**：悬停时的放大与快速旋转照旧——那是操作反馈，不是常驻提示。判据是列表的展开状态（`_isOpen`）。
 - **为什么广播而不是遍历字典**：动作列表 UI 的实例分两处存放，在用的在 `_animActionPlayerToUIListDic` 里，回收的躺在 `_animActionListInstanceListFree` 里。遍历字典会漏掉池中实例，等它被复用出来就是一个带着旧设置的僵尸。池中实例是 enabled 的，静态事件能覆盖到。
-- **系统级与用户级可见性正交**：`_isUiFadeIn`（由 `Start/StopAnimSimulator` 控制）与 `UiDisplayOn`（玩家设置）两者皆真才显示。淡入的目标值改为 `UiDisplayAlpha` 而非写死的 1，否则滑条设的值每次淡入都会被抹回不透明。「点击恢复」只认后者——`StopAnimSimulator()` 关掉的 UI 不该被随便一次点击唤回来。
+- **系统级与用户级可见性正交，且各管一样东西**：`_isUiFadeIn`（由 `Start/StopAnimSimulator` 控制）管**激活态**，`UiDisplayOn`（玩家设置）管 **alpha 与射线拦截**，两者皆真才看得见。这个分工是必须的——若让用户级也去停用物体，「关着 UI 时停止再开始」会让 `FadeInUI` 提前返回、Canvas 永久停在停用态，之后连点击都唤不回来。现在 `FadeInUI` **无条件激活**，可见与否交给 alpha。淡入的目标值改为 `UiDisplayAlpha` 而非写死的 1，否则滑条设的值每次淡入都会被抹回不透明。「点击恢复」只认后者——`StopAnimSimulator()` 关掉的 UI 不该被随便一次点击唤回来。
 - **配置面板展开时挂起角色交互**：本系统的悬停判定是**相机物理射线**、不经 GraphicRaycaster，点在 UI 上会照样穿透到后面的角色身上，拖透明度滑条尤其危险——会被识别成拖拽型动作。
 
 ### 兼容

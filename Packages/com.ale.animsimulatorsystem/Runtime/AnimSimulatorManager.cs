@@ -328,26 +328,19 @@ namespace Ale.AnimSimulatorSystem
             if (_isUiFadeIn) return; // 已经是淡入状态则不重复执行
             _isUiFadeIn = true;
 
-            // 玩家自己把 UI 关掉时不强行拉起来——那是他的选择，等他点一下屏幕再回来。
-            // 系统级可见（_isUiFadeIn）与用户级可见（UiDisplayOn）是两层正交状态，两者皆真才显示。
-            if (!UiDisplayOn) return;
-
-            // 淡入 UI
-            if (uiCanvasGroup)
-            {
-                // 激活 UI
-                if (uiCanvas)
-                    uiCanvas.gameObject.SetActive(true);
-                // 打断在途的淡出：否则那条淡出的完成回调会在稍后触发，把刚激活的 UI 又关掉。
-                ToolkitTween.Kill(uiCanvasGroup);
-                // 淡入动画。目标是**玩家设定的透明度**而非恒定的 1——写死 1 会让透明度滑条
-                // 每次淡入都被抹回不透明。
-                ToolkitTween.FadeCanvasGroup(uiCanvasGroup, UiDisplayAlpha, UiFadeDuration);
-            }
-            else if (uiCanvas)
-            {
+            // 激活 UI。**激活态归系统级独占**：用户级的显示开关只改 alpha 与射线拦截，从不碰它
+            // （理由见 ApplyUiDisplay）。所以这里无条件激活——玩家把 UI 关着时，
+            // 下面那句会把 alpha 定到 0，物体活着但看不见也点不着。
+            if (uiCanvas)
                 uiCanvas.gameObject.SetActive(true);
-            }
+
+            // 打断在途的淡出：否则那条淡出的完成回调会在稍后触发，把刚激活的 UI 又关掉。
+            if (uiCanvasGroup)
+                ToolkitTween.Kill(uiCanvasGroup);
+
+            // 淡入的目标值由用户级配置决定：开着就淡到玩家设定的透明度（不是写死的 1，
+            // 否则透明度滑条每次淡入都被抹回不透明），关着就淡到 0。
+            ApplyUiDisplay(UiFadeDuration);
         }
         
         /// <summary>
@@ -401,6 +394,13 @@ namespace Ale.AnimSimulatorSystem
         private const string PrefKeyClickTipAlpha = "AnimSim.Display.ClickTip.Alpha";
         private const string PrefKeyOperationTipOn = "AnimSim.Display.OperationTip.On";
         private const string PrefKeyOperationTipAlpha = "AnimSim.Display.OperationTip.Alpha";
+
+        // 「UI」显示开关翻转时的过渡时长（秒）。比系统级的 UiFadeDuration 短——
+        // 那是场景级的进出场，这里只是玩家随手拨一下开关，半秒会显得迟钝。
+        private const float UiDisplayToggleDuration = 0.2f;
+
+        // 缺 CanvasGroup 的一次性告警旗标
+        private bool _uiCanvasGroupMissingWarned;
 
         /// <summary>
         /// 「UI」这一条透明度的<b>下限</b>。
@@ -456,7 +456,7 @@ namespace Ale.AnimSimulatorSystem
         {
             // 下限是硬保证：面板那侧的滑条最小值只是让手感一致，配错了也不能真把界面调没。
             alpha = Mathf.Clamp(alpha, UiDisplayAlphaMin, 1f);
-            // 开关刚翻转时走补间，只拖动滑条时直接写——否则拖动的每一帧都会起一条新补间。
+            // 开关刚翻转时走一小段补间，只拖动滑条时瞬置——否则拖动的每一帧都会起一条新补间。
             bool isSwitchChanged = UiDisplayOn != isOn;
 
             UiDisplayOn = isOn;
@@ -464,7 +464,7 @@ namespace Ale.AnimSimulatorSystem
             PlayerPrefs.SetInt(PrefKeyUiOn, isOn ? 1 : 0);
             PlayerPrefs.SetFloat(PrefKeyUiAlpha, alpha);
 
-            ApplyUiDisplay(isSwitchChanged);
+            ApplyUiDisplay(isSwitchChanged ? UiDisplayToggleDuration : 0f);
             RaiseUiDisplayConfigChanged();
         }
 
@@ -501,29 +501,38 @@ namespace Ale.AnimSimulatorSystem
         /// <see cref="StopAnimSimulator"/> 控制）与用户级可见性（<see cref="UiDisplayOn"/>）正交：
         /// 系统级关着时这里什么都不做，等 <see cref="FadeInUI"/> 来接手。</para>
         /// </summary>
-        /// <param name="animate">开关刚翻转时为真，走淡入补间；仅改透明度时为假，直接写。</param>
-        private void ApplyUiDisplay(bool animate)
+        /// <param name="duration">变化时长（秒）。0 为瞬置——拖动透明度滑条时用它，免得每帧起一条补间。</param>
+        private void ApplyUiDisplay(float duration)
         {
             if (!uiCanvas || !_isUiFadeIn) return;
 
-            if (UiDisplayOn)
+            if (!uiCanvasGroup)
             {
-                if (!uiCanvas.gameObject.activeSelf)
-                    uiCanvas.gameObject.SetActive(true);
-
-                if (uiCanvasGroup)
+                // 没有 CanvasGroup 就只剩「停用物体」这一条路，而那会连带停掉 Canvas 内所有组件的
+                // Update 与协程、并走一遍 OnDisable/OnEnable。告警一次，提示补一个 CanvasGroup。
+                if (!_uiCanvasGroupMissingWarned)
                 {
-                    ToolkitTween.Kill(uiCanvasGroup);
-                    if (animate) ToolkitTween.FadeCanvasGroup(uiCanvasGroup, UiDisplayAlpha, UiFadeDuration);
-                    else uiCanvasGroup.alpha = UiDisplayAlpha;
+                    _uiCanvasGroupMissingWarned = true;
+                    AnimSimLog.Warn(this, "「UI CanvasGroup」未设置：「UI」显示开关只能退化为停用 / 启用 Canvas 物体，" +
+                                          "这会连带停掉 Canvas 内所有组件的 Update 与协程。" +
+                                          $"请给根 Canvas 加一个 CanvasGroup 并接到本组件的 uiCanvasGroup 上。" +
+                                          $"GameObject={gameObject.name}");
                 }
+                uiCanvas.gameObject.SetActive(UiDisplayOn);
+                return;
             }
-            else
-            {
-                // 关闭立刻见效，不走淡出：玩家关 UI 就是为了当场把画面让出来，拖半秒反而碍事。
-                if (uiCanvasGroup) ToolkitTween.Kill(uiCanvasGroup);
-                uiCanvas.gameObject.SetActive(false);
-            }
+
+            // **不动激活态**：停用 Canvas 物体会把它下面所有组件的 Update 与协程一并停掉，
+            // 还会走一遍 OnDisable/OnEnable，某些组件的状态会因此错乱。改为 alpha 归零 +
+            // 停止拦截射线——同样达到「看不见且点不着」，而组件照常运转。
+            // 激活态只由系统级的 FadeInUI / FadeOutUI 负责。
+            float targetAlpha = UiDisplayOn ? UiDisplayAlpha : 0f;
+            ToolkitTween.Kill(uiCanvasGroup);
+            // duration <= 0 时 ToolkitTween 会瞬置并直接完成，不进补间队列，故此处无需分支。
+            ToolkitTween.FadeCanvasGroup(uiCanvasGroup, targetAlpha, duration);
+
+            // alpha 为 0 的图形在 uGUI 里**仍然会拦截点击**，必须一并关掉射线拦截。
+            uiCanvasGroup.blocksRaycasts = UiDisplayOn;
         }
 
         /// <summary>触发显示配置变化广播。</summary>
