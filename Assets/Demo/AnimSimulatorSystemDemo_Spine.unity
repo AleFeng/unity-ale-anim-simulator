@@ -625,6 +625,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1035465538559640492, guid: 7b9e75798a22a1c46bf45e83bdd498b1, type: 3}
+      propertyPath: autoStartTest
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3835149585072219834, guid: 7b9e75798a22a1c46bf45e83bdd498b1, type: 3}
       propertyPath: m_Name
       value: AnimSimulatorManager
