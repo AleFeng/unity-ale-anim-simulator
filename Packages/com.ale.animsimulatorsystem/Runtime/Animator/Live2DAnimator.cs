@@ -60,6 +60,13 @@ namespace Ale.AnimSimulatorSystem
         // 自动分层改为按轨道序数钳取之后，任何轨道都必得到一个有效层号，不再存在「用尽」这回事，
         // 该字段也就没有了任何作用，故删除——留着只会让人在 Inspector 上配了却不起作用。
 
+        [Header("Live2D 淡入淡出")]
+        [Tooltip("跨层回落的层权重淡化时长（秒）。动作播完、该轨道没有别的动画可恢复时，把它所在的层权重" +
+                 "淡到 0 露出下层，再停掉剪辑——Cubism 的动作淡化只发生在同层两条动作之间，跨层回落只能自己补。\n" +
+                 "同层动作之间的交叉淡化仍由各 motion 的 .fade.asset（FadeInTime / FadeOutTime）决定，与本值无关。\n" +
+                 "0.2 秒与 Spine 后端「空动画淡出」的时长一致。")]
+        [SerializeField] private float live2DLayerFadeDuration = 0.2f;
+
         [Header("Live2D 皮肤")]
         [Tooltip("皮肤定义列表：皮肤名 → 要显示的部件 ID 集合。")]
         [SerializeField] private Live2DSkinData[] live2DSkins;
@@ -380,6 +387,9 @@ namespace Ale.AnimSimulatorSystem
                 return false;
             }
 
+            // 起播前掐断该层在途的权重淡出：上一条的淡出若继续跑，会把刚起播的动作一路压到 0，
+            // 其完成回调还会把整层误停（完整的对称淡入在下一步接入）
+            KillLayerWeightTween(layerIndex);
             // 设置 轨道混合权重（须在播放前设好，层权重是层混合器的输入）
             ApplyBlendWeight(layerIndex, animData.BlendWeight);
 
@@ -529,17 +539,32 @@ namespace Ale.AnimSimulatorSystem
         #endregion
 
         /// <inheritdoc/>
+        /// <remarks>
+        /// <para><b>停止即淡出，绝不同帧硬停</b>：<c>CubismMotionController.StopAnimation</c> 会同帧断开
+        /// Playable 并把该层的 <c>_playingMotions</c> 整表清空——模型在一帧内从动作末帧跳回下层姿势，
+        /// 这正是「播完跳变」的根源；且淡化表被清空后，Cubism 的交叉淡化（要求同层 ≥2 条动作）永远无法启动。</para>
+        /// <para>有恢复：不 Stop、直接叠播，让 Cubism 拿残留的上一条当淡出源交叉淡化；
+        /// 无恢复：层权重淡到 0 露出下层再抽剪辑——跨层回落 Cubism 管不了，只能自己补。</para>
+        /// </remarks>
         protected override void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData)
         {
             if (!_trackPlayState.TryGetValue(trackIndex, out var state))
             {
+                int mappedLayer = MapTrackToLayer(trackIndex);
+                // 该层已有一条权重淡出在途——这次停止就是它排的（二次停止），或该层正被别的轨道补间中；
+                // 此时硬停会把淡出打断成跳变 / 误杀别人的动作，直接返回让在途的那条走完。
+                if (_layerWeightTween.ContainsKey(mappedLayer)) return;
                 // 没有记录也尝试停一下映射到的层，避免残留
-                StopNativeOnLayer(MapTrackToLayer(trackIndex));
+                StopNativeOnLayer(mappedLayer);
                 return;
             }
 
-            StopNativeOnLayer(state.layerIndex);
             _trackPlayState.Remove(trackIndex);
+
+            // 采样通道不经层混合器，权重淡化对它无意义，维持直接停。
+            // 停完不 return——恢复的那条永远走原生通道，仍要落入下面的恢复分支。
+            if (state.isScrub)
+                StopNativeOnLayer(state.layerIndex);
 
             // 栈里还压着上一条：恢复播放它（循环）
             if (resumeAnimData != null)
@@ -547,16 +572,37 @@ namespace Ale.AnimSimulatorSystem
                 var clip = FindClip(resumeAnimData.ResolveAnimName());
                 if (clip && live2DMotionController)
                 {
-                    // 层权重是层上的持久设置，被恢复那条的权重未必与刚停掉那条相同，须重设
-                    ApplyBlendWeight(state.layerIndex, resumeAnimData.BlendWeight);
+                    // 不先 Stop：Cubism 的交叉淡化靠残留在 _playingMotions 里的上一条当淡出源。
+                    // （scrub 来源例外——它已停、层是空的，此时叠播就是普通起播。）
+                    // 层权重是层上的持久设置，被恢复那条的权重未必与刚停掉那条相同：补间对齐，同值零开销。
+                    TweenLayerWeight(state.layerIndex, resumeAnimData.BlendWeight, live2DLayerFadeDuration);
                     live2DMotionController.PlayAnimation(clip, state.layerIndex,
                         CubismMotionPriority.PriorityForce, true, Mathf.Max(0.001f, Mathf.Abs(resumeAnimData.speed)));
                     _trackPlayState[trackIndex] = new FTrackPlayState
                     {
                         layerIndex = state.layerIndex, clip = clip,
                         isScrub = false, progress = 0f,
+                        // 逐帧重采样要用的渲染器随状态传承——此前这里漏带它，恢复后的采样切换会拿不到渲染器
+                        renderController = state.renderController,
                     };
+                    return;
                 }
+                // clip 查不到 / 控制器缺失：落到下面的无恢复兜底，至少把当前这条淡干净
+            }
+
+            if (state.isScrub) return; // 已在上面停掉，别再补一刀
+
+            // 无恢复：层权重淡到 0 露出下层，淡完再抽剪辑
+            if (state.layerIndex > 0 && live2DMotionController)
+            {
+                int layerToStop = state.layerIndex;
+                TweenLayerWeight(layerToStop, 0f, live2DLayerFadeDuration,
+                    onComplete: () => StopNativeOnLayer(layerToStop));
+            }
+            else
+            {
+                // 0 层是基准层权重恒 1，只能硬停
+                StopNativeOnLayer(state.layerIndex);
             }
         }
 
