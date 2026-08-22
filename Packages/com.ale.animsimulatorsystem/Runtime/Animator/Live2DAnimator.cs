@@ -387,11 +387,16 @@ namespace Ale.AnimSimulatorSystem
                 return false;
             }
 
-            // 起播前掐断该层在途的权重淡出：上一条的淡出若继续跑，会把刚起播的动作一路压到 0，
-            // 其完成回调还会把整层误停（完整的对称淡入在下一步接入）
-            KillLayerWeightTween(layerIndex);
-            // 设置 轨道混合权重（须在播放前设好，层权重是层混合器的输入）
-            ApplyBlendWeight(layerIndex, animData.BlendWeight);
+            // 层权重接到目标值（TweenLayerWeight 内部先掐断该层在途的淡出——上一条的淡出若继续跑，
+            // 会把刚起播的动作一路压到 0，其完成回调还会把整层误停）：
+            //   空层（记账 0，初始化时已把物理权重拉平）→ 从 0 淡入，补掉「空层第一条动作」的硬切入——
+            //   Cubism 的淡化要求同层已有动作才介入，这种场合只能靠层权重自己淡；
+            //   已在目标值附近 → 瞬置零开销（同层叠播的场合权重不动，交叉淡化交给 Cubism）。
+            if (layerIndex > 0)
+                TweenLayerWeight(layerIndex, animData.BlendWeight, live2DLayerFadeDuration);
+            else
+                // 0 层是基准层设不了权重，走这条只为触发既有的一次性告警
+                ApplyBlendWeight(layerIndex, animData.BlendWeight);
 
             // PriorityForce：本系统自己管轨道与覆盖关系，不希望被 Cubism 的优先级二次拦截
             live2DMotionController.PlayAnimation(clip, layerIndex,
