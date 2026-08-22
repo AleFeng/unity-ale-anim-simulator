@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 #if ASS_LIVE2D
+using Ale.Toolkit.Runtime;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.Motion;
 using Live2D.Cubism.Framework.MotionFade;
@@ -419,11 +420,113 @@ namespace Ale.AnimSimulatorSystem
                 return;
             }
 
-            live2DMotionController.SetLayerWeight(layerIndex, Mathf.Clamp01(blendWeight));
+            // 经记账写入：GetLayerWeight 的读数以这本账为准，绕过它直接写会让账本说谎
+            SetLayerWeightImmediate(layerIndex, blendWeight);
         }
 
         // 0 号层无法设权重的告警只发一次，避免逐次播放刷屏
         private bool _layerZeroWeightWarned;
+
+        #region 层权重淡入淡出
+        // 层索引 → 权重补间句柄。新指令到来时用于掐断在途的那条。
+        private readonly Dictionary<int, ToolkitTweenHandle> _layerWeightTween = new Dictionary<int, ToolkitTweenHandle>();
+        // 层索引 → 当前权重记账。Cubism 没有控制器级的权重读取接口（GetFadeStates 的间接路径在
+        // 控制器未初始化时全是空元素），且 OnEnable 会把所有层的物理权重初始化成 1.0——
+        // 首播空层时要靠这本账知道「其实还没人碰过这层」，先把物理值拉平再淡入。
+        private readonly Dictionary<int, float> _layerWeight = new Dictionary<int, float>();
+
+        // 误配模型（缺 FadeMotionList / 误挂 AnimatorController）上 SetLayerWeight 会 NRE 的一次性告警
+        private bool _layerWeightWriteFailedWarned;
+
+        /// <summary>取某层的记账权重。从未写过的层返回 0（见 <see cref="_layerWeight"/> 的说明）。</summary>
+        private float GetLayerWeight(int layerIndex)
+            => _layerWeight.TryGetValue(layerIndex, out var w) ? w : 0f;
+
+        /// <summary>立即设置层权重并记账。0 层是基准层设不了权重（Cubism 对它静默返回），只记账。</summary>
+        private void SetLayerWeightImmediate(int layerIndex, float weight)
+        {
+            weight = Mathf.Clamp01(weight);
+            _layerWeight[layerIndex] = weight;
+            if (layerIndex > 0 && live2DMotionController)
+                live2DMotionController.SetLayerWeight(layerIndex, weight);
+        }
+
+        /// <summary>掐断某层在途的权重补间。不触发它挂的完成回调——淡出被掐断时绝不能顺手把层停掉。</summary>
+        private void KillLayerWeightTween(int layerIndex)
+        {
+            if (!_layerWeightTween.TryGetValue(layerIndex, out var handle)) return;
+            handle.Kill();
+            _layerWeightTween.Remove(layerIndex);
+        }
+
+        /// <summary>
+        /// 把某层权重补间到目标值，先掐断该层在途的补间。
+        /// 目标与当前记账值几乎相等、或该层 / 时长不支持补间时，瞬置并同步回调。
+        /// </summary>
+        private void TweenLayerWeight(int layerIndex, float to, float duration, Action onComplete = null)
+        {
+            KillLayerWeightTween(layerIndex);
+
+            to = Mathf.Clamp01(to);
+            // 0 层设不了权重；时长非正没得补；已在目标值附近时补间只是空转
+            if (layerIndex <= 0 || !live2DMotionController || duration <= 0f ||
+                Mathf.Abs(GetLayerWeight(layerIndex) - to) < 0.001f)
+            {
+                SetLayerWeightImmediate(layerIndex, to);
+                onComplete?.Invoke();
+                return;
+            }
+
+            var handle = ToolkitTween.To(GetLayerWeight(layerIndex), to, duration,
+                x => SetLayerWeightImmediate(layerIndex, x),
+                EToolkitEase.Linear,
+                onComplete: () =>
+                {
+                    _layerWeightTween.Remove(layerIndex);
+                    SetLayerWeightImmediate(layerIndex, to);
+                    onComplete?.Invoke();
+                },
+                owner: this);
+
+            // owner 已死等场合 To 返回无效句柄且不跑回调，按瞬置兜底
+            if (handle.IsActive) _layerWeightTween[layerIndex] = handle;
+            else { SetLayerWeightImmediate(layerIndex, to); onComplete?.Invoke(); }
+        }
+
+        /// <summary>
+        /// 批量把 1 号及以上的层权重置 0。
+        /// <para><b>为什么需要</b>：<c>CubismMotionController.OnEnable</c> 把所有层的混合器权重初始化成 1.0，
+        /// 空层满权重会以默认值压住基准层的输出——没有任何场景需要这个副作用。</para>
+        /// </summary>
+        /// <param name="onlyUntouched">true = 只清从未被本类记账过的层（初始化用——stateInitList 的播放
+        /// 先于 <see cref="OnAnimatorStart"/> 执行，已设过权重的层不能碰）；false = 全清（清场用）。</param>
+        private void ZeroLayerWeights(bool onlyUntouched)
+        {
+            if (!live2DMotionController) return;
+
+            try
+            {
+                for (int i = 1; i < live2DMotionController.LayerCount; i++)
+                {
+                    if (onlyUntouched && _layerWeight.ContainsKey(i)) continue;
+                    SetLayerWeightImmediate(i, 0f);
+                }
+            }
+            catch (NullReferenceException)
+            {
+                // 缺 FadeMotionList 或 Animator 上误挂了 AnimatorController 时，CubismMotionController.OnEnable
+                // 会提前返回、内部层数组从未创建，SetLayerWeight 直接 NRE。这类误配模型在播放动作时本来
+                // 也会失败（播放路径的暴露维持原状），这里只保护新增的批量调用点，不让它变成启动崩溃。
+                if (!_layerWeightWriteFailedWarned)
+                {
+                    _layerWeightWriteFailedWarned = true;
+                    AnimSimLog.Warn(this, "CubismMotionController 未完成初始化（缺 CubismFadeMotionList，" +
+                                          "或 Animator 上误挂了 AnimatorController），层权重无法设置。" +
+                                          $"请检查模型配置。GameObject={gameObject.name}");
+                }
+            }
+        }
+        #endregion
 
         /// <inheritdoc/>
         protected override void StopAnimOnRenderer(Component rendererParam, int trackIndex, AnimData resumeAnimData)
@@ -471,6 +574,12 @@ namespace Ale.AnimSimulatorSystem
         {
             if (live2DMotionController) live2DMotionController.StopAllAnimation();
             _trackPlayState.Clear();
+
+            // 清场连带掐断全部在途的层权重补间——它们挂的完成回调此刻已无意义，
+            // 也不能让旧补间在下一次播放时还往层上写权重。层权重一并归零。
+            foreach (var handle in _layerWeightTween.Values) handle.Kill();
+            _layerWeightTween.Clear();
+            ZeroLayerWeights(onlyUntouched: false);
         }
 
         /// <inheritdoc/>
@@ -567,6 +676,10 @@ namespace Ale.AnimSimulatorSystem
         protected override void OnAnimatorStart()
         {
             HasUpdateController = GetComponent<Live2D.Cubism.Framework.CubismUpdateController>() != null;
+
+            // 清掉 CubismMotionController.OnEnable 留下的幻影满权重空层。
+            // 只清没记过账的层：stateInitList 的初始状态在基类 Start 里已先播出去、权重已设好，不能碰。
+            ZeroLayerWeights(onlyUntouched: true);
         }
 
         /// <summary>把所有处于采样通道的轨道按当前进度重新写一遍。</summary>
